@@ -25,6 +25,15 @@ class Rule:
     def __repr__(self): return 'Rule[%s]:=%s' % (self.k, self.value())
     def value(self): return ''.join(str(self._rindex[k]) for k in self.ranges())
 
+    def __hash__(self): return hash((self.k, self.v, tuple(self._taint),
+        tuple((k,v) for k,v in self._rindex.items())))
+    def __nq__(self, o):
+        if self.k != o.k: return True
+        if self.v != o.v: return True
+        if self._taint != o._taint: return True
+        if self._rindex != o._rindex: return True
+        return False
+
     def cur_taint(self):
         t = [-1] * len(self.taint)
         for k in self.ranges():
@@ -155,7 +164,7 @@ def get_grammar(assignments):
                 x = rule.update_with_key(r.v, r.k, my_grammar)
                 assert not x # if not empty, recurse
 
-    return g.Grammar({k:{v} for k,v in my_grammar.items()})
+    return g.Grammar({k:{v.value()} for k,v in my_grammar.items()})
 
 def merge_grammars(g1, g2):
     return g.Grammar({key: g1[key] | g2[key] for key in g1.keys() + g2.keys()})

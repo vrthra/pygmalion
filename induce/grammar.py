@@ -14,7 +14,7 @@ class Grammar:
 
     def __str__(self):
         def djs_to_string(djs):
-            return "\n\t| ".join([i.value().replace('\n', '\n|\t')
+            return "\n\t| ".join([i.replace('\n', '\n|\t')
                 for i in sorted(djs)])
         def fixline(key, rules):
             fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t| %s"
@@ -37,3 +37,4 @@ class V:
         if self.func != other.func: return True
         if self.var != other.var: return True
         if self.t != other.t: return True
+        return False
