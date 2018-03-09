@@ -1,11 +1,12 @@
 import pudb; brk = pudb.set_trace
 import pickle
 from . import tstr
+from . import grammar as g
 
 class Vars:
     def __init__(self, i, istack):
         self.i = i
-        self.defs = {'START':i}
+        self.defs = {g.V(0, '', '', 'START', 0):i}
         self.accessed_scop_var = {}
         self.istack = istack
 
@@ -24,7 +25,8 @@ class Vars:
         t = self.accessed_scop_var[bv]
         # DONT use line number. We are called from every line and the line
         # number is the line where a var is used  not where it is defined.
-        return "<%s:%s:%d>" % (frame['f_code']['co_name'], var, t)
+        return g.V(frame['f_code']['co_filename'], frame['f_lineno'],
+                frame['f_code']['co_name'], var, t)
 
     def update_vars(self, var, value, frame):
         tv = tstr.get_t(value)

@@ -20,3 +20,14 @@ class Grammar:
             fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t| %s"
             return fmt % (key, djs_to_string(rules))
         return "\n".join([fixline(key, self[key]) for key in self.keys()])
+
+
+class V:
+    def __init__(self, fn, l, n, var, t):
+        self.fn = fn
+        self.l = l
+        self.func = n
+        self.var = var
+        self.t = t
+    def __str__(self):
+        return "<%s:%s:%d>" % (self.func, self.var, self.t)

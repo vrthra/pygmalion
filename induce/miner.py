@@ -5,7 +5,7 @@ from . import grammar as g
 
 class NTKey:
     def __init__(self, k):
-        assert type(k) is str
+        assert type(k) is g.V
         self.k = k
     def __repr__(self): return "$%s" % self.k
     def __str__(self): return "$%s" % self.k
