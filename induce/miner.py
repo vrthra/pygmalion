@@ -66,7 +66,7 @@ class Rule:
         start_i, stop_i = ts.index(word._taint[0]), ts.index(word._taint[-1])
         ct[start_i:stop_i+1] = [-1] * len(word)
         new_sum = sum(i for i in ct if i < 0)
-        if new_sum < cur_tsum: return True
+        if new_sum <= cur_tsum: return True
         return False
 
     def _replace_tainted_str(self, o, ntkey):
