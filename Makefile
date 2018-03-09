@@ -1,19 +1,37 @@
 python3=PYTHONPATH=. python3
 required_dirs=.pickled
 mytargets=hello whilescope microjson
-.precious: $(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
+
+.SUFFIXES:
+
+traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
+
+.precious: $(traces) $(addsuffix .m,$(traces))
 
 all:
+	@echo $(traces)
 
 
 .pickled/%.py.trace: tests/%.py | .pickled
-	$(python3) ./bin/traceit.py $<
+	@$(python3) ./bin/traceit.py $<
 
+.pickled/%.py.trace.m: .pickled/%.py.trace
+	@$(python3) ./bin/mtraceit.py $<
+
+.pickled/%.py.trace.m.i: .pickled/%.py.trace.m
+	@$(python3) ./bin/inferit.py $<
 
 trace.%: .pickled/%.py.trace
-	@echo done
+	@echo
 
-$(required_dirs):; mkdir -p $@
+mtrace.%: .pickled/%.py.trace.m
+	@echo
+
+infer.%: .pickled/%.py.trace.m.i
+	@echo
+
+
+$(required_dirs):; @mkdir -p $@
 
 clobber:; rm -rf .pickled
 
