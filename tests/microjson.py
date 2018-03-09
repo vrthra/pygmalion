@@ -400,6 +400,7 @@ def inputs():
             'null',
             '"hello"',
             '{"hello":"world"}',
+            '[{"hello":"world"}, {"goodbye":"world"}]',
             ]
     return INPUTS
 
