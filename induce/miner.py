@@ -9,6 +9,9 @@ class NTKey:
         self.k = k
     def __repr__(self): return "$%s" % self.k
     def __str__(self): return "$%s" % self.k
+    def __hash__(self): return hash(self.k)
+    def __eq__(self, o): return self.k == o.k
+    def __ne__(self, o): return not (self == o)
 
 class Rule:
     def __init__(self,k, v):
@@ -155,7 +158,7 @@ def get_grammar(assignments):
     return g.Grammar({k:{v} for k,v in my_grammar.items()})
 
 def merge_grammars(g1, g2):
-    return g.Grammar({str(key): g1[key] | g2[key] for key in g1.keys() + g2.keys()})
+    return g.Grammar({key: g1[key] | g2[key] for key in g1.keys() + g2.keys()})
 
 # Get a grammar for multiple inputs
 def infer_grammar(traces):
