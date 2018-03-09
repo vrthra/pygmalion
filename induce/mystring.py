@@ -1,4 +1,4 @@
-import tainted
+from . import tstr
 import string
-ascii_letters = tainted.tstr(string.ascii_letters)
-digits = tainted.tstr(string.digits)
+ascii_letters = tstr.tstr(string.ascii_letters)
+digits = tstr.tstr(string.digits)
