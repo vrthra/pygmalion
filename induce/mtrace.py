@@ -18,9 +18,11 @@ class Vars:
         self.accessed_scop_var[var] += 1
 
     def base_name(self, var, frame):
-        return "%d:%s:%s" % (frame['f_lineno'], frame['f_code']['co_name'], var)
+        return "%s:%s" % (frame['f_code']['co_name'], var)
 
     def var_name(self, var, frame):
+        # if we access the same variable at the same line number,
+        # it is because it is a new scope.
         bv = self.base_name(var, frame)
         t = self.accessed_scop_var[bv]
         # DONT use line number. We are called from every line and the line
@@ -29,6 +31,11 @@ class Vars:
                 frame['f_code']['co_name'], var, t)
 
     def update_vars(self, var, value, frame):
+        # We can not detect variable reuse in different lines
+        # however, we may be able to detect variable reuse
+        # due to loops. The idea is that, when a variable gets
+        # a changed value in terms of the *taint* (he_ll_o)
+        # it means a new scope.
         tv = tstr.get_t(value)
         if not tv or len(tv) == 0 or not self.istack.has(tv): return
         bv = self.base_name(var, frame)
@@ -42,6 +49,8 @@ class Vars:
             oldv = self.defs.get(qual_var)
             newv = tstr.get_t(value)
             if oldv._taint != newv._taint:
+                # only update the assignment if we detect a change
+                # in taint value.
                 self.var_assign(bv)
                 qual_var = self.var_name(var, frame)
                 self.defs[qual_var] = newv
