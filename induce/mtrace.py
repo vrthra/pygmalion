@@ -105,7 +105,7 @@ class Tracker:
             self.istack.push(my_parameters)
 
             for var in my_parameters:
-                self.vars.update_vars(var, my_parameters[value], frame)
+                self.vars.update_vars(var, my_parameters[var], frame)
             return
 
         elif event == 'return':
