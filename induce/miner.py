@@ -162,7 +162,8 @@ def infer_grammar(traces):
     merged_grammar = g.Grammar()
     for instr, defs in traces:
         grammar = get_grammar(defs)
-        # print(repr(instr) + " ->\n" + str(grammar))
+        print(repr(instr) + " ->\n" + str(grammar))
+        print()
         merged_grammar = merge_grammars(merged_grammar, grammar)
     return merged_grammar
 

@@ -10,11 +10,11 @@ class Vars:
         self.accessed_scop_var = {}
         self.istack = istack
 
-    def init_var(self, var):
+    def var_init(self, var):
         if var not in self.accessed_scop_var:
             self.accessed_scop_var[var] = 0
 
-    def update_var(self, var):
+    def var_assign(self, var):
         self.accessed_scop_var[var] += 1
 
     def base_name(self, var, frame):
@@ -32,7 +32,7 @@ class Vars:
         tv = tstr.get_t(value)
         if not tv or len(tv) == 0 or not self.istack.has(tv): return
         bv = self.base_name(var, frame)
-        self.init_var(bv)
+        self.var_init(bv)
         qual_var = self.var_name(var, frame)
         if not self.defs.get(qual_var):
             v = tstr.get_t(value)
@@ -42,7 +42,7 @@ class Vars:
             oldv = self.defs.get(qual_var)
             newv = tstr.get_t(value)
             if oldv._taint != newv._taint:
-                self.update_var(bv)
+                self.var_assign(bv)
                 qual_var = self.var_name(var, frame)
                 self.defs[qual_var] = newv
 
@@ -95,12 +95,14 @@ class Tracker:
             my_parameters = {k: variables[k] for k in param_names}
             self.istack.push(my_parameters)
 
-            for var, value in my_parameters.items():
-                self.vars.update_vars(var, value, frame)
+            for var in my_parameters:
+                self.vars.update_vars(var, my_parameters[value], frame)
             return
 
         elif event == 'return':
             self.istack.pop()
             return
 
-        for var, value in variables.items(): self.vars.update_vars(var, value, frame)
+        for var in variables:
+            self.vars.update_vars(var, variables[var], frame)
+
