@@ -28,11 +28,12 @@ class V:
     def __str__(self): return "<%s:%s:%d>" % (self.func, self.var, self.t)
     def __repr__(self): return "<%s:%s:%d>" % (self.func, self.var, self.t)
     def __hash__(self):
-        return hash((self.fn, self.l, self.func, self.var, self.t))
+        return hash((self.fn, #self.l,
+            self.func, self.var, self.t))
     def __eq__(self, other): return not (self != other)
     def __ne__(self, other):
         if self.fn != other.fn: return True
-        if self.l != other.l: return True
+        # if self.l != other.l: return True
         if self.func != other.func: return True
         if self.var != other.var: return True
         if self.t != other.t: return True
