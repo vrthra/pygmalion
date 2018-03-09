@@ -41,12 +41,12 @@ class Vars:
         bv = self.base_name(var, frame)
         self.var_init(bv)
         qual_var = self.var_name(var, frame)
-        if not self.defs.get(qual_var):
+        if qual_var not in self.defs:
             v = tstr.get_t(value)
             assert type(v) is tstr.tstr
             self.defs[qual_var] = v
         else: # possible reassignment
-            oldv = self.defs.get(qual_var)
+            oldv = self.defs[qual_var]
             newv = tstr.get_t(value)
             if oldv._taint != newv._taint:
                 # only update the assignment if we detect a change
@@ -73,6 +73,9 @@ class InputStack:
         self.inputs.append(my_inputs)
 
     def pop(self): return self.inputs.pop()
+
+    def __repr__(self):
+        return repr(self.inputs)
 
 class FrameIter:
     def __init__(self, fname):

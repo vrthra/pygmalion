@@ -6,7 +6,7 @@ with open(sys.argv[1],"rb") as tf:
     try:
         while True:
             traces = pickle.load(tf)
-            frozen = jsonpickle.encode(traces)
-            print(frozen)
+            for i in traces:
+                print(jsonpickle.encode(i))
     except:
         pass
