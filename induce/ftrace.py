@@ -77,6 +77,7 @@ class Tracer:
                 # 'f_globals':self._f_var(f.f_globals),
                 'f_locals':self._f_var(f.f_locals),
                 'f_lasti':f.f_lasti,
+                'f_back':self._frame(f.f_back) if f.f_back else None,
                 'f_lineno':f.f_lineno}
 
     def tracer(self) -> Any:

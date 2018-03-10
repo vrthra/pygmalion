@@ -115,8 +115,8 @@ class Tracker:
         elif event == 'return':
             self.istack.pop()
             if Track_Return:
-                var = '(<-' + f_code['co_name'] + ')'
-                self.vars.update_vars(var, o['arg'], frame)
+                var = '(<-' + funct + ')'
+                self.vars.update_vars(var, o['arg'], frame['f_back'])
             return
 
         if Track_Vars:
