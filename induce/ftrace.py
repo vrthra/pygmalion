@@ -95,7 +95,7 @@ class Tracer:
             if event not in self.listeners: return
 
             frame_env = {'frame': self._frame(frame), 'loc': loc(frame),
-                    'i': self.trace_i, 'event': event}
+                    'i': self.trace_i, 'event': event, 'arg': arg}
             self.out(frame_env)
             self.trace_i += 1
             return traceit
