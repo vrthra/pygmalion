@@ -89,8 +89,6 @@ class FrameIter:
 
 class Tracker:
     def __init__(self, i):
-        self.istack = None
-        self.vars = None
         self.istack = InputStack()
         self.vars = Vars(i, self.istack)
 
