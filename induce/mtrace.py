@@ -3,6 +3,9 @@ import pickle
 from . import tstr
 from . import grammar as g
 
+Track_Vars = False
+Track_Return = True
+
 class Vars:
     def __init__(self, i, istack):
         self.i = i
@@ -111,8 +114,12 @@ class Tracker:
 
         elif event == 'return':
             self.istack.pop()
+            if Track_Return:
+                var = '(<-' + f_code['co_name'] + ')'
+                self.vars.update_vars(var, o['arg'], frame)
             return
 
-        for var in variables:
-            self.vars.update_vars(var, variables[var], frame)
+        if Track_Vars:
+            for var in variables:
+                self.vars.update_vars(var, variables[var], frame)
 
