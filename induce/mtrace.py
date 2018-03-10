@@ -5,6 +5,7 @@ from . import grammar as g
 
 Track_Vars = False
 Track_Return = True
+Ignore_Lambda = True
 
 class Vars:
     def __init__(self, i, istack):
@@ -103,6 +104,8 @@ class Tracker:
         frame = o['frame']
         f_code = frame['f_code']
         variables = frame['f_locals']
+        funct = f_code['co_name']
+        if Ignore_Lambda and '<lambda>' in funct: return
         if event == 'call':
             param_names = f_code['co_varnames'][0: f_code['co_argcount']]
             my_parameters = {k: variables[k] for k in param_names}
