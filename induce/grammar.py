@@ -25,16 +25,9 @@ class Grammar:
 class V:
     def __init__(self, fn, l, n, var, t):
         self.fn, self.l, self.func, self.var, self.t = fn, l, n, var, t
-    def __str__(self): return "<%s:%s:%d>" % (self.func, self.var, self.t)
-    def __repr__(self): return "<%s:%s:%d>" % (self.func, self.var, self.t)
-    def __hash__(self):
-        return hash((self.fn, #self.l,
-            self.func, self.var, self.t))
+        self._x = (self.func, self.var, self.t)
+    def __str__(self): return "<%s:%s:%d>" % self._x
+    def __repr__(self): return "<%s:%s:%d>" % self._x
+    def __hash__(self): return hash(self._x)
     def __eq__(self, other): return not (self != other)
-    def __ne__(self, other):
-        if self.fn != other.fn: return True
-        # if self.l != other.l: return True
-        if self.func != other.func: return True
-        if self.var != other.var: return True
-        if self.t != other.t: return True
-        return False
+    def __ne__(self, other): return self._x != other._x
