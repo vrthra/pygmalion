@@ -404,6 +404,9 @@ def inputs():
             ]
     return INPUTS
 
+def skip_classes():
+    return ['.*JSONStream.*']
+
 def main(s):
     from_json(s)
 

@@ -9,10 +9,14 @@ import imp
 if __name__ == "__main__":
     m_file = sys.argv[1]
     mod_obj = imp.new_module('example')
-    exec(open(m_file).read(), mod_obj.__dict__)
+    mod_obj.__file__ = m_file
+    code = compile(open(m_file).read(), os.path.basename(m_file), 'exec')
+    exec(code, mod_obj.__dict__)
     with open(".pickled/%s.trace" % os.path.basename(m_file), 'wb') as trace_file:
         # Infer grammar
         for _i in mod_obj.inputs():
             i = tstr.tstr(_i)
             with tracer.Tracer(i, trace_file) as t:
+                t._my_files = ['%s' % os.path.basename(m_file)]
+                t._skip_classes = mod_obj.skip_classes()
                 o = mod_obj.main(i)

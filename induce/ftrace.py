@@ -5,6 +5,10 @@ from typing import Dict, Tuple, Any, Optional, List, BinaryIO
 import sys
 import pickle
 import inspect
+import json
+import os
+import re
+import fnmatch
 from . import tstr
 
 # pylint: disable=multiple-statements,fixme, unidiomatic-typecheck
@@ -32,6 +36,13 @@ class Tracer:
         self.trace_file = tfile
         self.trace_i = 0
         self.listeners = {'call', 'return', 'line'}
+        cfg = os.getenv('trace.config')
+        self._my_files = []
+        self._skip_classes = []
+        if cfg:
+            self.conf = json.load(open(cfg))
+            self._my_files = self.conf['my_files']
+            self._skip_classes = self.conf['skip_classes']
 
     def __enter__(self) -> None:
         """ set hook """
@@ -39,6 +50,7 @@ class Tracer:
         self.out(event)
         self.oldtrace = sys.gettrace()
         sys.settrace(self.method)
+        return self
 
     def __exit__(self, typ: str, value: str, backtrace: Any) -> None:
         """ unhook """
@@ -48,7 +60,7 @@ class Tracer:
     def out(self, val: Dict[str, Any]) -> None:
         pickle.dump(val, self.trace_file)
 
-    def _f_code(self, c: Any) -> Dict[str, Any]:
+    def f_code(self, c: Any) -> Dict[str, Any]:
         return {'co_argcount': c.co_argcount,
                 'co_code':c.co_code,
                 'co_cellvars':c.co_cellvars,
@@ -65,7 +77,7 @@ class Tracer:
                 'co_varnames':c.co_varnames
                 }
 
-    def _f_var(self, v: Dict[str, Any]) -> Dict[str, Any]:
+    def f_var(self, v: Dict[str, Any]) -> Dict[str, Any]:
         def process(v: Any) -> Any:
             tv = type(v)
             if tv in [str, int, float, complex, str, bytes, bytearray]:
@@ -78,31 +90,47 @@ class Tracer:
                 return tstr.get_t(v)
         return {i:process(v[i]) for i in v}
 
-    def _frame(self, f: Any) -> Dict[str, Any]:
-        return {'f_code':self._f_code(f.f_code),
-                # 'f_globals':self._f_var(f.f_globals),
-                'f_locals':self._f_var(f.f_locals),
+    def frame(self, f: Any) -> Dict[str, Any]:
+        return {'f_code':self.f_code(f.f_code),
+                # 'f_globals':self.f_var(f.f_globals),
+                'f_locals':self.f_var(f.f_locals),
                 'f_lasti':f.f_lasti,
-                'f_back':self._frame(f.f_back) if f.f_back else None,
+                'f_back':self.frame(f.f_back) if f.f_back else None,
                 'f_lineno':f.f_lineno,
                 'f_context': Tracer.get_context(f)}
+
+    def skip(self, frame):
+        f, l, n, ls, i = self.loc(frame)
+        c = Tracer.get_context(frame)
+        if not self._my_files: return False
+        for pattern in self._skip_classes:
+            if re.search(pattern, c):
+                return True
+        for pattern in self._my_files:
+            if fnmatch.fnmatch(f, pattern):
+                return False
+        return True
+
+
+    def loc(self, c: Any) -> Tuple[str, str, int]:
+        (f, line, name, lines, index) = inspect.getframeinfo(c)
+        """ Returns location information of the caller """
+        return (f, line, name, lines, index)
 
     def tracer(self) -> Any:
         """ Generates the trace function that gets hooked in.  """
 
-        def loc(c: Any) -> Tuple[str, str, int]:
-            """ Returns location information of the caller """
-            return (c.f_code.co_filename, c.f_lineno, c.f_code.co_name)
-
         def traceit(frame: Any, event: str, arg: Optional[str]) -> Any:
             """ The actual trace function """
             vself = frame.f_locals.get('self')
+            if self.skip(frame):
+                return
             # dont process if the frame is tracer
             # this happens at the end of trace -- Tracer.__exit__
             if type(vself) == Tracer: return
             if event not in self.listeners: return
 
-            frame_env = {'frame': self._frame(frame), 'loc': loc(frame),
+            frame_env = {'frame': self.frame(frame), 'loc': self.loc(frame),
                     'i': self.trace_i, 'event': event, 'arg': arg}
             self.out(frame_env)
             self.trace_i += 1
