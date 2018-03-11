@@ -106,7 +106,7 @@ class Tracker:
         frame = o['frame']
         f_code = frame['f_code']
         variables = frame['f_locals']
-        funct = f_code['co_name']
+        funct = frame['f_context']
         if Ignore_Lambda and '<lambda>' in funct: return
         if event == 'call':
             param_names = f_code['co_varnames'][0: f_code['co_argcount']]
