@@ -80,7 +80,9 @@ class JSONStream:
             self.next()
 
     def next(self, size=1):
-        return self._stm.read(size)
+        v = self._stm.read(size)
+        self._tstr = self._tstr[size:]
+        return v
 
     def next_ord(self):
         return ord(next(self))
