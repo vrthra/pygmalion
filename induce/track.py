@@ -110,8 +110,9 @@ class Tracker:
             my_parameters = {k: variables[k] for k in param_names}
             self.istack.push(my_parameters)
 
-            for var in my_parameters:
-                self.vars.update_vars(var, my_parameters[var], frame)
+            if config.Track_Params:
+                for var in my_parameters:
+                    self.vars.update_vars(var, my_parameters[var], frame)
             return
 
         elif event == 'return':
