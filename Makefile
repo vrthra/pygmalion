@@ -21,9 +21,9 @@ endif
 
 .pickled/%.py.trace.m: .pickled/%.py.trace
 ifdef debug
-	$(python3) -m pudb ./bin/mtraceit.py $<
+	$(python3) -m pudb ./bin/trackit.py $<
 else
-	@$(python3) ./bin/mtraceit.py $<
+	@$(python3) ./bin/trackit.py $<
 endif
 
 .pickled/%.py.trace.m.i: .pickled/%.py.trace.m
