@@ -89,7 +89,9 @@ class FrameIter:
 
     def __next__(self):
         try: return pickle.load(self.f)
-        except EOFError: raise StopIteration 
+        except EOFError:
+            self.f.close()
+            raise StopIteration
 
 class Tracker:
     def __init__(self, i):
