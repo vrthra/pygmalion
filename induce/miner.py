@@ -3,6 +3,8 @@
 import pudb; brk = pudb.set_trace
 from . import grammar as g
 
+Swap_Including_Keys = False
+
 class NTKey:
     def __init__(self, k):
         assert type(k) is g.V
@@ -98,6 +100,10 @@ class Rule:
         trange = tainted_range(o)
         keytaint = self._tinclude(o)
         if not keytaint:
+            # we have two choices to make when there are
+            # eclipsed keys. One is to skip this key
+            # the other is to swap the relative positions of keys
+            if not Swap_Including_Keys: return []
             # the complete taint range is not contained, but we are still
             # inclued in the original. It means that an inbetween variable has
             # obscured our inclusion.
@@ -150,7 +156,7 @@ def get_grammar(assignments):
                 # and needs to be added to value.
                 if eclipsed:
                     all_eclipsed.append((eclipsed, nt_var))
-            append = True
+                append = True
 
         # Until merge, all keys have a single rule.
         if append: my_grammar[nt_var] = Rule(nt_var, value)
