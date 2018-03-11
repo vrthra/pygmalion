@@ -22,7 +22,7 @@ class Vars:
         self.accessed_scop_var[var] += 1
 
     def base_name(self, var, frame):
-        return "%s:%s" % (frame['f_code']['co_name'], var)
+        return "%s:%s" % (frame['f_context'], var)
 
     def var_name(self, var, frame):
         # if we access the same variable at the same line number,
@@ -32,7 +32,7 @@ class Vars:
         # DONT use line number. We are called from every line and the line
         # number is the line where a var is used  not where it is defined.
         return g.V(frame['f_code']['co_filename'], frame['f_lineno'],
-                frame['f_code']['co_name'], var, t)
+               frame['f_context'], var, t)
 
     def update_vars(self, var, value, frame):
         # We can not detect variable reuse in different lines

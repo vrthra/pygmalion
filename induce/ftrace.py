@@ -15,8 +15,14 @@ from . import tstr
 # However, if there is a shadowing local variable, we should ignore
 # the global.
 
+def decorate(stem: str, key: str, sep: str = '.') -> str:
+    """Prepend a prefix to key"""
+    return '%s%s%s' % (stem, sep, key)
 
 class Tracer:
+
+    class_cache: Dict[Any, str] = {}
+
     """
     Extremely dumb Tracer for tracing the execution of functions
     """
@@ -78,7 +84,8 @@ class Tracer:
                 'f_locals':self._f_var(f.f_locals),
                 'f_lasti':f.f_lasti,
                 'f_back':self._frame(f.f_back) if f.f_back else None,
-                'f_lineno':f.f_lineno}
+                'f_lineno':f.f_lineno,
+                'f_context': Tracer.get_context(f)}
 
     def tracer(self) -> Any:
         """ Generates the trace function that gets hooked in.  """
@@ -101,3 +108,58 @@ class Tracer:
             self.trace_i += 1
             return traceit
         return traceit
+
+    @classmethod
+    def set_cache(cls, code: Any, clazz: str) -> str:
+        """ Set the global class cache """
+        cls.class_cache[code] = clazz
+        return clazz
+
+    @classmethod
+    def get_class(cls, frame: Any) -> Optional[str]:
+        """ Set the class name"""
+        code = frame.f_code
+        name = code.co_name
+        if cls.class_cache.get(code): return cls.class_cache[code]
+        args, _, _, local_dict = inspect.getargvalues(frame)
+        class_name = ''
+
+        if name == '__new__':  # also for all class methods
+            class_name = local_dict[args[0]].__name__
+            return class_name
+        try:
+            class_name = local_dict['self'].__class__.__name__
+            if class_name: return class_name
+        except (KeyError, AttributeError):
+            pass
+
+        # investigate __qualname__ for class objects.
+        for objname, obj in frame.f_globals.items():
+            try:
+                if obj.__dict__[name].__code__ is code:
+                    return cls.set_cache(code, objname)
+            except (KeyError, AttributeError):
+                pass
+            try:
+                if obj.__slot__[name].__code__ is code:
+                    return cls.set_cache(code, objname)
+            except (KeyError, AttributeError):
+                pass
+        return "@"
+
+    @classmethod
+    def get_qualified_name(cls, frame: Any) -> str:
+        """ Set the qualified method name"""
+        code = frame.f_code
+        name = code.co_name  # type: str
+        clazz = cls.get_class(frame)
+        if clazz: return decorate(clazz, name)
+        return name
+
+    @classmethod
+    def get_context(cls, frame: Any) -> List[Tuple[str, int]]:
+        """
+        Get the context of current call. Switch to
+        inspect.getouterframes(frame) if stack is needed
+        """
+        return Tracer.get_qualified_name(frame)
