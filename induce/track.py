@@ -2,10 +2,7 @@ import pudb; brk = pudb.set_trace
 import pickle
 from . import tstr
 from . import grammar as g
-
-Track_Vars = False
-Track_Return = True
-Ignore_Lambda = True
+from . import config
 
 class Vars:
     def __init__(self, i, istack):
@@ -107,7 +104,7 @@ class Tracker:
         f_code = frame['f_code']
         variables = frame['f_locals']
         funct = frame['f_context']
-        if Ignore_Lambda and '<lambda>' in funct: return
+        if config.Ignore_Lambda and '<lambda>' in funct: return
         if event == 'call':
             param_names = f_code['co_varnames'][0: f_code['co_argcount']]
             my_parameters = {k: variables[k] for k in param_names}
@@ -119,12 +116,12 @@ class Tracker:
 
         elif event == 'return':
             self.istack.pop()
-            if Track_Return:
+            if config.Track_Return:
                 var = '(<-' + funct + ')'
                 self.vars.update_vars(var, o['arg'], frame['f_back'])
             return
 
-        if Track_Vars:
+        if config.Track_Vars:
             for var in variables:
                 self.vars.update_vars(var, variables[var], frame)
 

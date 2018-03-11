@@ -2,8 +2,8 @@
 # Mine a grammar from dynamic behavior
 import pudb; brk = pudb.set_trace
 from . import grammar as g
+from . import config
 
-Swap_Including_Keys = False
 
 class NTKey:
     def __init__(self, k):
@@ -103,7 +103,7 @@ class Rule:
             # we have two choices to make when there are
             # eclipsed keys. One is to skip this key
             # the other is to swap the relative positions of keys
-            if not Swap_Including_Keys: return []
+            if not config.Swap_Including_Keys: return []
             # the complete taint range is not contained, but we are still
             # inclued in the original. It means that an inbetween variable has
             # obscured our inclusion.
