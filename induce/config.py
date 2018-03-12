@@ -1,5 +1,7 @@
-Track_Params = True
 
+# [Procedure calls]
+
+Track_Params = True
 
 Track_Vars = True
 
@@ -14,9 +16,16 @@ Track_Vars = True
 #   a sequence of input string.
 Track_Return = False
 
+# []
+
 # Lambdas typicaly are unimportant, and contribute to noise.
 Ignore_Lambda = True
 
+# What should we do if we have a variable that eclipses already
+# replaced variables?
 
-Swap_Including_Keys = False
-Show_LineGrammar= False
+Swap_Eclipsing_Keys = True
+
+# [Verbosity]
+
+Show_Line_Grammar= False

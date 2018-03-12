@@ -105,7 +105,7 @@ class Rule:
             # we have two choices to make when there are
             # eclipsed keys. One is to skip this key
             # the other is to swap the relative positions of keys
-            if not config.Swap_Including_Keys: return []
+            if not config.Swap_Eclipsing_Keys: return []
             # the complete taint range is not contained, but we are still
             # inclued in the original. It means that an inbetween variable has
             # obscured our inclusion.
@@ -185,7 +185,7 @@ def infer_grammar(traces):
     merged_grammar = g.Grammar()
     for instr, defs in traces:
         grammar = get_grammar(defs)
-        if config.Show_LineGrammar:
+        if config.Show_Line_Grammar:
             print(repr(instr) + ":")
             print(str(grammar))
             print()
