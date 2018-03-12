@@ -124,7 +124,8 @@ class Rule:
         trange = tainted_range(o)
         keytaint = self._tinclude(o)
         if not keytaint:
-            assert False
+            pass
+            # TODO
         else:
             my_str = self._rindex[keytaint]
             # we are replacing part of another (larger) key

@@ -8,7 +8,7 @@ import pudb; brk = pudb.set_trace
 
 def nt_key_to_s(i):
     v = i.k
-    return "$<%s:%s>" % (v.func, v.var)
+    return "[%s:%s]" % (v.func, v.var)
 
 if __name__ == "__main__":
     grammar = pickle.load(open(sys.argv[1], "rb" ))
