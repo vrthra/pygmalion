@@ -7,8 +7,9 @@ mytargets=hello whilescope microjson array url
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
 infers=$(addprefix .pickled/, $(addsuffix .py.i,$(mytargets)) )
+refined=$(addprefix .pickled/, $(addsuffix .py.r,$(mytargets)) )
 
-.precious: $(traces) $(tracks) $(infers)
+.precious: $(traces) $(tracks) $(infers) $(refined)
 
 all:
 	@echo $(traces)
@@ -38,6 +39,15 @@ else
 endif
 	@mv $<.i $@
 
+.pickled/%.py.r: .pickled/%.py.i
+ifeq ($(debug),refine)
+	$(python3) -m pudb ./bin/refineit.py $<
+else
+	@$(python3) ./bin/refineit.py $<
+endif
+	@mv $<.r $@
+
+
 trace.%: .pickled/%.py.trace
 	@echo
 
@@ -47,6 +57,8 @@ track.%: .pickled/%.py.track
 infer.%: .pickled/%.py.i
 	@echo
 
+refine.%: .pickled/%.py.r
+	@echo
 
 $(required_dirs):; @mkdir -p $@
 

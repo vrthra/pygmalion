@@ -25,7 +25,9 @@ class Rule:
     def ranges(self): return sorted(self._rindex, key=lambda a: a.start)
     def __lt__(self, o): return str(self).__lt__(str(o))
     def __repr__(self): return 'Rule[%s]:=%s' % (self.k, self.value())
-    def value(self): return ''.join(str(self._rindex[k]) for k in self.ranges())
+    def value(self): return ''.join(str(k) for k in self.ranges())
+    def rvalues(self): return [self._rindex[k] for k in self.ranges()]
+    def __str__(self): return self.value()
 
     def __hash__(self): return hash((self.k, self.v, tuple(self._taint),
         tuple((k,v) for k,v in self._rindex.items())))
@@ -55,7 +57,7 @@ class Rule:
     def keys_enclosed_by(self, largerange):
         # keys enclosed by the given range within this rule.
         l = [k for k in self.ranges() if k.start in largerange]
-        assert all(k.stop - 1 in largerange for k in l)
+        # assert all(k.stop - 1 in largerange for k in l)
         return l
 
     def include(self, word):
@@ -170,7 +172,10 @@ def get_grammar(assignments):
                 x = rule.update_with_key(r.v, r.k, my_grammar)
                 assert not x # if not empty, recurse
 
-    return g.Grammar({k:{v.value()} for k,v in my_grammar.items()})
+    # Use this instead if you want the grammar values to be isomorphic
+    # only upto their string value.
+    # return g.Grammar({k:{v.value()} for k,v in my_grammar.items()})
+    return g.Grammar({k:{v} for k,v in my_grammar.items()})
 
 def merge_grammars(g1, g2):
     return g.Grammar({key: g1[key] | g2[key] for key in g1.keys() + g2.keys()})
@@ -180,8 +185,10 @@ def infer_grammar(traces):
     merged_grammar = g.Grammar()
     for instr, defs in traces:
         grammar = get_grammar(defs)
-        print(repr(instr) + " ->\n" + str(grammar))
-        print()
+        if config.Show_LineGrammar:
+            print(repr(instr) + ":")
+            print(str(grammar))
+            print()
         merged_grammar = merge_grammars(merged_grammar, grammar)
     return merged_grammar
 
