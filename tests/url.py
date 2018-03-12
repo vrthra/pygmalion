@@ -288,6 +288,9 @@ def inputs():
             'http://mynews.com/query?a=b,c=d#fragment',
             'ftp://me:mexico@alaska.com']
 
+def skip_classes():
+    return []
+
 def main(arg):
     u = URL(arg)
     print(u)
