@@ -18,5 +18,5 @@ if __name__ == "__main__":
             i = tstr.tstr(_i)
             with tracer.Tracer(i, trace_file) as t:
                 t._my_files = ['%s' % os.path.basename(m_file)]
-                t._skip_classes = mod_obj.skip_classes()
+                t._skip_classes = mod_obj.skip_classes() if hasattr(mod_obj, 'skip_classes') else []
                 o = mod_obj.main(i)
