@@ -105,9 +105,9 @@ class Tracker:
         variables = frame['f_locals']
         funct = frame['f_context']
         if config.Ignore_Lambda and '<lambda>' in funct: return
+        param_names = f_code['co_varnames'][0: f_code['co_argcount']]
+        my_parameters = {k: variables[k] for k in param_names}
         if event == 'call':
-            param_names = f_code['co_varnames'][0: f_code['co_argcount']]
-            my_parameters = {k: variables[k] for k in param_names}
             self.istack.push(my_parameters)
 
             if config.Track_Params:
@@ -124,5 +124,7 @@ class Tracker:
 
         if config.Track_Vars:
             for var in variables:
+                if not config.Track_Params:
+                    if var in my_parameters: continue
                 self.vars.update_vars(var, variables[var], frame)
 
