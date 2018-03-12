@@ -25,7 +25,7 @@ class Rule:
     def ranges(self): return sorted(self._rindex, key=lambda a: a.start)
     def __lt__(self, o): return str(self).__lt__(str(o))
     def __repr__(self): return 'Rule[%s]:=%s' % (self.k, self.value())
-    def value(self): return ''.join(str(k) for k in self.ranges())
+    def value(self): return ''.join(str(k) for k in self.rvalues())
     def rvalues(self): return [self._rindex[k] for k in self.ranges()]
     def __str__(self): return self.value()
 
