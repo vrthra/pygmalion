@@ -7,4 +7,4 @@ import pickle
 if __name__ == "__main__":
     traces = pickle.load(open(sys.argv[1], "rb" ))
     grammar = miner.infer_grammar(traces)
-    print("Merged grammar ->\n" + str(grammar))
+    pickle.dump(grammar, open("%s.i" % sys.argv[1], "wb"))

@@ -6,8 +6,9 @@ mytargets=hello whilescope microjson array url
 
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
+infers=$(addprefix .pickled/, $(addsuffix .py.i,$(mytargets)) )
 
-.precious: $(traces) $(tracks)
+.precious: $(traces) $(tracks) $(infers)
 
 all:
 	@echo $(traces)
@@ -35,6 +36,7 @@ ifeq ($(debug),infer)
 else
 	@$(python3) ./bin/inferit.py $<
 endif
+	@mv $<.i $@
 
 trace.%: .pickled/%.py.trace
 	@echo
