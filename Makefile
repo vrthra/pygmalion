@@ -5,29 +5,32 @@ mytargets=hello whilescope microjson array url
 .SUFFIXES:
 
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
+tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
 
-.precious: $(traces) $(addsuffix .m,$(traces))
+.precious: $(traces) $(tracks)
 
 all:
 	@echo $(traces)
 
 
 .pickled/%.py.trace: tests/%.py | .pickled
-ifdef debug
+ifeq ($(debug),trace)
 	$(python3) -m pudb ./bin/traceit.py $<
 else
 	@$(python3) ./bin/traceit.py $<
 endif
+	@mv $@.tmp $@
 
-.pickled/%.py.trace.m: .pickled/%.py.trace
-ifdef debug
+.pickled/%.py.track: .pickled/%.py.trace
+ifeq ($(debug),track)
 	$(python3) -m pudb ./bin/trackit.py $<
 else
 	@$(python3) ./bin/trackit.py $<
 endif
+	@mv $<.m $@
 
-.pickled/%.py.trace.m.i: .pickled/%.py.trace.m
-ifdef debug
+.pickled/%.py.i: .pickled/%.py.track
+ifeq ($(debug),infer)
 	$(python3) -m pudb ./bin/inferit.py $<
 else
 	@$(python3) ./bin/inferit.py $<
@@ -36,10 +39,10 @@ endif
 trace.%: .pickled/%.py.trace
 	@echo
 
-mtrace.%: .pickled/%.py.trace.m
+track.%: .pickled/%.py.track
 	@echo
 
-infer.%: .pickled/%.py.trace.m.i
+infer.%: .pickled/%.py.i
 	@echo
 
 
