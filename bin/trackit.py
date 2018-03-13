@@ -12,9 +12,10 @@ if __name__ == "__main__":
     for i in o:
         event = i['event']
         if event in ['start']:
-            tracker = track.Tracker(i['$input'])
+            inp, ins = i['$input']
+            tracker = track.Tracker(inp, ins)
         elif event in ['stop']:
-            traces.append((tracker.vars.i, tracker.vars.defs))
+            traces.append((tracker.vars.i, tracker.vars.ins, tracker.vars.defs))
         else:
             tracker.track(i)
     pickle.dump(traces, open("%s.tmp" % sys.argv[1], "wb" ))

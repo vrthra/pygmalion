@@ -156,7 +156,7 @@ class Rule:
 def tainted_range(o): return range(o._taint[0], o._taint[-1]+1)
 
 # Obtain a grammar for a specific input
-def get_grammar(assignments):
+def get_grammar(assignments, ins):
     my_grammar = {}
     # all values are tainted strings.
     for var, value in assignments.items():
@@ -197,5 +197,5 @@ def get_grammar(assignments):
 
 # Get a grammar for multiple inputs
 def mine_grammar(definitions):
-    return [(i,get_grammar(defs)) for i, defs in definitions]
+    return [(i, ins, get_grammar(defs, ins)) for i, ins, defs in definitions]
 
