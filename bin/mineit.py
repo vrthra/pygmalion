@@ -8,6 +8,9 @@ if __name__ == "__main__":
     defs = pickle.load(open(sys.argv[1], "rb" ))
     grammarinfo = []
     for i,g in miner.mine_grammar(defs):
+        print(g)
+        print()
+        print(g.reconstitute())
         grammarinfo.append((i, g))
     with open("%s.tmp" % sys.argv[1], "wb") as f:
         pickle.dump(grammarinfo, f)

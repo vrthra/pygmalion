@@ -12,6 +12,15 @@ class Grammar:
     def get_dict(self):
         return {str(k):v for k,v in self._dict.items()}
 
+    def reconstitute(self):
+        def djs_to_string(djs):
+            return "\n\t| ".join([i.inputval(self).replace('\n', '\n|\t')
+                for i in sorted(djs)])
+        def fixline(key, rules):
+            fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t| %s"
+            return fmt % (key, djs_to_string(rules))
+        return "\n".join([fixline(key, self[key]) for key in self.keys()])
+
     def __str__(self):
         def djs_to_string(djs):
             return "\n\t| ".join([str(i).replace('\n', '\n|\t')

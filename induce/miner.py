@@ -29,6 +29,17 @@ class Rule:
     def rvalues(self): return [self._rindex[k] for k in self.ranges()]
     def __str__(self): return self.value()
 
+    def reconstitute(self, v, g):
+        if type(v) is NTKey:
+            # get the value from grammar
+            val = list(g[v])
+            assert len(val) == 1 # only for linear grammars
+            return val[0].inputval(g)
+        else:
+            return str(v)
+
+    def inputval(self, g): return ''.join([self.reconstitute(k,g) for k in self.rvalues()])
+
     def __hash__(self): return hash((self.k, self.v, tuple(self._taint),
         tuple((k,v) for k,v in self._rindex.items())))
     def __nq__(self, o):
@@ -158,6 +169,8 @@ def get_grammar(assignments):
             # at higher height.
             # i.e key(rule).height should be smaller than var.height
             if key.k.height <= var.height and rule.include(value):
+                # but we still need to let keys below in the stack be
+                # eclipsed.
                 eclipsed = rule.replace_with_key(value, nt_var)
                 # eclipsed are the keys displaced from rule by value
                 # and needs to be added to value.
