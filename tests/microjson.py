@@ -393,17 +393,19 @@ encode = to_json
 
 def inputs():
     INPUTS = [
-            '1',
-            '2',
-            '3',
-            '[1, 2, 3]',
-            '[4 , 5 , 6, 7 ]',
-            '["a" , "b" , "c", "d"]',
+            '15',
+            '23',
+            '31',
+            '[10, 201, 300]',
+            '[4222 , 522 , 613, 7001 ]',
+            '[14 , 25 , 36, 475 ]',
+            '["axe" , "boy" , "cats", "digger"]',
             'true',
             'false',
             'null',
             '"hello"',
             '{"hello":"world"}',
+            '{"xx":9990, "yy":8888}',
             '[{"hello":"world"}, {"goodbye":"world"}]',
             ]
     return INPUTS

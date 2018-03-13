@@ -1,7 +1,10 @@
 
 # [Procedure calls]
-
-Track_Params = True
+# Why should we not track params to a function? because
+# the input string may get progressively eaten rather than
+# split recursively. So the input string variable actually
+# causes more noise than signal.
+Track_Params = False
 
 Track_Vars = True
 
