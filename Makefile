@@ -74,23 +74,28 @@ refine.%: .pickled/%.py.refine
 
 xtrace.%:
 	rm -f .pickled/$*.py.trace
+	@echo
 	$(MAKE) trace.$*
 
 xtrack.%:
 	rm -f .pickled/$*.py.track
+	@echo
 	$(MAKE) track.$*
 
 xmine.%:
 	rm -f .pickled/$*.py.mine
+	@echo
 	$(MAKE) mine.$*
 
 xinfer.%:
 	rm -f .pickled/$*.py.infer
+	@echo
 	$(MAKE) infer.$*
 
 
 xrefine.%:
 	rm -f .pickled/$*.py.refine
+	@echo
 	$(MAKE) refine.$*
 
 

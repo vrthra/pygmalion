@@ -28,4 +28,4 @@ Swap_Eclipsing_Keys = True
 
 # [Verbosity]
 
-Show_Line_Grammar= False
+Show_Colors = True
