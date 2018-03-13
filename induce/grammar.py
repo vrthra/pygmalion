@@ -23,8 +23,8 @@ class Grammar:
 
 
 class V:
-    def __init__(self, fn, l, n, var, t):
-        self.fn, self.l, self.func, self.var, self.t = fn, l, n, var, t
+    def __init__(self, fn, l, n, var, t, height=0):
+        self.fn, self.l, self.func, self.var, self.t, self.height = fn, l, n, var, t, height
         self._x = (self.func, self.var, self.t)
     def __str__(self): return "<%s:%s:%d>" % self._x
     def __repr__(self): return "<%s:%s:%d>" % self._x

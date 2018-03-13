@@ -29,7 +29,7 @@ class Vars:
         # DONT use line number. We are called from every line and the line
         # number is the line where a var is used  not where it is defined.
         return g.V(frame['f_code']['co_filename'], frame['f_lineno'],
-               frame['f_context'], var, t)
+                   frame['f_context'], var, t, self.istack.height())
 
     def update_vars(self, var, value, frame):
         # We can not detect variable reuse in different lines
@@ -66,6 +66,9 @@ class InputStack:
     def has(self, val):
         return any(taint_include(val, var)
                 for var in self.inputs[-1].values())
+
+    def height(self):
+        return len(self.inputs)
 
     def push(self, inputs):
         my_inputs = {k:tstr.get_t(v) for k,v in inputs.items() if tstr.get_t(v)}

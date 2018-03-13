@@ -153,7 +153,11 @@ def get_grammar(assignments):
         nt_var = NTKey(var)
         append = False if my_grammar else True
         for key, rule in my_grammar.items():
-            if rule.include(value):
+            # is the key at a higher stack height than var?
+            # only replace things at a lower height with something
+            # at higher height.
+            # i.e key(rule).height should be smaller than var.height
+            if key.k.height <= var.height and rule.include(value):
                 eclipsed = rule.replace_with_key(value, nt_var)
                 # eclipsed are the keys displaced from rule by value
                 # and needs to be added to value.
