@@ -13,7 +13,9 @@ def nt_key_to_s(i):
     return "[%s:%s]" % (v.func, v.var)
 
 if __name__ == "__main__":
-    grammar = pickle.load(open(sys.argv[1], "rb" ))
+    fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
+    fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'w')
+    grammar = pickle.load(fin)
     newg = {}
     for key in grammar.keys():
         rules = grammar[key]
@@ -31,6 +33,6 @@ if __name__ == "__main__":
                 my_str.append(str_var)
             newr.add(''.join(my_str))
     x = g.Grammar(newg)
-    print(str(x))
-    with open("%s.tmp" % sys.argv[1], 'w+') as f:
-        print(str(grammar), file=f)
+    if len(sys.argv) > 1:
+        print(str(x), file=sys.stderr)
+    print(str(x), file=fout)

@@ -86,8 +86,8 @@ class InputStack:
         return repr(self.inputs)
 
 class FrameIter:
-    def __init__(self, fname):
-        self.f = open(fname, 'rb')
+    def __init__(self, f):
+        self.f = f
 
     def __iter__(self): return self
 

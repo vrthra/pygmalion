@@ -5,7 +5,9 @@ import induce.track as track
 import pickle
 
 if __name__ == "__main__":
-    o = track.FrameIter(sys.argv[1])
+    fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
+    fout = sys.stdout.buffer if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
+    o = track.FrameIter(fin)
     tracker = None
     traces = []
     # this is a single input.
@@ -18,4 +20,4 @@ if __name__ == "__main__":
             traces.append((tracker.vars.i, tracker.vars.ins, tracker.vars.defs))
         else:
             tracker.track(i)
-    pickle.dump(traces, open("%s.tmp" % sys.argv[1], "wb" ))
+    pickle.dump(traces, fout)

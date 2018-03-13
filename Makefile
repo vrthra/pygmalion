@@ -103,6 +103,8 @@ $(required_dirs):; @mkdir -p $@
 
 clobber:; rm -rf .pickled
 
+clean:; rm -f .pickled/*
+
 
 typecheck:
 	$(python3) -m mypy --strict --follow-imports=skip -m induce.ftrace
