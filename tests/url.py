@@ -49,14 +49,20 @@ class URL:
             aRef=true;
         i = start
 
+        c = spec[i]
+        if c not in string.ascii_letters:
+            raise Exception("no protocol:" + original)
+
         while (not aRef) and spec[i:] != '' and spec[i] != '/':
             c = spec[i]
-            if c == ':':
-                s = spec[start: i].lower()
-                if self.isValidProtocol(s):
+            if c not in (string.ascii_letters + string.digits) and c != '.' and c != '+' and c != '-' :
+                if c == ':':
+                    s = spec[start: i].lower()
                     newProtocol = s
                     start = i + 1
-                break
+                    break
+                else:
+                    raise Exception("no protocol: "+original)
             i += 1
         # Only use our context if the protocols match.
         self.protocol = newProtocol
