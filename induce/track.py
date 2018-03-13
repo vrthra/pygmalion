@@ -64,6 +64,9 @@ class InputStack:
         self.inputs = []
 
     def has(self, val):
+        # TODO: Alternatively look only if val is tainted.
+        # The idea is that any tainted value obviously comes
+        # from the input
         return any(taint_include(val, var)
                 for var in self.inputs[-1].values())
 
