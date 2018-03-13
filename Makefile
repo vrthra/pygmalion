@@ -6,10 +6,10 @@ mytargets=hello whilescope microjson array url
 
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
-infers=$(addprefix .pickled/, $(addsuffix .py.i,$(mytargets)) )
+mines=$(addprefix .pickled/, $(addsuffix .py.i,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.r,$(mytargets)) )
 
-.precious: $(traces) $(tracks) $(infers) $(refined)
+.precious: $(traces) $(tracks) $(mines) $(refined)
 
 all:
 	@echo $(traces)
@@ -32,10 +32,10 @@ endif
 	@mv $<.m $@
 
 .pickled/%.py.i: .pickled/%.py.track
-ifeq ($(debug),infer)
-	$(python3) -m pudb ./bin/inferit.py $<
+ifeq ($(debug),mine)
+	$(python3) -m pudb ./bin/mineit.py $<
 else
-	@$(python3) ./bin/inferit.py $<
+	@$(python3) ./bin/mineit.py $<
 endif
 	@mv $<.i $@
 
@@ -54,7 +54,7 @@ trace.%: .pickled/%.py.trace
 track.%: .pickled/%.py.track
 	@echo
 
-infer.%: .pickled/%.py.i
+mine.%: .pickled/%.py.i
 	@echo
 
 refine.%: .pickled/%.py.r
@@ -68,9 +68,9 @@ xtrack.%:
 	rm -f .pickled/$*.py.track
 	$(MAKE) track.$*
 
-xinfer.%:
+xmine.%:
 	rm -f .pickled/$*.py.i
-	$(MAKE) infer.$*
+	$(MAKE) mine.$*
 
 xrefine.%:
 	rm -f .pickled/$*.py.r
