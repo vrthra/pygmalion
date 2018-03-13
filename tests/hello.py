@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 def inputs():
-    return ['hello']
+    return ['hello', 'HELLO']
 
 def main(s):
     h = s[0]

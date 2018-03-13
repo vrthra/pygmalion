@@ -6,10 +6,11 @@ mytargets=hello whilescope microjson array url
 
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
-mines=$(addprefix .pickled/, $(addsuffix .py.i,$(mytargets)) )
-refined=$(addprefix .pickled/, $(addsuffix .py.r,$(mytargets)) )
+mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
+infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
+refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(traces) $(tracks) $(mines) $(refined)
+.precious: $(traces) $(tracks) $(mines) $(infers) $(refined)
 
 all:
 	@echo $(traces)
@@ -21,7 +22,7 @@ ifeq ($(debug),trace)
 else
 	@$(python3) ./bin/traceit.py $<
 endif
-	@mv $@.tmp $@
+	@mv .pickled/$*.py.tmp $@
 
 .pickled/%.py.track: .pickled/%.py.trace
 ifeq ($(debug),track)
@@ -29,23 +30,31 @@ ifeq ($(debug),track)
 else
 	@$(python3) ./bin/trackit.py $<
 endif
-	@mv $<.m $@
+	@mv $<.tmp $@
 
-.pickled/%.py.i: .pickled/%.py.track
+.pickled/%.py.mine: .pickled/%.py.track
 ifeq ($(debug),mine)
 	$(python3) -m pudb ./bin/mineit.py $<
 else
 	@$(python3) ./bin/mineit.py $<
 endif
-	@mv $<.i $@
+	@mv $<.tmp $@
 
-.pickled/%.py.r: .pickled/%.py.i
+.pickled/%.py.infer: .pickled/%.py.mine
+ifeq ($(debug),infer)
+	$(python3) -m pudb ./bin/inferit.py $<
+else
+	@$(python3) ./bin/inferit.py $<
+endif
+	@mv $<.tmp $@
+
+.pickled/%.py.refine: .pickled/%.py.infer
 ifeq ($(debug),refine)
 	$(python3) -m pudb ./bin/refineit.py $<
 else
 	@$(python3) ./bin/refineit.py $<
 endif
-	@mv $<.r $@
+	@mv $<.tmp $@
 
 
 trace.%: .pickled/%.py.trace
@@ -54,10 +63,13 @@ trace.%: .pickled/%.py.trace
 track.%: .pickled/%.py.track
 	@echo
 
-mine.%: .pickled/%.py.i
+mine.%: .pickled/%.py.mine
 	@echo
 
-refine.%: .pickled/%.py.r
+infer.%: .pickled/%.py.infer
+	@echo
+
+refine.%: .pickled/%.py.refine
 	@echo
 
 xtrace.%:
@@ -69,11 +81,16 @@ xtrack.%:
 	$(MAKE) track.$*
 
 xmine.%:
-	rm -f .pickled/$*.py.i
+	rm -f .pickled/$*.py.mine
 	$(MAKE) mine.$*
 
+xinfer.%:
+	rm -f .pickled/$*.py.infer
+	$(MAKE) infer.$*
+
+
 xrefine.%:
-	rm -f .pickled/$*.py.r
+	rm -f .pickled/$*.py.refine
 	$(MAKE) refine.$*
 
 

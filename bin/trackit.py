@@ -17,4 +17,4 @@ if __name__ == "__main__":
             traces.append((tracker.vars.i, tracker.vars.defs))
         else:
             tracker.track(i)
-    pickle.dump(traces, open("%s.m" % sys.argv[1], "wb" ))
+    pickle.dump(traces, open("%s.tmp" % sys.argv[1], "wb" ))

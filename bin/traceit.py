@@ -12,7 +12,7 @@ if __name__ == "__main__":
     mod_obj.__file__ = m_file
     code = compile(open(m_file).read(), os.path.basename(m_file), 'exec')
     exec(code, mod_obj.__dict__)
-    with open(".pickled/%s.trace.tmp" % os.path.basename(m_file), 'wb') as trace_file:
+    with open(".pickled/%s.tmp" % os.path.basename(m_file), 'wb') as trace_file:
         # Infer grammar
         for _i in mod_obj.inputs():
             i = tstr.tstr(_i)

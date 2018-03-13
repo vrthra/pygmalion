@@ -5,6 +5,9 @@ import sys
 import pickle
 
 if __name__ == "__main__":
-    traces = pickle.load(open(sys.argv[1], "rb" ))
-    grammar = miner.infer_grammar(traces)
-    pickle.dump(grammar, open("%s.i" % sys.argv[1], "wb"))
+    defs = pickle.load(open(sys.argv[1], "rb" ))
+    grammarinfo = []
+    for i,g in miner.mine_grammar(defs):
+        grammarinfo.append((i, g))
+    with open("%s.tmp" % sys.argv[1], "wb") as f:
+        pickle.dump(grammarinfo, f)

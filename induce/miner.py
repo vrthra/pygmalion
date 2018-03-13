@@ -182,18 +182,7 @@ def get_grammar(assignments):
     # return g.Grammar({k:{v.value()} for k,v in my_grammar.items()})
     return g.Grammar({k:{v} for k,v in my_grammar.items()})
 
-def merge_grammars(g1, g2):
-    return g.Grammar({key: g1[key] | g2[key] for key in g1.keys() + g2.keys()})
-
 # Get a grammar for multiple inputs
-def infer_grammar(traces):
-    merged_grammar = g.Grammar()
-    for instr, defs in traces:
-        grammar = get_grammar(defs)
-        if config.Show_Line_Grammar:
-            print(repr(instr) + ":")
-            print(str(grammar))
-            print()
-        merged_grammar = merge_grammars(merged_grammar, grammar)
-    return merged_grammar
+def mine_grammar(definitions):
+    return [(i,get_grammar(defs)) for i, defs in definitions]
 

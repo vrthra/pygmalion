@@ -30,5 +30,5 @@ if __name__ == "__main__":
             newr.add(''.join(my_str))
     x = g.Grammar(newg)
     print(str(x))
-    with open("%s.r" % sys.argv[1], 'w+') as f:
+    with open("%s.tmp" % sys.argv[1], 'w+') as f:
         print(str(grammar), file=f)
