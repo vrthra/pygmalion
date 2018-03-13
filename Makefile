@@ -60,6 +60,23 @@ infer.%: .pickled/%.py.i
 refine.%: .pickled/%.py.r
 	@echo
 
+xtrace.%:
+	rm -f .pickled/$*.py.trace
+	$(MAKE) trace.$*
+
+xtrack.%:
+	rm -f .pickled/$*.py.track
+	$(MAKE) track.$*
+
+xinfer.%:
+	rm -f .pickled/$*.py.i
+	$(MAKE) infer.$*
+
+xrefine.%:
+	rm -f .pickled/$*.py.r
+	$(MAKE) refine.$*
+
+
 $(required_dirs):; @mkdir -p $@
 
 clobber:; rm -rf .pickled
