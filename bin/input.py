@@ -33,7 +33,12 @@ if __name__ == "__main__":
             pychains.execfile.PrefixArg = i
             e = pychains.execfile.ExecFile()
             e.cmdline(i)
-            pickle.dump(e.cmp_output, trace_file)
+            outputs = {}
+            for o in e.cmp_output:
+                op = o.opA.x()
+                if op not in outputs: outputs[op] = []
+                outputs[op].append(o)
+            pickle.dump(outputs, trace_file)
             #for o in e.cmp_output:
             #    opB = o.opB if type(o.opB) not in [set, list, dict] else [o for o in o.opB]
             #    print(json.dumps({"pos": o.opA.x(),
