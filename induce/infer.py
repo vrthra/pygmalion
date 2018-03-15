@@ -3,19 +3,18 @@ import pudb
 from pychains.vm import TraceOp, Op
 brk = pudb.set_trace
 
-def merge_grammars(g1, lg, cmps, xcmps):
+def merge_grammars(g1, lg, xcmps):
     for k in lg.keys():
         rule = lg[k]
         assert len(rule) == 1
         r = list(rule)[0]
-        r.comparisons = {i:xcmps[i] for i in r.taint}
+        r.comparisons = {i:xcmps[i] for i in r.taint if i < len(xcmps)}
         # get rule taints.
         pass
     return g.Grammar({key: g1[key] | lg[key] for key in g1.keys() + lg.keys()})
 
 def process_one(pos, v):
     opA = set(i.opA for i in v)
-    assert len(opA) == 1
     # EQ
     eq = [i for i in v if Op(i.opnum) == Op.EQ]
     ne = [i for i in v if Op(i.opnum) == Op.NE]
@@ -41,8 +40,7 @@ def process_one(pos, v):
     all_in = sin + fni
     all_ni = sni + fin
 
-    return {'i':pos, 'o':list(opA)[0], 'eq': all_eq, 'ne': all_ne, 'in': all_in, 'ni': all_ni}
-
+    return {'i':pos, 'o':list(opA)[0], 'eq': all_eq, 'ne': all_ne, 'in': all_in, 'ni': all_ni, 'seq': seq, 'feq': feq, 'sne':sne, 'fne':fne, 'sin':sin, 'fin':fin, 'sni':sni, 'fni':fni}
 
     # belongs_to = seq
     # belongs_to.extend(fne)
@@ -81,10 +79,9 @@ def process_ins(ins):
 # Get a grammar for multiple inputs
 def infer_grammar(lgrammars):
     merged_grammar = g.Grammar()
-    for i, ins, xins, lgrammar in lgrammars:
+    for i, xins, lgrammar in lgrammars:
         print(i)
-        cmps = process_ins(ins)
         # this is for a single input
         xcmps = process_xins(xins)
-        merged_grammar = merge_grammars(merged_grammar, lgrammar, cmps, xcmps)
+        merged_grammar = merge_grammars(merged_grammar, lgrammar, xcmps)
     return merged_grammar

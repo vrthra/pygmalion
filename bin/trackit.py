@@ -18,11 +18,11 @@ if __name__ == "__main__":
     for i in o:
         event = i['event']
         if event in ['start']:
-            inp, ins = i['$input']
+            inp = i['$input']
             xins = pickle.load(ifin)
-            tracker = track.Tracker(inp, ins)
+            tracker = track.Tracker(inp, xins)
         elif event in ['stop']:
-            traces.append((tracker.vars.i, tracker.vars.ins, xins, tracker.vars.defs))
+            traces.append((tracker.vars.i, tracker.vars.ins, tracker.vars.defs))
         else:
             tracker.track(i)
     pickle.dump(traces, fout)

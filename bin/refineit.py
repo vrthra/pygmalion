@@ -24,7 +24,7 @@ if __name__ == "__main__":
             newg[newk] = set()
         newr = newg[newk]
         for r in rules:
-            assert r.comparisons
+            #assert r.comparisons
             my_str = []
             skip = False
             for i in r.rvalues():
@@ -35,16 +35,22 @@ if __name__ == "__main__":
                     pos = i.x()
                     str_var = str(i)
                 my_str.append(str_var)
-            if not skip:
+            if not skip and r.comparisons:
                 c = r.comparisons[pos]
                 my_str.extend(["\t"] +
-                        [" eq:" + repr(''.join([str(i) for i in c['eq']])),
-                         ' ne:' + repr(''.join([str(i) for i in c['ne']])),
-                         ' in:' + repr(''.join([''.join(i) for i in c['in']])),
-                         ' ni:' + repr(''.join([''.join(i) for i in c['ni']]))])
+                        [
+                         ' seq:' + repr(''.join([str(i) for i in c['seq']])),
+                         ' sne:' + repr(''.join([str(i) for i in c['sne']])),
+                         ' sin:' + repr(''.join([''.join(i) for i in c['sin']])),
+                         ' sni:' + repr(''.join([''.join(i) for i in c['sni']])),
+                         ' feq:' + repr(''.join([str(i) for i in c['feq']])),
+                         ' fne:' + repr(''.join([str(i) for i in c['fne']])),
+                         ' fin:' + repr(''.join([''.join(i) for i in c['fin']])),
+                         ' fni:' + repr(''.join([''.join(i) for i in c['fni']])),
+                         ])
             else:
                 my_str.extend([''])
-            newr.add(''.join(my_str))
+            newr.add("".join(my_str))
     x = g.Grammar(newg)
     if len(sys.argv) > 1:
         print(str(x), file=sys.stderr)

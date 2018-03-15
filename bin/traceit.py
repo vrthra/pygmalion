@@ -27,10 +27,9 @@ if __name__ == "__main__":
         fn = ".pickled/%s.tmp" % os.path.basename(m_file)
     with opened_file(fn) as trace_file:
         # Infer grammar
-        for x,_i in enumerate(mod_obj.inputs()):
+        for _i in mod_obj.inputs():
             i = tstr.tstr(_i)
-            c = mod_obj.comparisons()[x]
-            with tracer.Tracer((i, c), trace_file) as t:
+            with tracer.Tracer(i, trace_file) as t:
                 t._my_files = ['%s' % os.path.basename(m_file)]
                 t._skip_classes = mod_obj.skip_classes() if hasattr(mod_obj, 'skip_classes') else []
                 o = mod_obj.main(i)

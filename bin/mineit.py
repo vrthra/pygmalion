@@ -10,11 +10,11 @@ if __name__ == "__main__":
     defs = pickle.load(fin)
 
     grammarinfo = []
-    for i, ins, xins, g in miner.mine_grammar(defs):
+    for i, xins, g in miner.mine_grammar(defs):
         if len(sys.argv) > 2:
             print(g)
             print()
             print(g.reconstitute())
         print(i, flush=True)
-        grammarinfo.append((i, ins, xins, g))
+        grammarinfo.append((i, xins, g))
     pickle.dump(grammarinfo, fout)
