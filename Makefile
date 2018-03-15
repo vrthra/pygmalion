@@ -4,13 +4,14 @@ mytargets=hello whilescope microjson array url
 
 .SUFFIXES:
 
+inputs=$(addprefix .pickled/, $(addsuffix .py.trace.input,$(mytargets)) )
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
 mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
 infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(traces) $(tracks) $(mines) $(infers) $(refined)
+.precious: $(traces) $(tracks) $(mines) $(infers) $(refined) $(inputs)
 
 all:
 	@echo $(traces)
@@ -22,6 +23,8 @@ ifeq ($(debug),trace)
 else
 	@$(python3) ./bin/traceit.py $<
 endif
+	@$(python3) ./bin/input.py $<
+	@mv .pickled/$*.py.i.tmp $@.input
 	@mv .pickled/$*.py.tmp $@
 
 .pickled/%.py.track: .pickled/%.py.trace
