@@ -7,7 +7,7 @@
 
 # std
 import math
-import induce.myio as io
+import myio as io
 import types
 
 
@@ -656,3 +656,8 @@ def skip_classes():
 def main(s):
     from_json(s)
 
+
+if __name__ == '__main__':
+    import sys
+    result = from_json(sys.argv[1])
+    print(repr(result))
