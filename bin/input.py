@@ -8,6 +8,8 @@ import imp
 from contextlib import contextmanager
 import pychains.execfile
 from  pychains.vm import Op
+import pudb
+brk = pudb.set_trace
 
 @contextmanager
 def opened_file(f):
@@ -39,6 +41,7 @@ if __name__ == "__main__":
                 if op not in outputs: outputs[op] = []
                 outputs[op].append(o)
             pickle.dump(outputs, trace_file)
+            #pickle.dump(e.cmp_output, trace_file)
             #for o in e.cmp_output:
             #    opB = o.opB if type(o.opB) not in [set, list, dict] else [o for o in o.opB]
             #    print(json.dumps({"pos": o.opA.x(),

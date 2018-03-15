@@ -21,6 +21,7 @@ class Rule:
         self.v = v
         self._taint = v._taint
         self._rindex = {tainted_range(self): v}
+        self.comparisons = None
 
     def ranges(self): return sorted(self._rindex, key=lambda a: a.start)
     def __lt__(self, o): return str(self).__lt__(str(o))
@@ -197,5 +198,5 @@ def get_grammar(assignments, ins):
 
 # Get a grammar for multiple inputs
 def mine_grammar(definitions):
-    return [(i, ins, get_grammar(defs, ins)) for i, ins, defs in definitions]
+    return [(i, ins, xins, get_grammar(defs, ins)) for i, ins, xins, defs in definitions]
 

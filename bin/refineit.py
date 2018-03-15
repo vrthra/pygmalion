@@ -24,13 +24,26 @@ if __name__ == "__main__":
             newg[newk] = set()
         newr = newg[newk]
         for r in rules:
+            assert r.comparisons
             my_str = []
+            skip = False
             for i in r.rvalues():
                 if type(i) == miner.NTKey:
                     str_var = bc(bc.okblue).o(nt_key_to_s(i))
+                    skip = True
                 else:
+                    pos = i.x()
                     str_var = str(i)
                 my_str.append(str_var)
+            if not skip:
+                c = r.comparisons[pos]
+                my_str.extend(["\t"] +
+                        [" eq:" + repr(''.join([str(i) for i in c['eq']])),
+                         ' ne:' + repr(''.join([str(i) for i in c['ne']])),
+                         ' in:' + repr(''.join([''.join(i) for i in c['in']])),
+                         ' ni:' + repr(''.join([''.join(i) for i in c['ni']]))])
+            else:
+                my_str.extend([''])
             newr.add(''.join(my_str))
     x = g.Grammar(newg)
     if len(sys.argv) > 1:
