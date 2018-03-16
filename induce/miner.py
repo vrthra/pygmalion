@@ -169,7 +169,10 @@ def get_grammar(assignments):
             # only replace things at a lower height with something
             # at higher height.
             # i.e key(rule).height should be smaller than var.height
-            if key.k.height <= var.height and rule.include(value):
+            val = True
+            if config.Prevent_Deep_Stack_Modification:
+                val = key.k.height <= var.height
+            if val and rule.include(value):
                 # but we still need to let keys below in the stack be
                 # eclipsed.
                 eclipsed = rule.replace_with_key(value, nt_var)

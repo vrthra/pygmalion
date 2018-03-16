@@ -35,4 +35,6 @@ Show_Colors = True
 
 Show_Comparisons = False
 
-Compress_Grammar = False
+Compress_Grammar = True
+
+Prevent_Deep_Stack_Modification = False
