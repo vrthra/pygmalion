@@ -85,7 +85,8 @@ if __name__ == "__main__":
                 #my_str.extend([''])
             newr.add(process(my_str))
     x = g.Grammar(newg)
-    x.compress()
+    if config.Compress_Grammar:
+        x.compress()
     if len(sys.argv) > 1:
         print(str(x), file=sys.stderr)
     print(str(x), file=fout)

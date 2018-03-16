@@ -34,3 +34,5 @@ Swap_Eclipsing_Keys = True
 Show_Colors = True
 
 Show_Comparisons = False
+
+Compress_Grammar = False
