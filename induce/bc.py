@@ -1,6 +1,10 @@
 import induce.config as config
 
 class bc:
+    blue = '\033[94m'
+    green = '\033[92m'
+    yellow = '\033[93m'
+    red = '\033[91m'
     header = '\033[95m'
     okblue = '\033[94m'
     okgreen = '\033[92m'

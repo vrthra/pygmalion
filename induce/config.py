@@ -32,3 +32,5 @@ Swap_Eclipsing_Keys = True
 # [Verbosity]
 
 Show_Colors = True
+
+Show_Comparisons = False

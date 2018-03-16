@@ -401,15 +401,17 @@ def inputs():
             '[14 , 25 , 36, 475 ]',
             '["axe" , "boy" , "cats", "digger"]',
             'true',
-            # 'false',
-            # 'null',
-            # '"hello"',
-            # '{"hello":"world"}',
-            # '{"xx":9990, "yy":8888}',
-            # '[{"hello":"world"}, {"goodbye":"world"}]',
+            'false',
+            'null',
+            '"hello"',
+            '{"hello":"world"}',
+            '{"xx":9990, "yy":8888}',
+            '[{"hello":"world"}, {"goodbye":"world"}]',
             ]
     #return ['[10, 229, 344]', '[1003, 20, 20001, 22122, 220]']
-    return INPUTS
+    #return INPUTS
+    v = [l.strip() for l in open('microjson.input') if not l[0] == '#']
+    return v
 
 def skip_classes():
     return ['.*JSONStream.*']

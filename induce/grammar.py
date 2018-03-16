@@ -1,3 +1,5 @@
+import induce.bc as bc
+red = bc.bc(bc.bc.red)
 class Grammar:
     def __init__(self, d={}): self._dict = d
     def __setitem__(self, key, item): self._dict[key] = item
@@ -30,6 +32,22 @@ class Grammar:
             return fmt % (key, djs_to_string(rules))
         return "\n".join([fixline(key, self[key]) for key in self.keys()])
 
+    def compress(self):
+        for i in self.keys():
+            values = self.get(i)
+            newvalues = set()
+            addv = []
+            last = None
+            append = None
+            for v in values:
+                if len(v) == 1:
+                    addv.append(v)
+                else:
+                    newvalues.add(v)
+            if addv:
+                newvalues.add(red('[') + ''.join(addv) + red(']'))
+            self[i] = newvalues
+        return self
 
 class V:
     def __init__(self, fn, l, n, var, t, height=0):
