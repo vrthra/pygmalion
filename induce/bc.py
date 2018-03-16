@@ -11,3 +11,4 @@ class bc:
     underline = '\033[4m'
     def __init__(self, c): self.c = c
     def o(self, v): return self.c + v + bc.endc if config.Show_Colors else v
+    def __call__(self, v): return self.o(v)
