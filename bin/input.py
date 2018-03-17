@@ -6,8 +6,9 @@ import pickle
 import json
 import imp
 from contextlib import contextmanager
-import pychains.execfile
-from  pychains.vm import Op
+import trackingvm.execfile
+import bytevm.sys
+from trackingvm.vm import Op
 import pudb
 brk = pudb.set_trace
 
@@ -32,9 +33,8 @@ if __name__ == "__main__":
     with opened_file(fn) as trace_file:
         # Infer grammar
         for x,i in enumerate(mod_obj.inputs()):
-            pychains.execfile.PrefixArg = i
-            e = pychains.execfile.ExecFile()
-            e.cmdline(i)
+            e = trackingvm.execfile.ExecFile()
+            e.cmdline([m_file, i])
             outputs = {}
             for o in e.cmp_output:
                 op = o.opA.x()

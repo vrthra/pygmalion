@@ -1,6 +1,6 @@
 import induce.grammar as g
 import pudb
-from pychains.vm import TraceOp, Op
+from trackingvm.vm import TraceOp, Op
 brk = pudb.set_trace
 
 def merge_grammars(g1, lg, xcmps):
