@@ -1,6 +1,6 @@
 import pudb; brk = pudb.set_trace
 import pickle
-from . import tstr
+from taintedstr import tstr, get_t
 from . import grammar as g
 from . import config
 
@@ -38,18 +38,18 @@ class Vars:
         # due to loops. The idea is that, when a variable gets
         # a changed value in terms of the *taint* (he_ll_o)
         # it means a new scope.
-        tv = tstr.get_t(value)
+        tv = get_t(value)
         if not tv or len(tv) == 0 or not self.istack.has(tv): return
         bv = self.base_name(var, frame)
         self.var_init(bv)
         qual_var = self.var_name(var, frame)
         if qual_var not in self.defs:
-            v = tstr.get_t(value)
-            assert type(v) is tstr.tstr
+            v = get_t(value)
+            assert type(v) is tstr
             self.defs[qual_var] = v
         else: # possible reassignment
             oldv = self.defs[qual_var]
-            newv = tstr.get_t(value)
+            newv = get_t(value)
             if oldv._taint != newv._taint:
                 # only update the assignment if we detect a change
                 # in taint value.
@@ -75,7 +75,7 @@ class InputStack:
         return len(self.inputs)
 
     def push(self, inputs):
-        my_inputs = {k:tstr.get_t(v) for k,v in inputs.items() if tstr.get_t(v)}
+        my_inputs = {k:get_t(v) for k,v in inputs.items() if get_t(v)}
         if self.inputs:
             my_inputs = {k:v for k,v in my_inputs.items() if self.has(v)}
         self.inputs.append(my_inputs)

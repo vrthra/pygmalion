@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import induce.tstr as tstr
+import taintedstr as tainted
 import sys
 import os.path
 import induce.ftrace as tracer
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     with opened_file(fn) as trace_file:
         # Infer grammar
         for _i in mod_obj.inputs():
-            i = tstr.tstr(_i)
+            i = tainted.tstr(_i)
             with tracer.Tracer(i, trace_file) as t:
                 t._my_files = ['%s' % os.path.basename(m_file)]
                 t._skip_classes = mod_obj.skip_classes() if hasattr(mod_obj, 'skip_classes') else []

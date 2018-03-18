@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import induce.tstr as tstr
 import sys
 import os.path
 import pickle

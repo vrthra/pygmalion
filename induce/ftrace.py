@@ -9,7 +9,7 @@ import json
 import os
 import re
 import fnmatch
-from . import tstr
+from taintedstr import tstr, get_t
 
 # pylint: disable=multiple-statements,fixme, unidiomatic-typecheck
 # pylint: line-too-long
@@ -87,7 +87,7 @@ class Tracer:
             elif tv in [dict]: # or hasattr(v, '__dict__')
                 return {i:process(v[i]) for i in v}
             else:
-                return tstr.get_t(v)
+                return get_t(v)
         return {i:process(v[i]) for i in v}
 
     def frame(self, f: Any) -> Dict[str, Any]:
