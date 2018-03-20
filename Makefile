@@ -17,7 +17,7 @@ all:
 	@echo $(traces)
 
 
-.pickled/%.py.trace: tests/%.py | .pickled
+.pickled/%.py.trace: subjects/%.py | .pickled
 ifeq ($(debug),trace)
 	$(python3) -m pudb ./bin/traceit.py $<
 else

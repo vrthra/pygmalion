@@ -392,6 +392,9 @@ decode = from_json
 encode = to_json
 
 def inputs():
+    import os.path
+    if os.path.exists('tests/microjson.input'):
+        return [l.strip() for l in open('tests/microjson.input') if not l[0] == '#']
     INPUTS = [
             '15',
             '23',
@@ -408,10 +411,7 @@ def inputs():
             '{"xx":9990, "yy":8888}',
             '[{"hello":"world"}, {"goodbye":"world"}]',
             ]
-    #return ['[10, 229, 344]', '[1003, 20, 20001, 22122, 220]']
-    #return INPUTS
-    v = [l.strip() for l in open('microjson.input') if not l[0] == '#']
-    return v
+    return INPUTS
 
 def skip_classes():
     return ['.*JSONStream.*']
