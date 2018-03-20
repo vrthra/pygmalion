@@ -1,4 +1,4 @@
-import induce.config as config
+import pygmalion.config as config
 
 class bc:
     blue = '\033[94m'

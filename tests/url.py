@@ -1,4 +1,4 @@
-import induce.mystring as string
+import pygmalion.mystring as string
 class URL:
     __slots__ = [
             'protocol',

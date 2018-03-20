@@ -110,4 +110,4 @@ clean:; rm -f .pickled/*
 
 
 typecheck:
-	$(python3) -m mypy --strict --follow-imports=skip -m induce.ftrace
+	$(python3) -m mypy --strict --follow-imports=skip -m pygmalion.ftrace

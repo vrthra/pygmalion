@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import induce.miner as miner
-import induce.grammar as g
+import pygmalion.miner as miner
+import pygmalion.grammar as g
 import sys
 import pickle
 

@@ -1,4 +1,4 @@
-import induce.bc as bc
+import pygmalion.bc as bc
 red = bc.bc(bc.bc.red)
 class Grammar:
     def __init__(self, d={}): self._dict = d

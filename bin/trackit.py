@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import os.path
-import induce.track as track
+import pygmalion.track as track
 import pickle
 
 if __name__ == "__main__":

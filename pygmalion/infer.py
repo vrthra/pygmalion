@@ -1,4 +1,4 @@
-import induce.grammar as g
+import pygmalion.grammar as g
 import pudb
 from trackingvm.vm import TraceOp, Op
 brk = pudb.set_trace

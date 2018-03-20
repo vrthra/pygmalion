@@ -2,7 +2,7 @@
 import taintedstr as tainted
 import sys
 import os.path
-import induce.ftrace as tracer
+import pygmalion.ftrace as tracer
 import pickle
 import imp
 from contextlib import contextmanager

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import induce.infer as infer
-import induce.grammar as g
+import pygmalion.infer as infer
+import pygmalion.grammar as g
 import sys
 import pickle
 

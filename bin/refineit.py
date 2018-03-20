@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-import induce.refiner as refiner
-import induce.miner as miner
-import induce.grammar as g
-import induce.config as config
+import pygmalion.refiner as refiner
+import pygmalion.miner as miner
+import pygmalion.grammar as g
+import pygmalion.config as config
 import sys
 import os
 import pickle
-from induce.bc import bc
+from pygmalion.bc import bc
 import pudb; brk = pudb.set_trace
 
 if os.getenv('SHOW_COMPARISONS') == 'true':
