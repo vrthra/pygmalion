@@ -1,6 +1,6 @@
 import pygmalion.grammar as g
 import pudb
-from trackingvm.vm import TraceOp, Op
+from taintedstr import Op
 brk = pudb.set_trace
 
 def merge_grammars(g1, lg, xcmps):
@@ -16,10 +16,10 @@ def merge_grammars(g1, lg, xcmps):
 def process_one(pos, v):
     opA = set(i.opA for i in v)
     # EQ
-    eq = [i for i in v if Op(i.opnum) == Op.EQ]
-    ne = [i for i in v if Op(i.opnum) == Op.NE]
-    inv = [i for i in v if Op(i.opnum) == Op.IN]
-    nin = [i for i in v if Op(i.opnum) == Op.NOT_IN]
+    eq = [i for i in v if Op(i.op) == Op.EQ]
+    ne = [i for i in v if Op(i.op) == Op.NE]
+    inv = [i for i in v if Op(i.op) == Op.IN]
+    nin = [i for i in v if Op(i.op) == Op.NOT_IN]
 
     # success
     seq = [i.opB for i in eq if i.opA == i.opB]
@@ -59,6 +59,14 @@ def process_one(pos, v):
     # v1 = ''.join(belongs_to)
     # v2 = ''.join(not_belongs)
 
+def process_comparisons(xins):
+    outputs = {}
+    for o in xins:
+        op = o.opA.x()
+        if op not in outputs: outputs[op] = []
+        outputs[op].append(o)
+    return outputs
+
 def process_xins(ins):
     lst = sorted(ins.keys())
     vals = []
@@ -82,6 +90,6 @@ def infer_grammar(lgrammars):
     for i, xins, lgrammar in lgrammars:
         print(i)
         # this is for a single input
-        xcmps = process_xins(xins)
+        xcmps = process_xins(process_comparisons(xins))
         merged_grammar = merge_grammars(merged_grammar, lgrammar, xcmps)
     return merged_grammar

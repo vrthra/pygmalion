@@ -1,6 +1,5 @@
 tox
 pudb
 exrex
--e ../trackingvm
 -e ../myio
 -e ../taintedstr

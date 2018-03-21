@@ -9,7 +9,7 @@ import json
 import os
 import re
 import fnmatch
-from taintedstr import tstr, get_t
+import taintedstr
 from . import util
 
 Debug = os.getenv('DEBUG')
@@ -52,12 +52,13 @@ class Tracer:
         self.out({'event': 'start', '$input': self.in_data})
         self.oldtrace = sys.gettrace()
         sys.settrace(self.method)
+        taintedstr.Comparisons.clear()
         return self
 
     def __exit__(self, typ: str, value: str, backtrace: Any) -> None:
         """ unhook """
         sys.settrace(self.oldtrace) #type: ignore
-        self.out({'event': 'stop'})
+        self.out({'event': 'stop', "$comparisons": taintedstr.Comparisons})
 
     def out(self, val: Dict[str, Any]) -> None:
         if Debug:
@@ -92,7 +93,7 @@ class Tracer:
             elif tv in [dict]: # or hasattr(v, '__dict__')
                 return {i:process(v[i]) for i in v}
             else:
-                return get_t(v)
+                return taintedstr.get_t(v)
         return {i:process(v[i]) for i in v}
 
     def frame(self, f: Any) -> Dict[str, Any]:

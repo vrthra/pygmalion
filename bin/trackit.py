@@ -8,8 +8,6 @@ if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
     fout = sys.stdout.buffer if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
 
-    ifin = open("input.pickle", 'rb') if len(sys.argv) < 2 else open(sys. argv[1] + '.input', 'rb')
-
     o = track.FrameIter(fin)
     tracker = None
     traces = []
@@ -19,10 +17,10 @@ if __name__ == "__main__":
         event = i['event']
         if event in ['start']:
             inp = i['$input']
-            xins = pickle.load(ifin)
-            tracker = track.Tracker(inp, xins)
+            tracker = track.Tracker(inp)
         elif event in ['stop']:
-            traces.append((tracker.vars.i, tracker.vars.ins, tracker.vars.defs))
+            comparisons = i['$comparisons']
+            traces.append((tracker.vars.i, comparisons, tracker.vars.defs))
         else:
             tracker.track(i)
     pickle.dump(traces, fout)

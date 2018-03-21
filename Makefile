@@ -4,14 +4,13 @@ mytargets=hello whilescope microjson array urljava mathexpr
 
 .SUFFIXES:
 
-inputs=$(addprefix .pickled/, $(addsuffix .py.trace.input,$(mytargets)) )
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
 mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
 infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(traces) $(tracks) $(mines) $(infers) $(refined) $(inputs)
+.precious: $(traces) $(tracks) $(mines) $(infers) $(refined)
 
 all:
 	@echo $(traces)
@@ -23,8 +22,6 @@ ifeq ($(debug),trace)
 else
 	@$(python3) ./bin/traceit.py $<
 endif
-	@$(python3) ./bin/input.py $<
-	@mv .pickled/$*.py.i.tmp $@.input
 	@mv .pickled/$*.py.tmp $@
 
 .pickled/%.py.track: .pickled/%.py.trace
@@ -111,3 +108,11 @@ clean:; rm -f .pickled/*
 
 typecheck:
 	$(python3) -m mypy --strict --follow-imports=skip -m pygmalion.ftrace
+
+help:
+	@echo "trace | track | mine | infer | refine"
+	@echo trace - Simple frame dumper -- use xtrace.hello
+	@echo track - Evaluate the dumps, figure out the causal chain
+	@echo mine - Linear grammar
+	@echo infer - Context Free grammar
+	@echo refine - To normalized form

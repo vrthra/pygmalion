@@ -4,7 +4,7 @@
 # the input string may get progressively eaten rather than
 # split recursively. So the input string variable actually
 # causes more noise than signal.
-Track_Params = False
+Track_Params = True
 
 Track_Vars = True
 
@@ -26,6 +26,22 @@ Ignore_Lambda = True
 
 # What should we do if we have a variable that eclipses already
 # replaced variables?
+# e.g
+# x = peek()
+# if x == '[': parseSqBr()
+# def parseSqBr:
+#    v = eatUntilEnd(']')
+# now, x contains '[' but if x is processed, v will be ignored
+# because any rule that contains x will be ineligible for v.
+# similarly,
+# strval = ''
+# while hasNext:
+#    char = peek()
+#    if char in digits:
+#       strval += char
+# here, the char gets tainted first, and will not be a part of
+# strval eventhough it obviously is. This is an interplay between
+# input and output formats.
 
 Swap_Eclipsing_Keys = True
 
@@ -35,6 +51,9 @@ Show_Colors = True
 
 Show_Comparisons = False
 
-Compress_Grammar = True
+Compress_Grammar = False
 
+# True: only replace things at a lower height with something
+# at higher height. This is useful mainly when we decide whether
+# to split inner method values after the inner method returns.
 Prevent_Deep_Stack_Modification = False

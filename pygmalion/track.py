@@ -5,9 +5,8 @@ from . import grammar as g
 from . import config
 
 class Vars:
-    def __init__(self, i, ins, istack):
+    def __init__(self, i, istack):
         self.i = i
-        self.ins = ins
         self.defs = {g.V(0, '', '', 'START', 0):i}
         self.accessed_scop_var = {}
         self.istack = istack
@@ -98,9 +97,9 @@ class FrameIter:
             raise StopIteration
 
 class Tracker:
-    def __init__(self, i, ins):
+    def __init__(self, i):
         self.istack = InputStack()
-        self.vars = Vars(i, ins, self.istack)
+        self.vars = Vars(i, self.istack)
 
 
     # We record all string variables and values occurring during execution
