@@ -2,6 +2,7 @@
 import pygmalion.infer as infer
 import pygmalion.grammar as g
 import sys
+import os
 import pickle
 
 if __name__ == "__main__":
@@ -9,6 +10,6 @@ if __name__ == "__main__":
     fout = sys.stdout.buffer if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     grammarinfo = pickle.load(fin)
     grammar = infer.infer_grammar(grammarinfo)
-    if len(sys.argv) > 2:
+    if os.getenv('DEBUG'):
         print(str(grammar), file=sys.stderr)
     pickle.dump(grammar, fout)
