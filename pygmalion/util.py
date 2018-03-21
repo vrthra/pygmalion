@@ -14,6 +14,9 @@ def lossy_obj_rep(val):
             s = json.dumps(val)
             return val
         except:
-            return '<not serializable #%s %s>' % (val.__class__.__name__, hash(val))
+            try:
+                return '<not serializable #%s %s>' % (val.__class__.__name__, hash(val))
+            except:
+                return '<not serializable #%s %s>' % (val.__class__.__name__, str(val))
 
 
