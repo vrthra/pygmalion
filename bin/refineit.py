@@ -30,7 +30,7 @@ def char_class_process(lststr):
         v = lststr[i]
         i = i+1
         if v == '+':
-            res.append('[<plus>]')
+            res.append(red('[')+ '+' + red(']'))
             continue
         if len(res) == 0:
             res.append(v)
@@ -78,9 +78,11 @@ if __name__ == "__main__":
                     pos = i.x()
                     str_var = str(i)
                 my_str.append(str_var)
+            rstr = char_class_process(my_str)
+            cmps = []
             if not skip and r.comparisons and config.Show_Comparisons:
                 c = r.comparisons[pos]
-                my_str.extend(["\t"] +
+                cmps.extend(["\t"] +
                         [
                          yellow('EQ_y:') + repr(''.join([to_str(i) for i in c['seq']]))     if c['seq'] else '',
                          yellow('NE_y:') + repr(''.join([to_str(i) for i in c['sne']]))     if c['sne'] else '',
@@ -94,7 +96,7 @@ if __name__ == "__main__":
             else:
                 pass
                 #my_str.extend([''])
-            newr.add(char_class_process(my_str))
+            newr.add(rstr + "\t".join(cmps))
     x = g.Grammar(newg)
     if config.Compress_Grammar:
         x.compress()

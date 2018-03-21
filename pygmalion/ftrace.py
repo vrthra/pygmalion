@@ -10,6 +10,9 @@ import os
 import re
 import fnmatch
 from taintedstr import tstr, get_t
+from . import util
+
+Debug = os.getenv('DEBUG')
 
 # pylint: disable=multiple-statements,fixme, unidiomatic-typecheck
 # pylint: line-too-long
@@ -46,8 +49,7 @@ class Tracer:
 
     def __enter__(self) -> None:
         """ set hook """
-        event = {'event': 'start', '$input': self.in_data}
-        self.out(event)
+        self.out({'event': 'start', '$input': self.in_data})
         self.oldtrace = sys.gettrace()
         sys.settrace(self.method)
         return self
@@ -58,6 +60,9 @@ class Tracer:
         self.out({'event': 'stop'})
 
     def out(self, val: Dict[str, Any]) -> None:
+        if Debug:
+            s = json.dumps(util.lossy_obj_rep(val))
+            print(s, file=sys.stderr, flush=True)
         pickle.dump(val, self.trace_file)
 
     def f_code(self, c: Any) -> Dict[str, Any]:
@@ -130,8 +135,9 @@ class Tracer:
             if type(vself) == Tracer: return
             if event not in self.listeners: return
 
-            frame_env = {'frame': self.frame(frame), 'loc': self.loc(frame),
-                    'i': self.trace_i, 'event': event, 'arg': arg}
+            frame_env = {'event': event, 'arg': arg,
+                    'frame': self.frame(frame), 'loc': self.loc(frame),
+                    'i': self.trace_i}
             self.out(frame_env)
             self.trace_i += 1
             return traceit
