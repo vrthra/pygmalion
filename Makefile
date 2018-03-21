@@ -18,9 +18,9 @@ all:
 
 .pickled/%.py.trace: subjects/%.py | .pickled
 ifeq ($(debug),trace)
-	$(python3) -m pudb ./bin/traceit.py $<
+	$(python3) -m pudb ./bin/traceit.py $< .pickled/$*.py.tmp
 else
-	@$(python3) ./bin/traceit.py $<
+	@$(python3) ./bin/traceit.py $< .pickled/$*.py.tmp
 endif
 	@mv .pickled/$*.py.tmp $@
 
