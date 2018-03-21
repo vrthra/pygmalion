@@ -13,7 +13,7 @@ if __name__ == "__main__":
     for i, xins, g in miner.mine_grammar(defs):
         if len(sys.argv) > 2:
             print(g)
-            print()
+            print("Reconstitued:")
             print(g.reconstitute())
         print(i, flush=True)
         grammarinfo.append((i, xins, g))
