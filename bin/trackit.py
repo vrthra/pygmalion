@@ -21,6 +21,11 @@ if __name__ == "__main__":
         elif event in ['stop']:
             comparisons = i['$comparisons']
             traces.append((tracker.vars.i, comparisons, tracker.vars.defs))
+            if os.getenv('DEBUG'):
+                for k in tracker.vars.defs.keys():
+                    print(k, file=sys.stderr, flush=True)
+                    print("\t",tracker.vars.defs[k], file=sys.stderr, flush=True)
+                print()
         else:
             tracker.track(i)
     pickle.dump(traces, fout)
