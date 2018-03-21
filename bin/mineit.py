@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import pygmalion.miner as miner
-import pygmalion.grammar as g
 import sys
+import os
 import pickle
 
 if __name__ == "__main__":
@@ -11,10 +11,10 @@ if __name__ == "__main__":
 
     grammarinfo = []
     for i, xins, g in miner.mine_grammar(defs):
-        if len(sys.argv) > 2:
-            print(g)
-            print("Reconstitued:")
-            print(g.reconstitute())
-        print(i, flush=True)
+        if os.getenv('DEBUG'):
+            print(g, file=sys.stderr)
+            print("Reconstitued:", file=sys.stderr)
+            print(g.reconstitute(), file=sys.stderr)
+        print(i, flush=True, file=sys.stderr)
         grammarinfo.append((i, xins, g))
     pickle.dump(grammarinfo, fout)
