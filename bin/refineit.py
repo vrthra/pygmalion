@@ -55,10 +55,7 @@ def to_str(i):
     else:
         return type(i).__name__ + ':' + str(i)
 
-if __name__ == "__main__":
-    fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
-    fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'w')
-    grammar = pickle.load(fin)
+def refine_grammar(grammar):
     newg = {}
     for key in grammar.keys():
         rules = grammar[key]
@@ -97,7 +94,13 @@ if __name__ == "__main__":
                 pass
                 #my_str.extend([''])
             newr.add(rstr + "\t".join(cmps))
-    x = g.Grammar(newg)
+    return g.Grammar(newg)
+
+if __name__ == "__main__":
+    fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
+    fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'w')
+    grammar = pickle.load(fin)
+    x = refine_grammar(grammar)
     if config.Compress_Grammar:
         x.compress()
     if len(sys.argv) > 1:
