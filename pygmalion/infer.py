@@ -62,7 +62,7 @@ def process_one(pos, v):
 def process_comparisons(xins):
     outputs = {}
     for o in xins:
-        op = o.opA.x()
+        op = o.op_A.x()
         if op not in outputs: outputs[op] = []
         outputs[op].append(o)
     return outputs
