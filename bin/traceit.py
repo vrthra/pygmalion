@@ -21,10 +21,10 @@ if __name__ == "__main__":
     mod_obj.__file__ = m_file
     code = compile(open(m_file).read(), os.path.basename(m_file), 'exec')
     exec(code, mod_obj.__dict__)
-    if len(sys.argv) > 2 and sys.argv[2] == '-o':
-        fn = None
+    if len(sys.argv) > 2:
+        fn = sys.argv[2]
     else:
-        fn = ".pickled/%s.tmp" % os.path.basename(m_file)
+        fn = None
     with opened_file(fn) as trace_file:
         # Infer grammar
         for _i in mod_obj.inputs():
