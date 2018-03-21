@@ -1,4 +1,4 @@
-import pychains.mystring as mystring
+import string
 class URL:
     __slots__ = [
             'protocol',
@@ -197,20 +197,20 @@ class URL:
         if _len < 1:
             return False
         c = protocol[0]
-        v = c in mystring.ascii_letters
-        if c not in mystring.ascii_letters:
+        v = c.in_(string.ascii_letters)
+        if not c:
             return False
         i = 1
         while i < _len:
             c = protocol[i]
-            if c not in (mystring.ascii_letters + mystring.digits) and c != '.' and c != '+' and c != '-' :
+            if (not c.in_(string.ascii_letters + string.digits)) and c != '.' and c != '+' and c != '-' :
                 return False
             i+= 1
         return True
 
     def parseProtocol(self, spec, start, i):
         c = spec[0]
-        if c not in mystring.ascii_letters:
+        if not c.in_(string.ascii_letters):
             raise Exception("no protocol: "+spec)
 
         while spec[i:] != '' and spec[i] != '/':
@@ -218,7 +218,7 @@ class URL:
             if c == ':':
                 s = spec[start: i].lower()
                 return s, i+1
-            elif c not in (mystring.ascii_letters + mystring.digits) and c != '.' and c != '+' and c != '-' :
+            elif (not c.in_(string.ascii_letters + string.digits)) and c != '.' and c != '+' and c != '-' :
                 raise Exception("no protocol: "+spec)
             i += 1
         raise Exception("no protocol: "+spec)
