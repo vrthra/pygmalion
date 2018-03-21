@@ -3,8 +3,9 @@
 
 class Parser:
     def __init__(self, string, vars={}):
+        self.ostring = string
         self.string = string
-        self.index = 0
+        self._tstr = string
         self.vars = {
             'pi': 3.141592653589793,
             'e': 2.718281828459045
@@ -31,20 +32,21 @@ class Parser:
             raise Exception(
                 "Unexpected character found: '" +
                 self.peek() +
-                "' at index " +
-                str(self.index))
+                "' at " +
+                self.ostring[:len(self.string)])
         return value
 
     def peek(self):
-        return self.string[self.index:self.index + 1]
+        return self.string[0:1]
 
     def hasNext(self):
-        return self.string[self.index:] != ''
+        return self.string != ''
 
     def skipWhitespace(self):
         while self.hasNext():
             if self.peek().in_(' \t\n\r'):
-                self.index += 1
+                self.string = self.string[1:]
+                self._tstr = self.string
             else:
                 return
 
@@ -57,10 +59,12 @@ class Parser:
             self.skipWhitespace()
             char = self.peek()
             if char == '+':
-                self.index += 1
+                self.string = self.string[1:]
+                self._tstr = self.string
                 values.append(self.parseMultiplication())
             elif char == '-':
-                self.index += 1
+                self.string = self.string[1:]
+                self._tstr = self.string
                 values.append(-1 * self.parseMultiplication())
             else:
                 break
@@ -72,16 +76,17 @@ class Parser:
             self.skipWhitespace()
             char = self.peek()
             if char == '*':
-                self.index += 1
+                self.string = self.string[1:]
+                self._tstr = self.string
                 values.append(self.parseParenthesis())
             elif char == '/':
-                div_index = self.index
-                self.index += 1
+                self.string = self.string[1:]
+                self._tstr = self.string
                 denominator = self.parseParenthesis()
                 if denominator == 0:
                     raise Exception(
                         "Division by 0 kills baby whales (occured at index " +
-                        str(div_index) +
+                        len(self.ostring) - len(self.string) +
                         ")")
                 values.append(1.0 / denominator)
             else:
@@ -95,14 +100,17 @@ class Parser:
         self.skipWhitespace()
         char = self.peek()
         if char == '(':
-            self.index += 1
+            self.string = self.string[1:]
+            self._tstr = self.string
             value = self.parseExpression()
             self.skipWhitespace()
             if self.peek() != ')':
                 raise Exception(
                     "No closing parenthesis found at character "
-                    + str(self.index))
-            self.index += 1
+                    + self.oindex[0:len(self.string)])
+
+            self.string = self.string[1:]
+            self._tstr = self.string
             return value
         else:
             return self.parseNegative()
@@ -111,7 +119,8 @@ class Parser:
         self.skipWhitespace()
         char = self.peek()
         if char == '-':
-            self.index += 1
+            self.string = self.string[1:]
+            self._tstr = self.string
             return -1 * self.parseParenthesis()
         else:
             return self.parseValue()
@@ -131,7 +140,8 @@ class Parser:
             char = self.peek()
             if char.lower().in_('_abcdefghijklmnopqrstuvwxyz0123456789'):
                 var += char
-                self.index += 1
+                self.string = self.string[1:]
+                self._tstr = self.string
             else:
                 break
 
@@ -146,8 +156,8 @@ class Parser:
     def parseNumber(self):
         self.skipWhitespace()
         strValue = ''
+        char = ''
         decimal_found = False
-        char = None
 
         while self.hasNext():
             char = self.peek()
@@ -163,7 +173,8 @@ class Parser:
                 strValue += char
             else:
                 break
-            self.index += 1
+            self.string = self.string[1:]
+            self._tstr = self.string
 
         if len(strValue) == 0:
             if char == '':
@@ -187,6 +198,10 @@ def main(s):
     print(parse.getValue())
 
 def inputs():
+    import os.path
+    if os.path.exists('tests/mathexpr.input'):
+        return [l.strip() for l in open('tests/mathexpr.input') if not l[0] == '#']
+
     return ['1 + 2',
             '2 * 3 + 1',
             '(1-2)/3',
@@ -198,4 +213,4 @@ def skip_classes():
 
 if __name__ == "__main__":
     import sys
-    main(sys.argv[1])
+    main(taintedstr.tstr(sys.argv[1]))
