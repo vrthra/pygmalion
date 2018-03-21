@@ -49,7 +49,7 @@ Swap_Eclipsing_Keys = True
 
 Show_Colors = True
 
-Show_Comparisons = False
+Show_Comparisons = True
 
 Compress_Grammar = False
 
