@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import pygmalion.refiner as refiner
 import pygmalion.config as config
+import pygmalion.util as u
 import sys
 import os
 import pickle
@@ -24,5 +25,5 @@ if __name__ == "__main__":
     if config.Compress_Grammar:
         x.compress()
     if len(sys.argv) > 1:
-        print(str(x), file=sys.stderr)
+        print(u.show_grammar(x), file=sys.stderr)
     print(str(x), file=fout)

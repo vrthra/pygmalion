@@ -40,7 +40,7 @@ def process_one(pos, v):
     all_in = sin + fni
     all_ni = sni + fin
 
-    return {'i':pos, 'o':list(opA)[0], 'eq': all_eq, 'ne': all_ne, 'in': all_in, 'ni': all_ni, 'seq': seq, 'feq': feq, 'sne':sne, 'fne':fne, 'sin':sin, 'fin':fin, 'sni':sni, 'fni':fni}
+    return {'pos':pos, 'opA':list(opA)[0], 'eq': all_eq, 'ne': all_ne, 'in': all_in, 'ni': all_ni, 'seq': seq, 'feq': feq, 'sne':sne, 'fne':fne, 'sin':sin, 'fin':fin, 'sni':sni, 'fni':fni, 'o':v}
 
     # belongs_to = seq
     # belongs_to.extend(fne)
