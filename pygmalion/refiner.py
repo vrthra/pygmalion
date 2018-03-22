@@ -69,6 +69,8 @@ def normalize_char_cmp(elt, rule):
     regex = []
     for pos in elt._taint:
         # get the original
+        if not pos in rule.comparisons:
+            continue
         cmps = rule.comparisons[pos]
         # First priority to all equals that succeeded
         # This is because we should be able to get a grammar that
@@ -224,7 +226,7 @@ def compress_grammar(grammar):
                                 pass
                         else:
                             lst.append(str(i))
-                            last_i = i
+                            lasti = i
                     en = ''.join(lst)
                 if not last_en:
                     last_en = en

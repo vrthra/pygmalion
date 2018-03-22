@@ -1,4 +1,4 @@
-
+import os
 # [Procedure calls]
 # Why should we not track params to a function? because
 # the input string may get progressively eaten rather than
@@ -51,7 +51,7 @@ Show_Colors = True
 
 Show_Comparisons = True
 
-Compress_Grammar = True
+Compress_Grammar = True if os.getenv('COMPRESS_GRAMMAR') else False
 
 # True: only replace things at a lower height with something
 # at higher height. This is useful mainly when we decide whether
