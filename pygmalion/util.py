@@ -1,4 +1,7 @@
 import json
+import string
+import pudb
+brk = pudb.set_trace
 
 def lossy_obj_rep(val):
     if isinstance(val, list):
@@ -19,8 +22,11 @@ def lossy_obj_rep(val):
             except:
                 return '<not serializable #%s %s>' % (val.__class__.__name__, str(val))
 
+def elts_to_str(lstrule):
+    return ''.join(str(i) for i in lstrule)
+
 def djs_to_string(djs):
-    vals = [str(i).replace('\n', '\n|\t') for i in djs]
+    vals = [elts_to_str(i).replace('\n', '\n|\t') for i in djs]
     return "\n\t| ".join(vals)
 
 def fixline(key, rules):
@@ -29,3 +35,12 @@ def fixline(key, rules):
 
 def show_grammar(g):
     return "\n".join([fixline(key, g[key]) for key in g])
+
+def to_str(k):
+    v = ''
+    for i in k:
+        if str(i) not in string.punctuation + string.digits + string.ascii_letters:
+            v+= repr(i)[1:-1]
+        else:
+            v += i
+    return v
