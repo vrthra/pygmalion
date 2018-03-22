@@ -19,4 +19,13 @@ def lossy_obj_rep(val):
             except:
                 return '<not serializable #%s %s>' % (val.__class__.__name__, str(val))
 
+def djs_to_string(djs):
+    vals = [str(i).replace('\n', '\n|\t') for i in djs]
+    return "\n\t| ".join(vals)
 
+def fixline(key, rules):
+    fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t| %s"
+    return fmt % (key, djs_to_string(rules))
+
+def show_grammar(g):
+    return "\n".join([fixline(key, g[key]) for key in g])
