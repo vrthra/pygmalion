@@ -57,3 +57,5 @@ Compress_Grammar = True if os.getenv('COMPRESS_GRAMMAR') else False
 # at higher height. This is useful mainly when we decide whether
 # to split inner method values after the inner method returns.
 Prevent_Deep_Stack_Modification = False
+
+Use_Character_Classes = True

@@ -41,6 +41,7 @@ class Rule:
     def value(self): return ''.join(str(k) for k in self.rvalues())
     def rvalues(self): return [self._rindex[k] for k in self.ranges()]
     def __str__(self): return self.value()
+    def __iter__(self): return iter(self.rvalues())
 
     def reconstitute(self, v, g):
         if type(v) is NTKey:

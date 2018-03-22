@@ -104,7 +104,8 @@ class Parser:
             self._tstr = self.string
             value = self.parseExpression()
             self.skipWhitespace()
-            if self.peek() != ')':
+            c = self.peek()
+            if c != ')':
                 raise Exception(
                     "No closing parenthesis found at character "
                     + self.oindex[0:len(self.string)])

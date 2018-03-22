@@ -121,7 +121,7 @@ def normalize_char_cmp(elt, rule):
             if scheck:
                 regex.append(Box(scheck))
             elif fcheck:
-                regex.append(Not(Box(scheck)))
+                regex.append(Box(fcheck))
     return miner.RWrap(rule.k, regex, rule._taint, rule.comparisons)
 
 def to_comparisons(rule):
@@ -190,7 +190,10 @@ def compress_rules(rules):
     rules = unique(rules)
     new_rules = []
     for rule in rules:
-        r = to_comparisons(rule)
+        if config.Use_Character_Classes:
+            r = to_comparisons(rule)
+        else:
+            r = rule
         new_rules.append(r)
     new_rules = merge_rules(new_rules)
     return new_rules
