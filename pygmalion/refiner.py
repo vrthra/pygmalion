@@ -248,5 +248,9 @@ def compress_grammar(grammar):
 
 
 def refine_grammar(grammar):
-    return compress_grammar({k:unique(compress_rules(grammar._dict[k])) for k in grammar._dict})
+    g = {k:unique(compress_rules(grammar._dict[k])) for k in grammar._dict}
+    if config.Compress_Grammar:
+        return compress_grammar(g)
+    else:
+        return g
 
