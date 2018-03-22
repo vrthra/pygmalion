@@ -15,10 +15,10 @@ import types
 __pychecker__ = 'no-returnvalues'
 
 # character classes
-WS = set([' ','\t','\r','\n','\b','\f'])
-DIGITS = set([str(i) for i in range(0, 10)])
-NUMSTART = DIGITS.union(['.','-','+'])
-NUMCHARS = NUMSTART.union(['e','E'])
+WS = ' ' # ''.join([' ','\t','\r','\n','\b','\f'])
+DIGITS = ''.join([str(i) for i in range(0, 10)])
+NUMSTART = DIGITS + ''.join(['.','-','+'])
+NUMCHARS = NUMSTART + ''.join(['e','E'])
 ESC_MAP = {'n':'\n','t':'\t','r':'\r','b':'\b','f':'\f'}
 REV_ESC_MAP = dict([(_v,_k) for _k,_v in list(ESC_MAP.items())] + [('"','"')])
 
@@ -70,7 +70,7 @@ class JSONStream:
 
     def skipspaces(self):
         "post-cond: read pointer will be over first non-WS char"
-        self._skip(lambda c: c not in WS)
+        self._skip(lambda c: not c.in_(WS))
 
     def _skip(self, stopcond):
         while True:
@@ -183,14 +183,15 @@ def _from_json_number(stm):
     pos = stm.pos
     while True:
         c = stm.peek()
+        if not c: break
 
-        if c not in NUMCHARS:
+        if not c.in_(NUMCHARS):
             break
         elif c == '-' and not saw_exp:
             pass
-        elif c in ('.','e','E'):
+        elif c.in_('.eE'):
             is_float = 1
-            if c in ('e','E'):
+            if c.in_('eE'):
                 saw_exp = 1
 
         stm.next()
@@ -243,9 +244,9 @@ def _from_json_dict(stm):
             raise JSONError(E_TRUNC, stm, pos)
 
         # end of dictionary, or next item
-        if expect_key and c in ('}',','):
+        if expect_key and c.in_('},'):
             raise JSONError(E_DKEY, stm, stm.pos)
-        if c in ('}',','):
+        if c.in_('},'):
             stm.next()
             if c == '}':
                 return result
@@ -286,8 +287,10 @@ def _from_json_raw(stm):
             return _from_json_fixed(stm, 'false', False, E_BOOL)
         elif c == 'n':
             return _from_json_fixed(stm, 'null', None, E_NULL)
-        elif c in NUMSTART:
+        elif c.in_(NUMSTART):
             return _from_json_number(stm)
+        elif c == '':
+            break
 
         raise JSONError(E_MALF, stm, stm.pos)
 
@@ -422,5 +425,6 @@ def main(s):
 
 if __name__ == '__main__':
     import sys
-    result = from_json(sys.argv[1])
+    import taintedstr
+    result = from_json(taintedstr.tstr(sys.argv[1]))
     print(repr(result))

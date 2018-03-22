@@ -3,23 +3,34 @@ import pudb
 from taintedstr import Op
 brk = pudb.set_trace
 
-def merge_grammars(g1, lg, xcmps):
+def merge_grammars(g1, lg, xcmps, inp):
     for k in lg.keys():
         rule = lg[k]
         assert len(rule) == 1
         r = list(rule)[0]
         r.comparisons = {i:xcmps[i] for i in r.taint if i < len(xcmps)}
+        r._input = inp
         # get rule taints.
         pass
     return g.Grammar({key: g1[key] | lg[key] for key in g1.keys() + lg.keys()})
 
 def process_one(pos, v):
-    opA = set(i.opA for i in v)
+    opA = set(i.opA for i,pos in v)
     # EQ
-    eq = [i for i in v if Op(i.op) == Op.EQ]
-    ne = [i for i in v if Op(i.op) == Op.NE]
-    inv = [i for i in v if Op(i.op) == Op.IN]
-    nin = [i for i in v if Op(i.op) == Op.NOT_IN]
+    eq =  [i for i,c in v if Op(i.op) == Op.EQ]
+    ne =  [i for i,c in v if Op(i.op) == Op.NE]
+    inv = [i for i,c in v if Op(i.op) == Op.IN]
+    nin = [i for i,c in v if Op(i.op) == Op.NOT_IN]
+    ins_c = max(c for i,c in v)
+    last_op = [i for i,c in v if c == ins_c]
+
+    last_sop = None
+    # find the last successful op
+    for ic in range(ins_c, 0, -1):
+        p_op = [i for i,c in v if c == ic]
+        if any(i.op_A == i.op_B for i in p_op):
+            last_sop = p_op
+            break
 
     # success
     seq = [i.opB for i in eq if i.opA == i.opB]
@@ -40,7 +51,7 @@ def process_one(pos, v):
     all_in = sin + fni
     all_ni = sni + fin
 
-    return {'pos':pos, 'opA':list(opA)[0], 'eq': all_eq, 'ne': all_ne, 'in': all_in, 'ni': all_ni, 'seq': seq, 'feq': feq, 'sne':sne, 'fne':fne, 'sin':sin, 'fin':fin, 'sni':sni, 'fni':fni, 'o':v}
+    return {'pos':pos, 'opA':list(opA)[0], 'eq': all_eq, 'ne': all_ne, 'in': all_in, 'ni': all_ni, 'seq': seq, 'feq': feq, 'sne':sne, 'fne':fne, 'sin':sin, 'fin':fin, 'sni':sni, 'fni':fni, 'o':v, 'last':last_op, 'slast':last_sop}
 
     # belongs_to = seq
     # belongs_to.extend(fne)
@@ -60,11 +71,12 @@ def process_one(pos, v):
     # v2 = ''.join(not_belongs)
 
 def process_comparisons(xins):
+    cmps, icmps = xins
     outputs = {}
-    for o in xins:
+    for i,o in enumerate(cmps):
         op = o.op_A.x()
         if op not in outputs: outputs[op] = []
-        outputs[op].append(o)
+        outputs[op].append((o, icmps[i]))
     return outputs
 
 def process_xins(ins):
@@ -91,5 +103,5 @@ def infer_grammar(lgrammars):
         print(i)
         # this is for a single input
         xcmps = process_xins(process_comparisons(xins))
-        merged_grammar = merge_grammars(merged_grammar, lgrammar, xcmps)
+        merged_grammar = merge_grammars(merged_grammar, lgrammar, xcmps, i)
     return merged_grammar

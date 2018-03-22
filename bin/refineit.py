@@ -22,8 +22,6 @@ if __name__ == "__main__":
     fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'w')
     grammar = pickle.load(fin)
     x = refiner.refine_grammar(grammar)
-    if config.Compress_Grammar:
-        x.compress()
     if len(sys.argv) > 1:
         print(u.show_grammar(x), file=sys.stderr)
     print(str(x), file=fout)

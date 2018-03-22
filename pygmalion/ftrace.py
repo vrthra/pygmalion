@@ -53,12 +53,14 @@ class Tracer:
         self.oldtrace = sys.gettrace()
         sys.settrace(self.method)
         taintedstr.Comparisons.clear()
+        taintedstr.IComparisons.clear()
+        taintedstr.Ins = 0
         return self
 
     def __exit__(self, typ: str, value: str, backtrace: Any) -> None:
         """ unhook """
         sys.settrace(self.oldtrace) #type: ignore
-        self.out({'event': 'stop', "$comparisons": taintedstr.Comparisons})
+        self.out({'event': 'stop', "$comparisons": (taintedstr.Comparisons, taintedstr.IComparisons)})
 
     def out(self, val: Dict[str, Any]) -> None:
         if Debug:

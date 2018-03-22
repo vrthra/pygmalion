@@ -51,7 +51,7 @@ Show_Colors = True
 
 Show_Comparisons = True
 
-Compress_Grammar = False
+Compress_Grammar = True
 
 # True: only replace things at a lower height with something
 # at higher height. This is useful mainly when we decide whether

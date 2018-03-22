@@ -15,6 +15,18 @@ class NTKey:
     def __eq__(self, o): return self.k == o.k
     def __ne__(self, o): return not (self == o)
 
+class RWrap:
+    def __init__(self, k, rvalues, taint, comparisons):
+        self.k = k
+        self.rvalues = rvalues
+        self._taint = taint
+        self.comparisons = comparisons
+    def value(self): return ''.join(str(k) for k in self.rvalues)
+    def __str__(self): return self.value()
+    def __repr__(self):
+        return 'R[%s]:=%s' % (self.k, self.value())
+
+
 class Rule:
     def __init__(self,k, v):
         self.k = k
