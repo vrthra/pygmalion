@@ -12,7 +12,7 @@ class NTKey:
     def __repr__(self): return "$%s" % self.k
     def __str__(self): return "$%s" % self.k
     def __hash__(self): return hash(self.k)
-    def __eq__(self, o): return self.k == o.k
+    def __eq__(self, o): return type(o) == NTKey and self.k == o.k
     def __ne__(self, o): return not (self == o)
 
 class RWrap:
@@ -192,7 +192,8 @@ def get_grammar(assignments):
                 # eclipsed are the keys displaced from rule by value
                 # and needs to be added to value.
                 if eclipsed:
-                    all_eclipsed.append((eclipsed, nt_var))
+                    if not config.Strip_Peek:
+                        all_eclipsed.append((eclipsed, nt_var))
                 append = True
 
         # Until merge, all keys have a single rule.

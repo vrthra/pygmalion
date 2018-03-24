@@ -45,6 +45,9 @@ Ignore_Lambda = True
 
 Swap_Eclipsing_Keys = True
 
+# should we discard the peeking variables that got eclipsed?
+Strip_Peek = False
+
 # [Verbosity]
 
 Show_Colors = True
