@@ -1,5 +1,5 @@
 tox
 pudb
 exrex
--e ../myio
+-e ../pycore
 -e ../taintedstr

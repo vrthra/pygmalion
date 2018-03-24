@@ -1,16 +1,18 @@
 python3=PYTHONPATH=. python3
+pip3=pip3
 required_dirs=.pickled
 mytargets=hello whilescope microjson array urljava urlpy mathexpr
 
 .SUFFIXES:
 
+chains=$(addprefix .pickled/, $(addsuffix .py.chain,$(mytargets)) )
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
 mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
 infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(traces) $(tracks) $(mines) $(infers) $(refined)
+.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined)
 
 all:
 	@echo $(traces)
@@ -56,6 +58,16 @@ else
 endif
 	@mv $<.tmp $@
 
+MY_RP=1.0
+NINPUT=10
+R=0
+
+.pickled/%.py.chain: subjects/%.py | .pickled
+	NOCTRL=1 MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) > $@.tmp
+	mv $@.tmp $@
+
+chain.%: .pickled/%.py.chain
+	@echo
 
 trace.%: .pickled/%.py.trace
 	@echo
@@ -71,6 +83,11 @@ infer.%: .pickled/%.py.infer
 
 refine.%: .pickled/%.py.refine
 	@echo
+
+xchain.%:
+	rm -f .pickled/$*.py.chain
+	@echo
+	$(MAKE) chain.$*
 
 xtrace.%:
 	rm -f .pickled/$*.py.trace
@@ -91,7 +108,6 @@ xinfer.%:
 	rm -f .pickled/$*.py.infer
 	@echo
 	$(MAKE) infer.$*
-
 
 xrefine.%:
 	rm -f .pickled/$*.py.refine
@@ -116,3 +132,7 @@ help:
 	@echo mine - Linear grammar
 	@echo infer - Context Free grammar
 	@echo refine - To normalized form
+
+
+req:
+	$(pip3) install -r requirements.txt --user
