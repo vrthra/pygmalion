@@ -38,9 +38,11 @@ def show_grammar(g):
 
 def to_str(k):
     v = ''
+    if not k:
+        return ':empty:'
     for i in k:
         if str(i) not in string.punctuation + string.digits + string.ascii_letters:
             v+= repr(i)[1:-1]
         else:
             v += i
-    return v
+    return ''.join(sorted(v))
