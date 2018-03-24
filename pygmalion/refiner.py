@@ -14,6 +14,7 @@ class Not:
         self.v = v
     def __str__(self): return "[^%s]" % str(self.v.val())
     def __repr__(self): return "!%s" % str(self.v)
+    def __bool__(self): return bool(self.v)
 
 class Box:
     def __init__(self, v):
@@ -21,44 +22,41 @@ class Box:
     def val(self): return u.to_str(self.v)
     def __str__(self): return "[%s]" % self.val()
     def __repr__(self): return "<%s>" % ''.join(self.v)
+    def __bool__(self): return bool(self.v)
+
+class Choice:
+    def __init__(self, a, b):
+        self.a, self.b = a, b
+    def __str__(self):
+        if self.a and not self.b:
+            return str(self.a)
+        elif self.a and not self.b:
+            return str(self.b)
+        else:
+            return '(%s|%s)' % (self.a, self.b)
 
 def nt_key_to_s(i):
     v = i.k
     return "[%s:%s]" % (v.func, v.var)
 
-def char_class_process(lststr):
-    i = 0
-    last = None
-    res = []
-    plus = '+'
-    while i < len(lststr):
-        v = lststr[i]
-        i = i+1
-        if v == '+':
-            res.append('['+ '+' + ']')
-            continue
-        if len(res) == 0:
-            res.append(v)
-            continue
-        if res[-1] == plus:
-            if v == res[-2]:
-                pass
-            else:
-                res.append(v)
+def get_regex(cmps):
+    # the input structure is a dict where keys are the instruction
+    # numbers and each value is a list of secondary instructions in key:o.
+    # or summaries in eq, ne, in, ni sne, fne, sni, sin etc.
+    # First priority to all equals that succeeded
+    # This is because we should be able to get a grammar that
+    # will include this element.
+    success_eq = set()
+    failure_eq = set()
+    assert not config.Python_Specific # we dont implement in, not in, neq etc yet.
+    for i in cmps:
+        kind, v = cmps[i]['charclass']
+        if kind:
+            success_eq.update(v)
         else:
-            if v == res[-1]:
-                res.append(plus)
-            else:
-                res.append(v)
-    return ''.join(res)
-
-def to_str(i):
-    if isinstance(i, str):
-        return i
-    elif isinstance(i, list):
-        return ''.join(i)
-    else:
-        return type(i).__name__ + ':' + str(i)
+            failure_eq.update(v)
+    v = Choice(Box(success_eq), Not(Box(failure_eq)))
+    return v
 
 def normalize_char_cmp(elt, rule):
     """
@@ -68,60 +66,9 @@ def normalize_char_cmp(elt, rule):
     """
     regex = []
     for pos in elt._taint:
-        # get the original
-        if not pos in rule.comparisons:
-            continue
-        cmps = rule.comparisons[pos]
-        # First priority to all equals that succeeded
-        # This is because we should be able to get a grammar that
-        # will include this element.
-        slast = cmps['slast']
-        if not slast:
-            eq_cmp = set(cmps['eq'])
-            ne_cmp = set(cmps['ne'])
-            in_cmp = set(cmps['in'])
-            ni_cmp = set(cmps['ni'])
-
-            if eq_cmp:
-                regex.append(Box(eq_cmp))
-            elif in_cmp:
-                regex.append(Box(in_cmp))
-            elif ne_cmp:
-                regex.append(Not(Box(ne_cmp)))
-            elif ni_cmp :
-                regex.append(Not(Box(ni_cmp)))
-        else:
-            eq_cmp =  [i for i in slast if Op(i.op) == Op.EQ]
-            ne_cmp =  [i for i in slast if Op(i.op) == Op.NE]
-            inv_cmp = [i for i in slast if Op(i.op) == Op.IN]
-            nin_cmp = [i for i in slast if Op(i.op) == Op.NOT_IN]
-
-            seq = [i.op_B for i in eq_cmp if i.opA == i.opB]
-            feq = [i.op_B for i in eq_cmp if i.opA != i.opB]
-
-            sne = [i.op_B for i in ne_cmp if i.opA != i.opB]
-            fne = [i.op_B for i in ne_cmp if i.opA == i.opB]
-
-            sin = [i.op_B for i in inv_cmp if i.opA in i.opB]
-            fin = [i.op_B for i in inv_cmp if i.opA not in i.opB]
-
-            sni = [i.op_B for i in nin_cmp if i.opA not in i.opB]
-            fni = [i.op_B for i in nin_cmp if i.opA in i.opB]
-
-            all_eq = seq + fne
-            all_ne = sne + feq
-
-            all_in = sin + fni
-            all_ni = sni + fin
-
-            # this was from the last *successful comparison*
-            # so we can simply add everything together
-            scheck = sorted(seq + feq)
-            fcheck = sorted(sne + fne)
-            if scheck:
-                regex.append(Box(scheck))
-            elif fcheck:
-                regex.append(Box(fcheck))
+        if not pos in rule.comparisons: continue
+        eltregex = get_regex(rule.comparisons[pos])
+        regex.append(eltregex)
     return miner.RWrap(rule.k, regex, rule._taint, rule.comparisons)
 
 def to_comparisons(rule):
@@ -186,7 +133,7 @@ def merge_rules(rules):
     return my_rules
 
 
-def compress_rules(rules):
+def to_char_classes(rules):
     rules = unique(rules)
     new_rules = []
     for rule in rules:
@@ -199,8 +146,6 @@ def compress_rules(rules):
     return new_rules
 
 def compress_grammar(grammar):
-    # TODO: Before compressing, verify that the comparisons are indeed
-    # same. If not, it may be better to keep them separate.
     def to_k(k): return "[%s:%s]" % (k.k.func, k.k.var)
     new_grammar = {}
     for k in grammar.keys():
@@ -251,11 +196,66 @@ def compress_grammar(grammar):
         new_g[k] = set(str(i) for i in new_grammar[k])
     return new_g
 
+def get_key_set(short_keys):
+    all_keys = {}
+    for k in short_keys.keys():
+        sk = short_keys[k]
+        if sk not in all_keys: all_keys[sk] = set()
+        all_keys[sk].add(k)
+    return all_keys
+
+def to_k(k): return "[%s:%s]" % (k.k.func, k.k.var)
+
+def is_rule_in_ruleset(r, ruleset):
+    def val(x): return str([str(i) for i in x])
+    return any(rule_match_simple(s,r) for s in ruleset)
+
+def subrule_of(k, key_set, grammar):
+    small_rules = grammar[k]
+    for key in key_set:
+        if k == key: continue
+        large_rules = grammar[key]
+        if all(is_rule_in_ruleset(r,large_rules) for r in small_rules):
+            return key
+    return None
+
+def remove_subset_keys(grammar):
+    # The idea is to remove those keys that are completely subsets of another
+    # key with the same stem
+    lst = [(k, grammar[k]) for k in grammar.keys()]
+    short_keys = {k:to_k(k) for k in grammar.keys()}
+    all_keys = get_key_set(short_keys)
+    to_remove = set()
+    for short_key in all_keys:
+        #if '_from_json_dict:c' in str(short_key): brk()
+        key_set = all_keys[short_key]
+        for k in key_set:
+            large_k = subrule_of(k, key_set, grammar)
+            if large_k and large_k not in to_remove:
+                to_remove.add((k, large_k))
+    new_grammar = {}
+    rks = {k for k,lk in to_remove}
+    for k in grammar.keys():
+        if k in rks: continue
+        new_grammar[k] = grammar[k]
+
+    for k in new_grammar:
+        rules = grammar[k]
+        for r in rules:
+            if k in r:
+                replace(k, lk)
+    return new_grammar
+
+
 
 def refine_grammar(grammar):
-    g = {k:unique(compress_rules(grammar._dict[k])) for k in grammar._dict}
+    g = {k:unique(to_char_classes(grammar._dict[k])) for k in grammar._dict}
+    # g = remove_subset_keys(g)
     if config.Compress_Grammar:
         return compress_grammar(g)
     else:
-        return g
+        if config.Sort_Grammar:
+            return {k:g[k] for k in sorted(g.keys(), key=lambda x: str(x))}
+        else:
+            return g
 

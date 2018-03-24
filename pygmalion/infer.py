@@ -1,4 +1,5 @@
 import pygmalion.grammar as g
+import pygmalion.config as config
 import pudb
 from taintedstr import Op
 brk = pudb.set_trace
@@ -14,63 +15,67 @@ def merge_grammars(g1, lg, xcmps, inp):
         pass
     return g.Grammar({key: g1[key] | lg[key] for key in g1.keys() + lg.keys()})
 
-def process_one(pos, v):
-    opA = set(i.opA for i,pos in v)
-    # EQ
-    eq =  [i for i,c in v if Op(i.op) == Op.EQ]
-    ne =  [i for i,c in v if Op(i.op) == Op.NE]
-    inv = [i for i,c in v if Op(i.op) == Op.IN]
-    nin = [i for i,c in v if Op(i.op) == Op.NOT_IN]
-    ins_c = max(c for i,c in v)
-    last_op = [i for i,c in v if c == ins_c]
+def process_one_op(v, pos):
+    if not v: assert False
+    opA = set(i.opA for i in v)
+    assert len(opA) == 1
+    opA = opA.pop()
 
-    last_sop = None
-    # find the last successful op
-    for ic in range(ins_c, 0, -1):
-        p_op = [i for i,c in v if c == ic]
-        if any(i.op_A == i.op_B for i in p_op):
-            last_sop = p_op
-            break
+    if not config.Python_Specific:
+        # The idea is that if opA is in atleast one of v, then
+        # it is an equality character class. Else it is an not in char class
+        assert all(Op(i.op) == Op.EQ for i in v)
+        c_eq = any(i.opB for i in v if i.opA == i.opB)
+        chars = [i.opB for i in v]
 
-    # success
-    seq = [i.opB for i in eq if i.opA == i.opB]
-    feq = [i.opB for i in eq if i.opA != i.opB]
+        return {'pos':pos, 'opA':opA, 'o':v, 'charclass':(c_eq, chars)}
+    else:
+        assert False # -- this is out of date. Needs to be fixed
+        # After the last tainted string update, some of these
+        # should go away. Hence the asserts
+        eq =  [i for i in v if Op(i.op) == Op.EQ]
+        ne =  [i for i in v if Op(i.op) == Op.NE]
+        inv = [i for i in v if Op(i.op) == Op.IN]
+        nin = [i for i in v if Op(i.op) == Op.NOT_IN]
+        assert not nin
 
-    sne = [i.opB for i in ne if i.opA != i.opB]
-    fne = [i.opB for i in ne if i.opA == i.opB]
+        # success
+        seq = [i.opB for i in eq if i.opA == i.opB]
+        feq = [i.opB for i in eq if i.opA != i.opB]
 
-    sin = [i.opB for i in inv if i.opA in i.opB]
-    fin = [i.opB for i in inv if i.opA not in i.opB]
+        sne = [i.opB for i in ne if i.opA != i.opB]
+        fne = [i.opB for i in ne if i.opA == i.opB]
 
-    sni = [i.opB for i in nin if i.opA not in i.opB]
-    fni = [i.opB for i in nin if i.opA in i.opB]
+        sin = [i.opB for i in inv if i.opA in i.opB]
+        fin = [i.opB for i in inv if i.opA not in i.opB]
 
-    all_eq = seq + fne
-    all_ne = sne + feq
+        sni = [i.opB for i in nin if i.opA not in i.opB]
+        fni = [i.opB for i in nin if i.opA in i.opB]
 
-    all_in = sin + fni
-    all_ni = sni + fin
+        all_eq = seq + fne
+        all_ne = sne + feq
 
-    return {'pos':pos, 'opA':list(opA)[0], 'eq': all_eq, 'ne': all_ne, 'in': all_in, 'ni': all_ni, 'seq': seq, 'feq': feq, 'sne':sne, 'fne':fne, 'sin':sin, 'fin':fin, 'sni':sni, 'fni':fni, 'o':v, 'last':last_op, 'slast':last_sop}
+        all_in = sin + fni
+        all_ni = sni + fin
+        return {'pos':pos, 'opA':opA, \
+                'eq': all_eq, 'ne': all_ne, \
+                'in': all_in, 'ni': all_ni, \
+                'seq': seq, 'feq': feq, \
+                'sne':sne, 'fne':fne, \
+                'sin':sin, 'fin':fin, \
+                'sni':sni, 'fni':fni, 'o':v}
 
-    # belongs_to = seq
-    # belongs_to.extend(fne)
-    # for i in sin:
-    #     belongs_to.extend(i)
-    # for i in fni:
-    #     belongs_to.extend(i)
+def process_one_instruction(pos, v):
+    # split into separate operations
+    ins_set = set(c for i,c in v)
+    ops = {}
+    for op_c in ins_set:
+        op = [i for i,c in v if c == op_c]
+        ops[op_c] = process_one_op(op, op_c)
+    return ops
 
-    # not_belongs = feq
-    # not_belongs.extend(sne)
-    # for i in fin:
-    #     not_belongs.extend(i)
-    # for i in sni:
-    #     not_belongs.extend(i)
 
-    # v1 = ''.join(belongs_to)
-    # v2 = ''.join(not_belongs)
-
-def process_comparisons(xins):
+def separate_comparisons_per_char(xins):
     cmps, icmps = xins
     outputs = {}
     for i,o in enumerate(cmps):
@@ -79,22 +84,14 @@ def process_comparisons(xins):
         outputs[op].append((o, icmps[i]))
     return outputs
 
-def process_xins(ins):
+def process_comparisons_per_char(ins):
     lst = sorted(ins.keys())
     vals = []
     for pos in lst:
         # v is a list of trace ops for position pos
         v = ins[pos]
-        vals.append(process_one(pos, v))
+        vals.append(process_one_instruction(pos, v))
     return vals
-
-def process_ins(ins):
-    imap = {}
-    for i in ins:
-        pos, cmp_type, _cwith, cto = i
-        if pos not in imap: imap[pos] = []
-        imap[pos].append((cmp_type, _cwith, cto))
-    return imap
 
 # Get a grammar for multiple inputs
 def infer_grammar(lgrammars):
@@ -102,6 +99,6 @@ def infer_grammar(lgrammars):
     for i, xins, lgrammar in lgrammars:
         print(i)
         # this is for a single input
-        xcmps = process_xins(process_comparisons(xins))
+        xcmps = process_comparisons_per_char(separate_comparisons_per_char(xins))
         merged_grammar = merge_grammars(merged_grammar, lgrammar, xcmps, i)
     return merged_grammar

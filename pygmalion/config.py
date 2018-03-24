@@ -62,3 +62,7 @@ Compress_Grammar = True if os.getenv('COMPRESS_GRAMMAR') else False
 Prevent_Deep_Stack_Modification = False
 
 Use_Character_Classes = True
+
+Sort_Grammar = True
+
+Python_Specific = (os.getenv('PYTHON_OPT') or 'false') in ['true', '1']
