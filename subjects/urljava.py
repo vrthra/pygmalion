@@ -253,12 +253,13 @@ class Parts:
 
 def main(arg):
     u = URL(arg)
-    print(u)
+    return str(u)
 
 def inputs():
     import os.path
-    if os.path.exists('tests/urljava.chain'):
-        return [l.strip() for l in open('tests/urljava.chain') if not l[0] == '#']
+    v = '.pickled//urljava.py.chain'
+    if os.path.exists(v):
+        return [l.strip() for l in open(v) if not l[0] == '#']
     INPUTS = ['http://www.google.com',
             'https://alaska.com:8080/me?you=this',
             'http://pages.com/new#fragment',

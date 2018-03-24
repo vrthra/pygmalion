@@ -5,6 +5,7 @@ mytargets=hello whilescope microjson array urljava urlpy mathexpr
 
 .SUFFIXES:
 
+input=$(addprefix .pickled/, $(addsuffix .py.input,$(mytargets)) )
 chains=$(addprefix .pickled/, $(addsuffix .py.chain,$(mytargets)) )
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
@@ -12,7 +13,7 @@ mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
 infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined)
+.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(input)
 
 all:
 	@echo $(traces)
