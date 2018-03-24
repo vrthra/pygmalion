@@ -46,7 +46,7 @@ def symbol_min_cost(nt, grammar, seen=set()):
 # The minimum cost of expansion of this rule
 # @memoize(0)
 def min_expansions(expansion, grammar, seen=set()):
-    symbols  = [s for s in expansion if type(s) == str]
+    symbols  = [s for s in expansion if is_symbol(s)]
     # at least one expansion has no variable to expand.
     if not symbols: return 1
 
@@ -74,7 +74,9 @@ def init_tree(start_symbol = "[:START]"):
     return (start_symbol, None)
 
 def is_symbol(s):
-    return s[0] == '$'
+    if type(s) != str: return False
+    if s == '+': return False
+    return True
     
 # Convert an expansion rule to children
 # @memoize(0)
@@ -82,7 +84,7 @@ def expansion_to_children(expansion):
     # print("Converting " + repr(expansion))
     # strings contains all substrings -- both terminals and non-terminals such
     # that ''.join(strings) == expansion
-    r = [(s, None) if type(s) == str else (s, []) for s in expansion if s]
+    r = [(s, None) if is_symbol(s) else (s, []) for s in expansion if s]
     return r
     
 # Expand a node
@@ -181,6 +183,7 @@ def expand_tree(tree, grammar, max_symbols):
 
 def to_str(v):
     res = []
+    if v == '+': return ''
     for i in v.rvalues:
         if type(i) == refiner.Choice:
             if i.a:
