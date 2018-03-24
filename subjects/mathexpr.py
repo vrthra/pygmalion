@@ -200,8 +200,9 @@ def main(s):
 
 def inputs():
     import os.path
-    if os.path.exists('tests/mathexpr.input'):
-        return [l.strip() for l in open('tests/mathexpr.input') if not l[0] == '#']
+    v = '.pickled/mathexpr.py.input'
+    if os.path.exists(v):
+        return [l.strip() for l in open(v) if not l[0] == '#']
 
     return ['1 + 2',
             '2 * 3 + 1',

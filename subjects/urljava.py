@@ -257,8 +257,8 @@ def main(arg):
 
 def inputs():
     import os.path
-    if os.path.exists('tests/urljava.input'):
-        return [l.strip() for l in open('tests/urljava.input') if not l[0] == '#']
+    if os.path.exists('tests/urljava.chain'):
+        return [l.strip() for l in open('tests/urljava.chain') if not l[0] == '#']
     INPUTS = ['http://www.google.com',
             'https://alaska.com:8080/me?you=this',
             'http://pages.com/new#fragment',
