@@ -778,7 +778,7 @@ def splitvalue(attr):
 
 def inputs():
     import os.path
-    v = '.pickled/urlpy.py.input'
+    v = '.pickled/urlpy.py.chain'
     if os.path.exists(v):
         return [l.strip() for l in open(v) if not l[0] == '#']
     return ['http://www.google.com',
