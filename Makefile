@@ -1,6 +1,6 @@
 python3=PYTHONPATH=. python3
 required_dirs=.pickled
-mytargets=hello whilescope microjson array urljava mathexpr
+mytargets=hello whilescope microjson array urljava urlpy mathexpr
 
 .SUFFIXES:
 
