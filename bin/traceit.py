@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+import resource
+import sys
+resource.setrlimit(resource.RLIMIT_STACK, [0x10000000, resource.RLIM_INFINITY])
+sys.setrecursionlimit(0x100000)
+
 import taintedstr
 import sys
 import os.path
@@ -27,7 +32,8 @@ if __name__ == "__main__":
         fn = None
     with opened_file(fn) as trace_file:
         # Infer grammar
-        for _i in mod_obj.inputs():
+        for j,_i in enumerate(mod_obj.inputs()):
+            print(j, _i, file=sys.stderr)
             i = taintedstr.tstr(_i)
             with tracer.Tracer(i, trace_file) as t:
                 t._my_files = ['%s' % os.path.basename(m_file)]
