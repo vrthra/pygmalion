@@ -54,7 +54,7 @@ Show_Colors = True
 
 Show_Comparisons = True
 
-Compress_Grammar = True if os.getenv('COMPRESS_GRAMMAR') else False
+Compress_Grammar = True # if os.getenv('COMPRESS_GRAMMAR') else False
 
 # True: only replace things at a lower height with something
 # at higher height. This is useful mainly when we decide whether

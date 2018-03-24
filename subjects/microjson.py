@@ -396,8 +396,9 @@ encode = to_json
 
 def inputs():
     import os.path
-    if os.path.exists('tests/microjson.input'):
-        return [l.strip() for l in open('tests/microjson.input') if not l[0] == '#']
+    v = '.pickled/microjson.py.chain'
+    if os.path.exists(v):
+        return [l.strip() for l in open(v) if not l[0] == '#']
     INPUTS = [
             '15',
             '23',

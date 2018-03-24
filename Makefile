@@ -58,6 +58,15 @@ else
 endif
 	@mv $<.tmp $@
 
+.pickled/%.py.input: .pickled/%.py.refine
+ifeq ($(debug),fuzz)
+	$(python3) -m pudb ./bin/fuzzit.py $<
+else
+	@$(python3) ./bin/fuzzit.py $<
+endif
+	@mv $<.tmp $@
+
+
 MY_RP=1.0
 NINPUT=10
 R=0
@@ -83,6 +92,10 @@ infer.%: .pickled/%.py.infer
 
 refine.%: .pickled/%.py.refine
 	@echo
+
+fuzz.%: .pickled/%.py.input
+	@echo
+
 
 xchain.%:
 	rm -f .pickled/$*.py.chain
@@ -114,12 +127,17 @@ xrefine.%:
 	@echo
 	$(MAKE) refine.$*
 
+xfuzz.%:
+	rm -f .pickled/$*.py.input
+	@echo
+	$(MAKE) fuzz.$*
+
 
 $(required_dirs):; @mkdir -p $@
 
 clobber:; rm -rf .pickled
 
-clean:; rm -f .pickled/*
+clean:; rm -f .pickled/*.chain
 
 
 typecheck:

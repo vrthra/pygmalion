@@ -19,9 +19,9 @@ red = bc(bc.red)
 
 if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
-    fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'w')
+    fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     grammar = pickle.load(fin)
     x = refiner.refine_grammar(grammar)
     if len(sys.argv) > 1:
         print(u.show_grammar(x), file=sys.stderr)
-    print(str(x), file=fout)
+    pickle.dump(x, file=fout)

@@ -33,7 +33,8 @@ class Choice:
         elif self.a and not self.b:
             return str(self.b)
         else:
-            return '(%s|%s)' % (self.a, self.b)
+            #return '(%s&%s)' % (self.a, self.b)
+            return '%s' % self.a
 
 def nt_key_to_s(i):
     v = i.k
@@ -147,6 +148,7 @@ def to_char_classes(rules):
 
 def compress_grammar(grammar):
     def to_k(k): return "[%s:%s]" % (k.k.func, k.k.var)
+    def to_str(l): return str(l)
     new_grammar = {}
     for k in grammar.keys():
         rules = grammar.get(k)
@@ -165,7 +167,7 @@ def compress_grammar(grammar):
                     for i in elt.rvalues:
                         if not lasti:
                             lasti = i
-                            lst.append(str(i))
+                            lst.append(i)
                             continue
                         if str(i) == str(lasti):
                             if lst[-1] != '+':
@@ -173,28 +175,34 @@ def compress_grammar(grammar):
                             else:
                                 pass
                         else:
-                            lst.append(str(i))
+                            lst.append(i)
                             lasti = i
-                    en = ''.join(lst)
+                    en = miner.RWrap(elt.k, lst, elt._taint, elt.comparisons)
                 if not last_en:
-                    last_en = en
+                    last_en = to_str(en)
                     new_rule.append(en)
                     continue
-                if last_en == en:
+                if last_en == to_str(en):
                     if new_rule[-1]!= '+':
                         new_rule.append('+')
                     else:
                         pass
                 else:
                     new_rule.append(en)
-                    last_en = en
-            srule = ''.join(new_rule)
-            new_rules.append(srule)
+                    last_en = to_str(en)
+            new_rules.append(new_rule)
         new_grammar[key].extend(new_rules)
     new_g = {}
+
+    # now compress the rules for each keys
     for k in new_grammar:
-        new_g[k] = set(str(i) for i in new_grammar[k])
-    return new_g
+        new_rules = {}
+        for rules in new_grammar[k]:
+            v = {str(r):r for r in rules}
+            key = ''.join(list(v.keys()))
+            new_rules[key] = list(v.values())
+        new_grammar[k] = list(new_rules.values())
+    return new_grammar
 
 def get_key_set(short_keys):
     all_keys = {}
