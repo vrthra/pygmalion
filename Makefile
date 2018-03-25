@@ -30,7 +30,7 @@ R=0
 ifeq ($(debug),trace)
 	$(python3) -m pudb ./bin/traceit.py $< .pickled/$*.py.tmp < .pickled/$*.py.chain
 else
-	@$(python3) ./bin/traceit.py $< .pickled/$*.py.tmp < .pickled/$*.py.chain
+	$(python3) ./bin/traceit.py $< .pickled/$*.py.tmp < .pickled/$*.py.chain
 endif
 	@mv .pickled/$*.py.tmp $@
 
@@ -38,7 +38,7 @@ endif
 ifeq ($(debug),track)
 	$(python3) -m pudb ./bin/trackit.py $<
 else
-	@$(python3) ./bin/trackit.py $<
+	$(python3) ./bin/trackit.py $<
 endif
 	@mv $<.tmp $@
 
@@ -46,7 +46,7 @@ endif
 ifeq ($(debug),mine)
 	$(python3) -m pudb ./bin/mineit.py $<
 else
-	@$(python3) ./bin/mineit.py $<
+	$(python3) ./bin/mineit.py $<
 endif
 	@mv $<.tmp $@
 
@@ -54,7 +54,7 @@ endif
 ifeq ($(debug),infer)
 	$(python3) -m pudb ./bin/inferit.py $<
 else
-	@$(python3) ./bin/inferit.py $<
+	$(python3) ./bin/inferit.py $<
 endif
 	@mv $<.tmp $@
 
@@ -62,75 +62,63 @@ endif
 ifeq ($(debug),refine)
 	$(python3) -m pudb ./bin/refineit.py $<
 else
-	@$(python3) ./bin/refineit.py $<
+	$(python3) ./bin/refineit.py $<
 endif
 	@mv $<.tmp $@
 
 .pickled/%.py.input: .pickled/%.py.refine
 ifeq ($(debug),fuzz)
-	$(python3) -m pudb ./bin/fuzzit.py $<
+	NOUT=100 $(python3) -m pudb ./bin/fuzzit.py $<
 else
-	@$(python3) ./bin/fuzzit.py $<
+	NOUT=100 $(python3) ./bin/fuzzit.py $<
 endif
 	@mv $<.tmp $@
 
 
-chain.%: .pickled/%.py.chain
-	@echo
+chain.%: .pickled/%.py.chain; @:
 
-trace.%: .pickled/%.py.trace
-	@echo
+trace.%: .pickled/%.py.trace; @:
 
-track.%: .pickled/%.py.track
-	@echo
+track.%: .pickled/%.py.track; @:
 
-mine.%: .pickled/%.py.mine
-	@echo
+mine.%: .pickled/%.py.mine; @:
 
-infer.%: .pickled/%.py.infer
-	@echo
+infer.%: .pickled/%.py.infer; @:
 
-refine.%: .pickled/%.py.refine
-	@echo
+refine.%: .pickled/%.py.refine; @:
 
-fuzz.%: .pickled/%.py.input
-	@echo
-
+fuzz.%: .pickled/%.py.input; @:
 
 xchain.%:
 	rm -f .pickled/$*.py.chain
-	@echo
 	$(MAKE) chain.$*
 
 xtrace.%:
 	rm -f .pickled/$*.py.trace
-	@echo
 	$(MAKE) trace.$*
 
 xtrack.%:
 	rm -f .pickled/$*.py.track
-	@echo
 	$(MAKE) track.$*
 
 xmine.%:
 	rm -f .pickled/$*.py.mine
-	@echo
 	$(MAKE) mine.$*
 
 xinfer.%:
 	rm -f .pickled/$*.py.infer
-	@echo
 	$(MAKE) infer.$*
 
 xrefine.%:
 	rm -f .pickled/$*.py.refine
-	@echo
 	$(MAKE) refine.$*
 
 xfuzz.%:
 	rm -f .pickled/$*.py.input
-	@echo
 	$(MAKE) fuzz.$*
+
+clobber.%:
+	rm -f .pickled/%*.*
 
 
 $(required_dirs):; @mkdir -p $@
@@ -144,12 +132,14 @@ typecheck:
 	$(python3) -m mypy --strict --follow-imports=skip -m pygmalion.ftrace
 
 help:
-	@echo "trace | track | mine | infer | refine"
+	@echo "chain| trace | track | mine | infer | refine | fuzz"
+	@echo chain - Pychains test generator -- use xchain.hello
 	@echo trace - Simple frame dumper -- use xtrace.hello
 	@echo track - Evaluate the dumps, figure out the causal chain
 	@echo mine - Linear grammar
 	@echo infer - Context Free grammar
 	@echo refine - To normalized form
+	@echo fuzz - Get fuzzed output from grammar
 
 
 req:
