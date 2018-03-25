@@ -5,8 +5,8 @@ def inputs():
 
 def main(s):
     h,s = s[0], s[1:]
-    assert s != ''
     assert h == 'h' or h == 'H'
+    assert s != ''
     e,s = s[0], s[1:]
     assert e == 'e' or e == 'E'
     assert s != ''

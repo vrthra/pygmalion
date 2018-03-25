@@ -2,6 +2,7 @@
 import sys
 import pychains.chain
 import imp
+import taintedstr
 if __name__ == "__main__":
     arg = sys.argv[1]
     times = int(sys.argv[2])
@@ -11,6 +12,7 @@ if __name__ == "__main__":
         e = pychains.chain.Chain()
         (a, r) = e.exec_argument(_mod.main)
         results.append(a)
+        taintedstr.reset_comparisons()
 
     for i in results:
         print(i)
