@@ -33,8 +33,9 @@ if __name__ == "__main__":
     with opened_file(fn) as trace_file:
         # Infer grammar
         for j,_i in enumerate(sys.stdin):
-            print(j, _i, file=sys.stderr)
-            i = taintedstr.tstr(_i)
+            assert _i[-1] == "\n"
+            i = taintedstr.tstr(_i[0:-1]) # strip '\n'
+            print(j, repr(i), file=sys.stderr)
             with tracer.Tracer(i, trace_file) as t:
                 t._my_files = ['%s' % os.path.basename(m_file)]
                 t._skip_classes = mod_obj.skip_classes() if hasattr(mod_obj, 'skip_classes') else []
