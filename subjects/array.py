@@ -16,5 +16,6 @@ def main(s):
         nums.append(num)
 
 if __name__ == '__main__':
+    import taintedstr
     for i in inputs():
-        main(i)
+        print(main(taintedstr.tstr(i)))

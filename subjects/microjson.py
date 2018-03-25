@@ -395,10 +395,6 @@ decode = from_json
 encode = to_json
 
 def inputs():
-    import os.path
-    v = '.pickled/microjson.py.chain'
-    if os.path.exists(v):
-        return [l.strip() for l in open(v) if not l[0] == '#']
     INPUTS = [
             '15',
             '23',
@@ -425,7 +421,7 @@ def main(s):
 
 
 if __name__ == '__main__':
-    import sys
     import taintedstr
-    result = from_json(taintedstr.tstr(sys.argv[1]))
-    print(repr(result))
+    for i in inputs():
+        result = from_json(taintedstr.tstr(i))
+        print(repr(result))

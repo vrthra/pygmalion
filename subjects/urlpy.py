@@ -777,10 +777,6 @@ def splitvalue(attr):
     return attr, None
 
 def inputs():
-    import os.path
-    v = '.pickled/urlpy.py.chain'
-    if os.path.exists(v):
-        return [l.strip() for l in open(v) if not l[0] == '#']
     return ['http://www.google.com',
             'https://alaska.com:8080/me?you=this',
             'http://pages.com/new#fragment',
@@ -798,4 +794,6 @@ def main(s):
     return("scheme:%s, netloc:%s, url:%s, params:%s, query:%s, fragment:%s" % vv)
 
 if __name__ == '__main__':
-      print(main(sys.argv[1]))
+    import taintedstr
+    for i in inputs():
+        print(main(taintedstr.tstr(i)))

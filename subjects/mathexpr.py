@@ -199,11 +199,6 @@ def main(s):
     print(parse.getValue())
 
 def inputs():
-    import os.path
-    v = '.pickled/mathexpr.py.input'
-    if os.path.exists(v):
-        return [l.strip() for l in open(v) if not l[0] == '#']
-
     return ['1 + 2',
             '2 * 3 + 1',
             '(1-2)/3',
@@ -214,5 +209,6 @@ def skip_classes():
     return []
 
 if __name__ == "__main__":
-    import sys
-    main(taintedstr.tstr(sys.argv[1]))
+    import taintedstr
+    for i in inputs():
+        print(main(taintedstr.tstr(i)))

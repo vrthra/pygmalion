@@ -256,10 +256,6 @@ def main(arg):
     return str(u)
 
 def inputs():
-    import os.path
-    v = '.pickled//urljava.py.chain'
-    if os.path.exists(v):
-        return [l.strip() for l in open(v) if not l[0] == '#']
     INPUTS = ['http://www.google.com',
             'https://alaska.com:8080/me?you=this',
             'http://pages.com/new#fragment',
@@ -272,6 +268,6 @@ def skip_classes():
 
 
 if __name__ == '__main__':
-    import sys
-    s = sys.argv[1]
-    main(s)
+    import taintedstr
+    for i in inputs():
+        print(main(taintedstr.tstr(i)))
