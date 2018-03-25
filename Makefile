@@ -5,7 +5,7 @@ mytargets=hello whilescope microjson array urljava urlpy mathexpr
 
 .SUFFIXES:
 
-input=$(addprefix .pickled/, $(addsuffix .py.input,$(mytargets)) )
+fuzz=$(addprefix .pickled/, $(addsuffix .py.fuzz,$(mytargets)) )
 chains=$(addprefix .pickled/, $(addsuffix .py.chain,$(mytargets)) )
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
@@ -13,10 +13,10 @@ mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
 infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(input)
+.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(fuzz)
 
 all:
-	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), input $(input)
+	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz)
 
 MY_RP=1.0
 NINPUT=10
@@ -66,7 +66,7 @@ else
 endif
 	@mv $<.tmp $@
 
-.pickled/%.py.input: .pickled/%.py.refine
+.pickled/%.py.fuzz: .pickled/%.py.refine
 ifeq ($(debug),fuzz)
 	NOUT=100 $(python3) -m pudb ./bin/fuzzit.py $<
 else
@@ -87,7 +87,7 @@ infer.%: .pickled/%.py.infer; @:
 
 refine.%: .pickled/%.py.refine; @:
 
-fuzz.%: .pickled/%.py.input; @:
+fuzz.%: .pickled/%.py.fuzz; @:
 
 xchain.%:
 	rm -f .pickled/$*.py.chain
@@ -114,8 +114,9 @@ xrefine.%:
 	$(MAKE) refine.$*
 
 xfuzz.%:
-	rm -f .pickled/$*.py.input
+	rm -f .pickled/$*.py.fuzz
 	$(MAKE) fuzz.$*
+	$(python3) ./bin/showpickle.py .pickled/$*.py.fuzz
 
 clobber.%:
 	rm -f .pickled/$*.*
