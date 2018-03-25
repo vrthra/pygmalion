@@ -16,14 +16,21 @@ refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 .precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(input)
 
 all:
-	@echo $(traces)
+	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), input $(input)
 
+MY_RP=1.0
+NINPUT=10
+R=0
 
-.pickled/%.py.trace: subjects/%.py | .pickled
+.pickled/%.py.chain: subjects/%.py | .pickled
+	NOCTRL=1 MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) > $@.tmp
+	mv $@.tmp $@
+
+.pickled/%.py.trace: subjects/%.py .pickled/%.py.chain
 ifeq ($(debug),trace)
-	$(python3) -m pudb ./bin/traceit.py $< .pickled/$*.py.tmp
+	$(python3) -m pudb ./bin/traceit.py $< .pickled/$*.py.tmp < .pickled/$*.py.chain
 else
-	@$(python3) ./bin/traceit.py $< .pickled/$*.py.tmp
+	@$(python3) ./bin/traceit.py $< .pickled/$*.py.tmp < .pickled/$*.py.chain
 endif
 	@mv .pickled/$*.py.tmp $@
 
@@ -67,14 +74,6 @@ else
 endif
 	@mv $<.tmp $@
 
-
-MY_RP=1.0
-NINPUT=10
-R=0
-
-.pickled/%.py.chain: subjects/%.py | .pickled
-	NOCTRL=1 MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) > $@.tmp
-	mv $@.tmp $@
 
 chain.%: .pickled/%.py.chain
 	@echo

@@ -7,7 +7,7 @@
 
 # std
 import math
-import myio as io
+import pycore.myio as io
 import types
 
 

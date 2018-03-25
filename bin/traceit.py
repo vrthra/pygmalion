@@ -32,7 +32,7 @@ if __name__ == "__main__":
         fn = None
     with opened_file(fn) as trace_file:
         # Infer grammar
-        for j,_i in enumerate(mod_obj.inputs()):
+        for j,_i in enumerate(sys.stdin):
             print(j, _i, file=sys.stderr)
             i = taintedstr.tstr(_i)
             with tracer.Tracer(i, trace_file) as t:

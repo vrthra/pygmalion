@@ -1,5 +1,6 @@
-tox
-pudb
-exrex
--e ../pycore
--e ../taintedstr
+# -e ../pycore
+-e git://github.com/vrthra/pycore.git@master#egg=pycore
+# -e ../taintedstr
+-e git://github.com/vrthra/taintedstr.git@comparisons#egg=taintedstr
+# -e ../pychains
+-e git://github.com/vrthra/pychains.git@master#egg=pychains
