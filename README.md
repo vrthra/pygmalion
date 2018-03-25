@@ -23,7 +23,7 @@ We have the following subjects under the _./subjects_ directory
 ## Complete end to end.
 
 ```bash
-$ make xfuzz.hello
+$ make xeval.hello
 ```
 
 We have the following stages
@@ -47,6 +47,9 @@ We have the following stages
    Try to produce human readable grammar
 * _fuzz_
    Generate output from the infered and refined grammar.
+* _eval_
+   Use the outputs generated and find how many are valid, and the amount of
+   coverage obtained
 
 
 ## Generating initial inputs using PyChains
