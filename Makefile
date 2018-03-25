@@ -118,7 +118,7 @@ xfuzz.%:
 	$(MAKE) fuzz.$*
 
 clobber.%:
-	rm -f .pickled/%*.*
+	rm -f .pickled/$*.*
 
 
 $(required_dirs):; @mkdir -p $@
