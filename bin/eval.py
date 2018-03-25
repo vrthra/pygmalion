@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import coverage
 import linecache
 import imp
 import os
@@ -29,8 +30,10 @@ if __name__ == "__main__":
     #linecache.cache[os.path.basename(m_file)] = linecache.cache[m_file]
 
     fin = sys.stdin.buffer if len(sys.argv) < 3 else open(sys.argv[2], 'rb')
-    fout = sys.stdout if len(sys.argv) < 3 else open("%s.tmp" % sys.argv[2], 'wb')
+    fout = sys.stdout if len(sys.argv) < 3 else open("%s.tmp" % sys.argv[2], 'w')
     valid_n = 0
+    cov = coverage.Coverage()
+    cov.start()
     for j,i in enumerate(records(fin)):
         print(j, repr(i))
         try:
@@ -39,5 +42,8 @@ if __name__ == "__main__":
             valid_n += 1
         except:
             pass
+    cov.stop()
             #print('Error')
     print("Valid:", valid_n)
+    cov.save()
+    print(cov.report(file=fout))

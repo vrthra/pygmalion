@@ -5,6 +5,7 @@ mytargets=hello whilescope microjson array urljava urlpy mathexpr
 
 .SUFFIXES:
 
+eval=$(addprefix .pickled/, $(addsuffix .py.eval,$(mytargets)) )
 fuzz=$(addprefix .pickled/, $(addsuffix .py.fuzz,$(mytargets)) )
 chains=$(addprefix .pickled/, $(addsuffix .py.chain,$(mytargets)) )
 traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
@@ -13,10 +14,10 @@ mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
 infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(fuzz)
+.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(fuzz) $(eval)
 
 all:
-	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz)
+	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz), eval $(eval)
 
 MY_RP=1.0
 NINPUT=10
@@ -129,8 +130,9 @@ xfuzz.%:
 	$(python3) ./bin/showpickle.py .pickled/$*.py.fuzz
 
 xeval.%:
-	rm -f .pickled/$*.py.xeval
+	rm -f .pickled/$*.py.eval
 	$(MAKE) eval.$*
+	cat .pickled/$*.py.eval
 
 clobber.%:
 	rm -f .pickled/$*.*
