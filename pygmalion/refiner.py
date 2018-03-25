@@ -22,7 +22,7 @@ class Box:
     def val(self): return u.to_str(self.v)
     def __str__(self): return "[%s]" % self.val()
     def __repr__(self): return "<%s>" % ''.join(self.v)
-    def __bool__(self): return bool(self.v)
+    def __bool__(self): return len(''.join(self.v)) > 0
 
 class Choice:
     def __init__(self, a, b):
@@ -33,8 +33,8 @@ class Choice:
         elif self.a and not self.b:
             return str(self.b)
         else:
-            #return '(%s&%s)' % (self.a, self.b)
-            return '%s' % self.a
+            return '(%s&%s)' % (self.a, self.b)
+            #return '%s' % self.a
 
 def nt_key_to_s(i):
     v = i.k
