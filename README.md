@@ -13,7 +13,7 @@ $ make req
 
 We have the following subjects under the _./subjects_ directory
 
-* helo.py
+* hello.py
 * array.py
 * microjson.py
 * urlpy.py
