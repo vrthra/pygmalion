@@ -64,6 +64,11 @@ $ make xchain.hello
 The result is placed in _.pickled/hello.py.chain_ and is in readable ASCII
 A number of environment variables are used to control the PyChains
 
+* **BFS**
+   Whether to apply the wide search strategy or not. This has the effect of
+   finding out closing elements in subjects such as *microjson* and *array*
+   but can result in inputs that are shorter in length. Default is *false*
+
 * **MY_RP**
    Used to indicate how to proceed when an input is accepted. Some subjects such
    as _urlpy.py_ allows single character inputs that can be extended to produce
