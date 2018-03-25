@@ -74,6 +74,14 @@ else
 endif
 	@mv $<.tmp $@
 
+.pickled/%.py.eval: .pickled/%.py.fuzz
+ifeq ($(debug),eval)
+	$(python3) -m pudb ./bin/eval.py subjects/$*.py $<
+else
+	$(python3) ./bin/eval.py subjects/$*.py $<
+endif
+	@mv $<.tmp $@
+
 
 chain.%: .pickled/%.py.chain; @:
 
@@ -88,6 +96,8 @@ infer.%: .pickled/%.py.infer; @:
 refine.%: .pickled/%.py.refine; @:
 
 fuzz.%: .pickled/%.py.fuzz; @:
+
+eval.%: .pickled/%.py.eval; @:
 
 xchain.%:
 	rm -f .pickled/$*.py.chain
@@ -117,6 +127,10 @@ xfuzz.%:
 	rm -f .pickled/$*.py.fuzz
 	$(MAKE) fuzz.$*
 	$(python3) ./bin/showpickle.py .pickled/$*.py.fuzz
+
+xeval.%:
+	rm -f .pickled/$*.py.xeval
+	$(MAKE) eval.$*
 
 clobber.%:
 	rm -f .pickled/$*.*
