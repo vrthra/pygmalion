@@ -51,6 +51,20 @@ We have the following stages
    Use the outputs generated and find how many are valid, and the amount of
    coverage obtained
 
+Each stage can be invoked by _x<stagename>.<subject>_. For example, for
+complete evaluation of _microjson.py_, the following command would be used
+
+```bash
+$ make xeval.microjson
+```
+
+On the other hand, if only production of grammar is neceassary, the following
+command is used
+
+```bash
+$ make xrefine.microjson
+```
+
 
 ## Generating initial inputs using PyChains
 
