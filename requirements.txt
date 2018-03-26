@@ -4,3 +4,4 @@
 -e git://github.com/vrthra/taintedstr.git@onlyeq#egg=taintedstr
 # -e ../pychains
 -e git://github.com/vrthra/pychains.git@master#egg=pychains
+coverage==4.5.1
