@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-import pickle
 import sys
+sys.path.append('.')
+import pickle
 import jsonpickle
 with open(sys.argv[1],"rb") as tf:
     try:

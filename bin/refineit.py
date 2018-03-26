@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+import sys
+sys.path.append('.')
 import pygmalion.refiner as refiner
 import pygmalion.config as config
 import pygmalion.util as u
-import sys
 import os
 import pickle
 from pygmalion.bc import bc

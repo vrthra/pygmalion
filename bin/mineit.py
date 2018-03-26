@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-import pygmalion.miner as miner
 import sys
+sys.path.append('.')
+import pygmalion.miner as miner
 import os
 import pickle
 import resource

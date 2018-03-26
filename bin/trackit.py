@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+sys.path.append('.')
 import os.path
 import pygmalion.track as track
 import pickle

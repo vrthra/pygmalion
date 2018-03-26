@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+import sys
+sys.path.append('.')
 import pygmalion.infer as infer
 import pygmalion.grammar as g
-import sys
 import os
 import pickle
 import resource
