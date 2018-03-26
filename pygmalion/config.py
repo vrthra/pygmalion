@@ -54,7 +54,9 @@ Show_Colors = True
 
 Show_Comparisons = True
 
-Compress_Grammar = False # if os.getenv('COMPRESS_GRAMMAR') else False
+Max_Compress_Grammar = (os.getenv('MAX_COMPRESS_GRAMMAR') or 'false') in {'true', '1'}
+
+Refine_Tactics = (os.getenv('REFINE_TACTICS') or 'single_repeat').split(',')
 
 # True: only replace things at a lower height with something
 # at higher height. This is useful mainly when we decide whether
@@ -65,4 +67,4 @@ Use_Character_Classes = True
 
 Sort_Grammar = True
 
-Python_Specific = (os.getenv('PYTHON_OPT') or 'false') in ['true', '1']
+Python_Specific = (os.getenv('PYTHON_OPT') or 'false') in {'true', '1'}

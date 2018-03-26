@@ -26,6 +26,7 @@ class RWrap:
     def __repr__(self):
         return 'R[%s]:=%s' % (self.k, self.value())
     def __hash__(self): return hash(self.value())
+    def __eq__(self, o): return type(o) == RWrap and self.value() == o.value()
 
 
 class Rule:

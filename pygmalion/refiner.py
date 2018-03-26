@@ -1,4 +1,5 @@
 from taintedstr import Op
+import itertools as it
 import pygmalion.miner as miner
 import pygmalion.grammar as g
 import pygmalion.config as config
@@ -27,6 +28,7 @@ class Box:
 class Choice:
     def __init__(self, a, b):
         self.a, self.b = a, b
+    def __repr__(self): return 'choice: %s' % str(self)
     def __str__(self):
         if self.a and not self.b:
             return str(self.a)
@@ -35,6 +37,8 @@ class Choice:
         else:
             return '(%s&%s)' % (self.a, self.b)
             #return '%s' % self.a
+    def __eq__(self, o):
+        return type(o) == Choice and str(self) == str(o)
 
 def nt_key_to_s(i):
     v = i.k
@@ -146,7 +150,7 @@ def to_char_classes(rules):
     new_rules = merge_rules(new_rules)
     return new_rules
 
-def compress_grammar(grammar):
+def max_compress_grammar(grammar):
     def to_k(k): return "[%s:%s]" % (k.k.func, k.k.var)
     def to_str(l):
         if type(l) is miner.NTKey: return to_k(l)
@@ -256,17 +260,53 @@ def remove_subset_keys(grammar):
                 replace(k, lk)
     return new_grammar
 
+def remove_multiple_repeats_from_elt(elt):
+    if type(elt) == miner.NTKey: return elt
+    if len(elt.rvalues) == 1: return elt
+    rv = remove_multiple_repeats_from_lst(elt.rvalues)
+    elt.rvalues = rv
+    return elt
 
+def remove_multiple_repeats_from_lst(lst):
+    # make them triplets
+    tpls = it.zip_longest(lst, lst[1:], lst[2:])
+    #return [a for (a,b,c) in tpls if not (a == b and b == c)]
+    lst = []
+    for a,b,c in tpls:
+        if (a == b and b == c): continue
+        lst.append(a)
+    return lst
+
+
+def remove_multi_repeats_from_rule(rule):
+    new_elts = []
+    for elt in rule:
+        e = remove_multiple_repeats_from_elt(elt)
+        new_elts.append(e)
+    elts = remove_multiple_repeats_from_lst(new_elts)
+    return elts
+
+
+def remove_multi_repeats(g):
+    for k in g:
+        rs = g[k]
+        new_rs = []
+        for r in rs:
+            new_r = remove_multi_repeats_from_rule(r)
+            new_rs.append(r)
+        g[k] = new_rs
+    return g
 
 def refine_grammar(grammar):
     g = {k:unique(to_char_classes(grammar._dict[k])) for k in grammar._dict}
     # g = remove_subset_keys(g)
-    if config.Compress_Grammar:
-        return compress_grammar(g)
-    else:
-        if config.Sort_Grammar:
-            return {k:sorted(g[k], key=lambda x: str(x))
-                    for k in sorted(g.keys(), key=lambda x: str(x))}
-        else:
-            return g
+    if config.Sort_Grammar:
+        g = {k:sorted(g[k], key=lambda x: str(x))
+                for k in sorted(g.keys(), key=lambda x: str(x))}
+
+    if 'single_repeat' in config.Refine_Tactics:
+        g = remove_multi_repeats(g)
+
+    if config.Max_Compress_Grammar: g =  max_compress_grammar(g)
+    return g
 
