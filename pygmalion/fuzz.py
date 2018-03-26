@@ -21,7 +21,7 @@ RE_NONTERMINAL = re.compile(r'(\$[a-zA-Z_]*)')
 DEBUG = False
 def log(s):
     if DEBUG:
-        print(s() if callable(s) else s)
+        print(s() if callable(s) else s, file=sys.stderr)
 
 
 # cache the function calls. We only cache a given call based on the
@@ -38,14 +38,15 @@ def memoize(argnum):
     return fn_wrap
 
 # The minimum cost of expansion of this symbol
-# @memoize(0) # memoize on the first arg
+@memoize(0) # memoize on the first arg
 def symbol_min_cost(nt, grammar, seen=set()):
     expansions = grammar[nt]
     return min(min_expansions(e, grammar, seen | {nt}) for e in expansions)
 
 # The minimum cost of expansion of this rule
-# @memoize(0)
+@memoize(0)
 def min_expansions(expansion, grammar, seen=set()):
+    #log("minexpansions %s" % expansion)
     symbols  = [s for s in expansion if is_symbol(s)]
     # at least one expansion has no variable to expand.
     if not symbols: return 1
@@ -54,7 +55,9 @@ def min_expansions(expansion, grammar, seen=set()):
     # recursion
     if any(s in seen for s in symbols): return float('inf')
     # the value of a expansion is the sum of all expandable variables inside + 1
-    return sum(symbol_min_cost(s, grammar, seen) for s in symbols) + 1
+    cost = sum(symbol_min_cost(s, grammar, seen) for s in symbols) + 1
+    #log("cost = %d" % cost)
+    return cost
 
 
 # We create a derivation tree with nodes in the form (SYMBOL, CHILDREN)
@@ -80,9 +83,9 @@ def is_symbol(s):
     return True
     
 # Convert an expansion rule to children
-# @memoize(0)
+@memoize(0)
 def expansion_to_children(expansion):
-    # print("Converting " + repr(expansion))
+    log("Converting " + repr(expansion))
     # strings contains all substrings -- both terminals and non-terminals such
     # that ''.join(strings) == expansion
     r = [(s, None) if is_symbol(s) else (s, []) for s in expansion if s]
@@ -91,20 +94,25 @@ def expansion_to_children(expansion):
 # Expand a node
 def expand_node(node, grammar, prefer_shortest_expansion):
     (symbol, children) = node
-    # print("Expanding " + repr(symbol))
+    log("Expanding " + repr(symbol))
     assert children is None
     
     # Fetch the possible expansions from grammar...
     expansions = grammar[symbol]
-    possible_children_with_len = [(expansion_to_children(expansion),
-                                   min_expansions(expansion, grammar, {symbol}))
-                                  for expansion in expansions]
+
+    possible_children_with_len = []
+    for expansion in expansions:
+        a = expansion_to_children(expansion)
+        b = min_expansions(expansion, grammar, {symbol})
+        possible_children_with_len.append((a, b))
+    log('Expanding.1')
     min_len = min(s[1] for s in possible_children_with_len)
     
     # ...as well as the shortest ones
     shortest_children = [child for (child, clen) in possible_children_with_len
                                if clen == min_len]
     
+    log('Expanding.2')
     # Pick a child randomly
     if prefer_shortest_expansion:
         children = random.choice(shortest_children)
@@ -136,12 +144,13 @@ def any_possible_expansions(tree):
     
 # Expand the tree once
 def expand_tree_once(tree, grammar, prefer_shortest_expansion):
+    log('Expand once %s %s' % (prefer_shortest_expansion, tree))
     (symbol, children) = tree
     if children is None:
         # Expand this node
         return expand_node(tree, grammar, prefer_shortest_expansion)
 
-    # print("Expanding tree " + repr(tree))
+    log("Expanding tree " + repr(tree))
 
     # Find all children with possible expansions
     expandable_children = [i for (i, c) in enumerate(children) if any_possible_expansions(c)]
@@ -160,7 +169,7 @@ def expand_tree_once(tree, grammar, prefer_shortest_expansion):
     
     new_tree = (symbol, new_children)
 
-    # print("Expanding tree " + repr(tree) + " into " + repr(new_tree))
+    log("Expanding tree " + repr(tree) + " into " + repr(new_tree))
 
     return new_tree
     
@@ -185,6 +194,8 @@ def expand_tree(tree, grammar, max_symbols):
 def to_str(v):
     res = []
     if v == '+': return ''
+    if type(v) is miner.NTKey:
+        return str(v)
     for i in v.rvalues:
         if type(i) == refiner.Choice:
             if i.a:
@@ -216,15 +227,27 @@ def all_terminals(tree):
     # Concatenate all terminal symbols from all children
     return ''.join([all_terminals(c) for c in children])
 
+def to_tuples(grammar):
+    for k in grammar:
+        rules = grammar[k]
+        new_rules = []
+        for rule in rules:
+            elts = tuple(rule)
+            new_rules.append(elts)
+        grammar[k] = tuple(new_rules)
+    return grammar
+
 # All together
 def produce(grammar, max_symbols = 1000):
     # Create an initial derivation tree
     tree = init_tree()
-    # print(tree)
+    log(tree)
+
+    grammar = to_tuples(grammar)
 
     # Expand all nonterminals
     tree = expand_tree(tree, grammar, max_symbols)
-    # print(tree)
+    log(tree)
     
     # Return the string
     return all_terminals(tree)
