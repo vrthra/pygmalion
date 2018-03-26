@@ -56,7 +56,9 @@ Show_Comparisons = True
 
 Max_Compress_Grammar = (os.getenv('MAX_COMPRESS_GRAMMAR') or 'false') in {'true', '1'}
 
-Refine_Tactics = (os.getenv('REFINE_TACTICS') or 'single_repeat').split(',')
+Refine_Tactics = (os.getenv('REFINE_TACTICS') or ','.join([
+        'single_repeat',
+        'remove_single_alternatives'])).split(',')
 
 # True: only replace things at a lower height with something
 # at higher height. This is useful mainly when we decide whether

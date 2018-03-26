@@ -270,12 +270,7 @@ def remove_multiple_repeats_from_elt(elt):
 def remove_multiple_repeats_from_lst(lst):
     # make them triplets
     tpls = it.zip_longest(lst, lst[1:], lst[2:])
-    #return [a for (a,b,c) in tpls if not (a == b and b == c)]
-    lst = []
-    for a,b,c in tpls:
-        if (a == b and b == c): continue
-        lst.append(a)
-    return lst
+    return [a for (a,b,c) in tpls if not (a == b and b == c)]
 
 
 def remove_multi_repeats_from_rule(rule):
@@ -297,6 +292,60 @@ def remove_multi_repeats(g):
         g[k] = new_rs
     return g
 
+def replace_key_in_rule(k, v, my_r):
+    replaced = False
+    ret_r = []
+    for elt in my_r:
+        if elt == k:
+            replaced = True
+            # expand v because it is a complete sequence
+            newelt = v
+        else:
+            newelt = [elt]
+        ret_r.extend(newelt)
+    return (replaced, ret_r)
+
+def remove_single_alternatives(g):
+    # given key := value with no alternatives, replace
+    # any instance of tht key with the value.
+    replaced = False
+    while True:
+        glst = [(k,g[k]) for k in g]
+        single_keys = [k for k,v in glst if len(v) == 1]
+        newg = {}
+        for key in g:
+            rset = g[key]
+            newrset = []
+            for r in rset:
+                my_r = r
+                for k in single_keys:
+                    if k == key: continue
+                    replaced, my_r = replace_key_in_rule(k, g[k][0], my_r)
+                newrset.append(my_r)
+            newg[key] = newrset
+        l = len(newg.keys())
+        newg = grammar_gc(newg)
+        if not replaced: return newg
+        g = newg
+    assert False
+
+def grammar_gc(grammar):
+    start = miner.NTKey(g.V(0, '', '', 'START', 0))
+    keys = [start]
+    seen = set(keys)
+    new_g = {}
+    while keys:
+        k, *keys = keys
+        new_g[k] = grammar[k]
+        rules = grammar[k]
+        for rule in rules:
+            for e in rule:
+                if type(e) is miner.NTKey and e not in seen:
+                    seen.add(e)
+                    keys.append(e)
+    return new_g
+
+
 def refine_grammar(grammar):
     g = {k:unique(to_char_classes(grammar._dict[k])) for k in grammar._dict}
     # g = remove_subset_keys(g)
@@ -304,8 +353,11 @@ def refine_grammar(grammar):
         g = {k:sorted(g[k], key=lambda x: str(x))
                 for k in sorted(g.keys(), key=lambda x: str(x))}
 
-    if 'single_repeat' in config.Refine_Tactics:
-        g = remove_multi_repeats(g)
+    if 'single_repeat' in config.Refine_Tactics: g = remove_multi_repeats(g)
+
+    if 'remove_single_alternatives' in config.Refine_Tactics:
+        g = remove_single_alternatives(g)
+
 
     if config.Max_Compress_Grammar: g =  max_compress_grammar(g)
     return g
