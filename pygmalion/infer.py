@@ -1,6 +1,7 @@
 import pygmalion.grammar as g
 import pygmalion.config as config
 import pudb
+import sys
 from taintedstr import Op
 brk = pudb.set_trace
 
@@ -96,8 +97,8 @@ def process_comparisons_per_char(ins):
 # Get a grammar for multiple inputs
 def infer_grammar(lgrammars):
     merged_grammar = g.Grammar()
-    for i, xins, lgrammar in lgrammars:
-        print(i)
+    for j, (i, xins, lgrammar) in enumerate(lgrammars):
+        print("infer:", j, i, file=sys.stderr, flush=True)
         # this is for a single input
         xcmps = process_comparisons_per_char(separate_comparisons_per_char(xins))
         merged_grammar = merge_grammars(merged_grammar, lgrammar, xcmps, i)

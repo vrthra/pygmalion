@@ -23,6 +23,7 @@ MY_RP=1.0
 NINPUT=10
 R=0
 NOUT=100
+MAXSYM=100
 
 .pickled/%.py.chain: subjects/%.py | .pickled
 	NOCTRL=1 MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) > $@.tmp
@@ -70,9 +71,9 @@ endif
 
 .pickled/%.py.fuzz: .pickled/%.py.refine
 ifeq ($(debug),fuzz)
-	NOUT=$(NOUT) $(python3) -m pudb ./bin/fuzzit.py $<
+	NOUT=$(NOUT) MAXSYM=$(MAXSYM) $(python3) -m pudb ./bin/fuzzit.py $<
 else
-	NOUT=$(NOUT) $(python3) ./bin/fuzzit.py $<
+	NOUT=$(NOUT) MAXSYM=$(MAXSYM) $(python3) ./bin/fuzzit.py $<
 endif
 	@mv $<.tmp $@
 

@@ -12,5 +12,5 @@ if __name__ == "__main__":
     grammar = pickle.load(fin)
     for i in range(nout):
         v = fuzz.produce(grammar, max_sym)
-        #print(i, repr(v), file=sys.stderr)
+        print(i, repr(v), file=sys.stderr, flush=True)
         pickle.dump(v, fout)
