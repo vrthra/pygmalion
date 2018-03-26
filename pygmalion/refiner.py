@@ -90,7 +90,7 @@ def to_comparisons(rule):
             rvalues.append(new_elt)
     return rvalues
 
-def unique(rules):
+def unique_rules(rules):
     my_rules_set = {}
     for rule in rules:
         if str(rule) not in my_rules_set:
@@ -139,7 +139,7 @@ def merge_rules(rules):
 
 
 def to_char_classes(rules):
-    rules = unique(rules)
+    rules = unique_rules(rules)
     new_rules = []
     for rule in rules:
         if config.Use_Character_Classes:
@@ -270,7 +270,12 @@ def remove_multiple_repeats_from_elt(elt):
 def remove_multiple_repeats_from_lst(lst):
     # make them triplets
     tpls = it.zip_longest(lst, lst[1:], lst[2:])
-    return [a for (a,b,c) in tpls if not (a == b and b == c)]
+    lst = []
+    for a,b,c in tpls:
+        if (a == b and b == c): continue
+        lst.append(a)
+    return lst
+    # return [a for (a,b,c) in tpls if not (a == b and b == c)]
 
 
 def remove_multi_repeats_from_rule(rule):
@@ -288,7 +293,8 @@ def remove_multi_repeats(g):
         new_rs = []
         for r in rs:
             new_r = remove_multi_repeats_from_rule(r)
-            new_rs.append(r)
+            new_rs.append(new_r)
+        new_rs = remove_multiple_repeats_from_lst(new_rs)
         g[k] = new_rs
     return g
 
@@ -347,16 +353,19 @@ def grammar_gc(grammar):
 
 
 def refine_grammar(grammar):
-    g = {k:unique(to_char_classes(grammar._dict[k])) for k in grammar._dict}
+    g = {k:unique_rules(to_char_classes(grammar._dict[k])) for k in grammar._dict}
     # g = remove_subset_keys(g)
     if config.Sort_Grammar:
         g = {k:sorted(g[k], key=lambda x: str(x))
                 for k in sorted(g.keys(), key=lambda x: str(x))}
 
-    if 'single_repeat' in config.Refine_Tactics: g = remove_multi_repeats(g)
-
     if 'remove_single_alternatives' in config.Refine_Tactics:
         g = remove_single_alternatives(g)
+
+    if 'single_repeat' in config.Refine_Tactics:
+        g = remove_multi_repeats(g)
+
+    g = {k:unique_rules(g[k]) for k in g}
 
 
     if config.Max_Compress_Grammar: g =  max_compress_grammar(g)
