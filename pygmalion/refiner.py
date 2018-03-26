@@ -265,7 +265,8 @@ def refine_grammar(grammar):
         return compress_grammar(g)
     else:
         if config.Sort_Grammar:
-            return {k:g[k] for k in sorted(g.keys(), key=lambda x: str(x))}
+            return {k:sorted(g[k], key=lambda x: str(x))
+                    for k in sorted(g.keys(), key=lambda x: str(x))}
         else:
             return g
 
