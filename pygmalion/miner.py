@@ -216,5 +216,6 @@ def get_grammar(assignments):
 
 # Get a grammar for multiple inputs
 def mine_grammar(definitions):
-    return [(i, xins, get_grammar(defs)) for i, xins, defs in definitions]
+    for (i, xins, defs) in definitions:
+        yield (i, xins, get_grammar(defs))
 
