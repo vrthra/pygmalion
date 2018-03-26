@@ -11,5 +11,6 @@ if __name__ == "__main__":
     fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     grammar = pickle.load(fin)
     for i in range(nout):
-        print(i, file=sys.stderr)
-        pickle.dump(fuzz.produce(grammar, max_sym), fout)
+        v = fuzz.produce(grammar, max_sym)
+        #print(i, repr(v), file=sys.stderr)
+        pickle.dump(v, fout)

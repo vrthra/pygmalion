@@ -148,11 +148,13 @@ def to_char_classes(rules):
 
 def compress_grammar(grammar):
     def to_k(k): return "[%s:%s]" % (k.k.func, k.k.var)
-    def to_str(l): return str(l)
+    def to_str(l):
+        if type(l) is miner.NTKey: return to_k(l)
+        else: return str(l)
     new_grammar = {}
     for k in grammar.keys():
         rules = grammar.get(k)
-        key = to_k(k)
+        key = k
         if key not in new_grammar: new_grammar[key] = []
         new_rules = []
         for rule in rules:
@@ -160,7 +162,7 @@ def compress_grammar(grammar):
             last_en = None
             for elt in rule:
                 if type(elt) is miner.NTKey:
-                    en = to_k(elt)
+                    en = elt
                 else:
                     lasti = None
                     lst = []

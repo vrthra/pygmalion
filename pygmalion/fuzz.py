@@ -70,11 +70,12 @@ def min_expansions(expansion, grammar, seen=set()):
 #     expanded into $START -> $EXPR -> $EXPR + $TERM
 
 # Return an initialized tree
-def init_tree(start_symbol = "[:START]"):
+def init_tree():
+    start_symbol = miner.NTKey(g.V(0, '', '', 'START', 0))#"[:START]"
     return (start_symbol, None)
 
 def is_symbol(s):
-    if type(s) != str: return False
+    if type(s) != miner.NTKey: return False
     if s == '+': return False
     return True
     
@@ -94,7 +95,7 @@ def expand_node(node, grammar, prefer_shortest_expansion):
     assert children is None
     
     # Fetch the possible expansions from grammar...
-    expansions = grammar[str(symbol)]
+    expansions = grammar[symbol]
     possible_children_with_len = [(expansion_to_children(expansion),
                                    min_expansions(expansion, grammar, {symbol}))
                                   for expansion in expansions]

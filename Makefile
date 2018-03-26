@@ -1,4 +1,4 @@
-python3=PYTHONPATH=. python3
+python3=python3
 pip3=pip3
 required_dirs=.pickled
 mytargets=hello whilescope microjson array urljava urlpy mathexpr
@@ -158,6 +158,7 @@ help:
 	@echo infer - Context Free grammar
 	@echo refine - To normalized form
 	@echo fuzz - Get fuzzed output from grammar
+	@echo eval - Evaluate the fuzzed output
 
 
 req:

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import taintedstr
 import coverage
 import linecache
 import imp
@@ -37,13 +38,13 @@ if __name__ == "__main__":
     for j,i in enumerate(records(fin)):
         print(j, repr(i))
         try:
-            v = mod_obj.main(i)
+            v = mod_obj.main(taintedstr.tstr(i))
             print("\t=>",v)
             valid_n += 1
         except:
             pass
-    cov.stop()
             #print('Error')
+    cov.stop()
     print("Valid:", valid_n)
     cov.save()
     print(cov.report(file=fout))
