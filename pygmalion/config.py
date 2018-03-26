@@ -58,7 +58,8 @@ Max_Compress_Grammar = (os.getenv('MAX_COMPRESS_GRAMMAR') or 'false') in {'true'
 
 Refine_Tactics = (os.getenv('REFINE_TACTICS') or ','.join([
         'single_repeat',
-        'remove_single_alternatives'])).split(',')
+        'remove_single_alternatives',
+        'compress_keys'])).split(',')
 
 # True: only replace things at a lower height with something
 # at higher height. This is useful mainly when we decide whether

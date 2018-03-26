@@ -32,11 +32,10 @@ class Choice:
     def __str__(self):
         if self.a and not self.b:
             return str(self.a)
-        elif self.a and not self.b:
+        elif not self.a and self.b:
             return str(self.b)
         else:
             return '(%s&%s)' % (self.a, self.b)
-            #return '%s' % self.a
     def __eq__(self, o):
         return type(o) == Choice and str(self) == str(o)
 
@@ -305,7 +304,10 @@ def replace_key_in_rule(k, v, my_r):
         if elt == k:
             replaced = True
             # expand v because it is a complete sequence
-            newelt = v
+            if type(v) is list:
+                newelt = v
+            else:
+                newelt = [v]
         else:
             newelt = [elt]
         ret_r.extend(newelt)
@@ -314,8 +316,8 @@ def replace_key_in_rule(k, v, my_r):
 def remove_single_alternatives(g):
     # given key := value with no alternatives, replace
     # any instance of tht key with the value.
-    replaced = False
     while True:
+        replaced = False
         glst = [(k,g[k]) for k in g]
         single_keys = [k for k,v in glst if len(v) == 1]
         newg = {}
@@ -326,12 +328,14 @@ def remove_single_alternatives(g):
                 my_r = r
                 for k in single_keys:
                     if k == key: continue
-                    replaced, my_r = replace_key_in_rule(k, g[k][0], my_r)
+                    rep, my_r = replace_key_in_rule(k, g[k][0], my_r)
+                    if rep: replaced = True
                 newrset.append(my_r)
             newg[key] = newrset
         l = len(newg.keys())
         newg = grammar_gc(newg)
         if not replaced: return newg
+        assert l > len(newg)
         g = newg
     assert False
 
@@ -351,22 +355,63 @@ def grammar_gc(grammar):
                     keys.append(e)
     return new_g
 
+def compress_keys(grammar):
+    while True:
+        replaced = False
+        glst = {k:u.djs_to_string(grammar[k]) for k in grammar}
+        replacements = []
+        for k1 in glst:
+            v1 = glst[k1]
+            for k2 in glst:
+                if k1 == k2: continue
+                v2 = glst[k2]
+                if v1 == v2:
+                    replacements.append((k2, k1))
+        newg = None
+        newg = {}
+        for k in grammar:
+            rules = grammar[k]
+            new_rules = []
+            for rule in rules:
+                new_rule = rule
+                for k2, k1 in replacements:
+                    rep, new_rule = replace_key_in_rule(k2, k1, rule)
+                    if rep:
+                        # print("In ", k, ":", k2, "=>", k1)
+                        replaced = True
+                new_rules.append(new_rule)
+            newg[k] = new_rules
+        if not replaced: return newg
+        l = len(grammar)
+        newg = grammar_gc(newg)
+        assert l > len(newg)
+        grammar = newg
+    assert False
+
 
 def refine_grammar(grammar):
     g = {k:unique_rules(to_char_classes(grammar._dict[k])) for k in grammar._dict}
     # g = remove_subset_keys(g)
+    # print('To character classes', file=sys.stderr)
     if config.Sort_Grammar:
+        # print('sort', file=sys.stderr)
         g = {k:sorted(g[k], key=lambda x: str(x))
                 for k in sorted(g.keys(), key=lambda x: str(x))}
 
     if 'remove_single_alternatives' in config.Refine_Tactics:
+        # print('remove_single_alternatives', file=sys.stderr)
         g = remove_single_alternatives(g)
 
     if 'single_repeat' in config.Refine_Tactics:
+        # print('single_repeat', file=sys.stderr)
         g = remove_multi_repeats(g)
 
+    # print('unique_rules', file=sys.stderr)
     g = {k:unique_rules(g[k]) for k in g}
 
+    if 'compress_keys' in config.Refine_Tactics:
+        # print('compress_keys', file=sys.stderr)
+        g = compress_keys(g)
 
     if config.Max_Compress_Grammar: g =  max_compress_grammar(g)
     return g
