@@ -87,7 +87,7 @@ def to_comparisons(rule):
         else:
             new_elt = normalize_char_cmp(elt, rule)
             rvalues.append(new_elt)
-    return rvalues
+    return miner.RWrap(rule.k, rvalues, rule._taint, rule.comparisons)
 
 def unique_rules(rules):
     my_rules_set = {}
@@ -96,13 +96,16 @@ def unique_rules(rules):
             my_rules_set[str(rule)] = rule
     return list(my_rules_set.values())
 
-def rule_match_simple(mr, r):
+def rule_match_simple(rwmr, rwr):
     """
     Two rules match if they have same length, and each
     *comparison* in one correspond to another.
     Note that we can have a complex regex kind of rule
     match too -- not implemented here.
     """
+    mr = rwmr.rvalues()
+    r = rwr.rvalues()
+
     if len(mr) != len(r): return False
     for i, me in enumerate(mr):
         e = r[i]
@@ -279,11 +282,11 @@ def remove_multiple_repeats_from_lst(lst):
 
 def remove_multi_repeats_from_rule(rule):
     new_elts = []
-    for elt in rule:
+    for elt in rule.rvalues():
         e = remove_multiple_repeats_from_elt(elt)
         new_elts.append(e)
     elts = remove_multiple_repeats_from_lst(new_elts)
-    return elts
+    return miner.RWrap(rule.k, elts, rule._taint, rule.comparisons)
 
 
 def remove_multi_repeats(g):
@@ -297,10 +300,16 @@ def remove_multi_repeats(g):
         g[k] = new_rs
     return g
 
-def replace_key_in_rule(k, v, my_r):
+def replace_key_in_rule(k, vr, my_r):
     replaced = False
     ret_r = []
-    for elt in my_r:
+    if type(vr) is miner.NTKey:
+        v = vr
+    elif type(vr) is miner.RWrap:
+        v = vr.rvalues()[0]
+    else:
+        assert False
+    for elt in my_r.rvalues():
         if elt == k:
             replaced = True
             # expand v because it is a complete sequence
@@ -311,7 +320,7 @@ def replace_key_in_rule(k, v, my_r):
         else:
             newelt = [elt]
         ret_r.extend(newelt)
-    return (replaced, ret_r)
+    return (replaced, miner.RWrap(my_r.k, ret_r, my_r._taint, my_r.comparisons))
 
 def remove_single_alternatives(g):
     # given key := value with no alternatives, replace
@@ -323,14 +332,14 @@ def remove_single_alternatives(g):
         newg = {}
         for key in g:
             rset = g[key]
-            newrset = []
+            newrset = set()
             for r in rset:
                 my_r = r
                 for k in single_keys:
                     if k == key: continue
-                    rep, my_r = replace_key_in_rule(k, g[k][0], my_r)
+                    rep, my_r = replace_key_in_rule(k, list(g[k])[0], my_r)
                     if rep: replaced = True
-                newrset.append(my_r)
+                newrset.add(my_r)
             newg[key] = newrset
         l = len(newg.keys())
         newg = grammar_gc(newg)
@@ -340,6 +349,8 @@ def remove_single_alternatives(g):
     assert False
 
 def grammar_gc(grammar):
+    # Removes any unused keys if one starts from START and adds
+    # all referencing keys in rules recursively
     start = miner.NTKey(g.V.start())
     keys = [start]
     seen = set(keys)
@@ -349,7 +360,7 @@ def grammar_gc(grammar):
         new_g[k] = grammar[k]
         rules = grammar[k]
         for rule in rules:
-            for e in rule:
+            for e in rule.rvalues():
                 if type(e) is miner.NTKey and e not in seen:
                     seen.add(e)
                     keys.append(e)
@@ -394,7 +405,7 @@ def refine_grammar(grammar):
     for k in grammar.keys():
         v = grammar.get(k)
         cv = to_char_classes(v)
-        newg[k] = unique_rules(cv)
+        newg[k] = set(unique_rules(cv))
     g = newg
     # g = remove_subset_keys(g)
     # print('To character classes', file=sys.stderr)

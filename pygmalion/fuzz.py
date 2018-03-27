@@ -21,7 +21,7 @@ RE_NONTERMINAL = re.compile(r'(\$[a-zA-Z_]*)')
 DEBUG = False
 def log(s):
     if DEBUG:
-        print(s() if callable(s) else s, file=sys.stderr)
+        print(s() if callable(s) else s, file=sys.stderr, flush=True)
 
 
 # cache the function calls. We only cache a given call based on the
@@ -46,8 +46,9 @@ def symbol_min_cost(nt, grammar, seen=set()):
 # The minimum cost of expansion of this rule
 @memoize(0)
 def min_expansions(expansion, grammar, seen=set()):
+    ex = expansion.rvalues()
     #log("minexpansions %s" % expansion)
-    symbols  = [s for s in expansion if is_symbol(s)]
+    symbols  = [s for s in ex if is_symbol(s)]
     # at least one expansion has no variable to expand.
     if not symbols: return 1
 
@@ -85,10 +86,11 @@ def is_symbol(s):
 # Convert an expansion rule to children
 @memoize(0)
 def expansion_to_children(expansion):
-    log("Converting " + repr(expansion))
+    ex = expansion.rvalues()
+    log("Converting " + repr(ex))
     # strings contains all substrings -- both terminals and non-terminals such
     # that ''.join(strings) == expansion
-    r = [(s, None) if is_symbol(s) else (s, []) for s in expansion if s]
+    r = [(s, None) if is_symbol(s) else (s, []) for s in ex if s]
     return r
     
 # Expand a node
@@ -227,23 +229,11 @@ def all_terminals(tree):
     # Concatenate all terminal symbols from all children
     return ''.join([all_terminals(c) for c in children])
 
-def to_tuples(grammar):
-    for k in grammar:
-        rules = grammar[k]
-        new_rules = []
-        for rule in rules:
-            elts = tuple(rule)
-            new_rules.append(elts)
-        grammar[k] = tuple(new_rules)
-    return grammar
-
 # All together
 def produce(grammar, max_symbols = 1000):
     # Create an initial derivation tree
     tree = init_tree()
     log(tree)
-
-    grammar = to_tuples(grammar)
 
     # Expand all nonterminals
     tree = expand_tree(tree, grammar, max_symbols)
