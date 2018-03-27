@@ -151,7 +151,7 @@ typecheck:
 	$(python3) -m mypy --strict --follow-imports=skip -m pygmalion.ftrace
 
 help:
-	@echo "chain| trace | track | mine | infer | refine | fuzz"
+	@echo "chain| trace | track | mine | infer | refine | fuzz | eval"
 	@echo chain - Pychains test generator -- use xchain.hello
 	@echo trace - Simple frame dumper -- use xtrace.hello
 	@echo track - Evaluate the dumps, figure out the causal chain
