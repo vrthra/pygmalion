@@ -198,21 +198,19 @@ def to_str(v):
     if v == '+': return ''
     if type(v) is miner.NTKey:
         return str(v)
-    for i in v.rvalues():
-        if type(i) == refiner.Choice:
-            if i.a:
-                res.append(random.choice(list(i.a.v)))
-            elif i.b:
-                lst = [c for c in All_Characters if c not in i.b.v.v]
-                res.append(random.choice(lst))
-        elif type(i) == refiner.Box:
-            res.append(random.choice(list(i.v)))
-        elif type(i) == refiner.Not:
-            lst = [c for c in All_Characters if c not in i.v.v]
-            res.append(random.choice(lst))
-        else:
-            res.append(str(i))
-    return ''.join(res)
+    if type(v) == refiner.Choice:
+        if v.a:
+            return random.choice(list(v.a.v))
+        elif v.b:
+            lst = [c for c in All_Characters if c not in v.b.v.v]
+            return random.choice(lst)
+    elif type(v) == refiner.Box:
+        return random.choice(list(v.v))
+    elif type(v) == refiner.Not:
+        lst = [c for c in All_Characters if c not in v.v.v]
+        return random.choice(lst)
+    else:
+        return str(v)
     
 # The tree as a string
 def all_terminals(tree):

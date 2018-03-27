@@ -73,7 +73,7 @@ def normalize_char_cmp(elt, rule):
         if not pos in rule.comparisons: continue
         eltregex = get_regex(rule.comparisons[pos])
         regex.append(eltregex)
-    return miner.RWrap(rule.k, regex, rule._taint, rule.comparisons)
+    return regex
 
 def to_comparisons(rule):
     """
@@ -136,7 +136,7 @@ def merge_rules(rules):
         if append:
             my_rules.append(rule)
 
-    assert len(rules) == len(my_rules)
+    assert len(rules) >= len(my_rules)
     return my_rules
 
 
@@ -264,7 +264,7 @@ def remove_subset_keys(grammar):
 
 def remove_multiple_repeats_from_elt(elt):
     if type(elt) == miner.NTKey: return elt
-    if len(elt.rvalues()) == 1: return elt
+    if len(elt) == 1: return elt
     rv = remove_multiple_repeats_from_lst(elt.rvalues())
     elt._rvalues = rv
     return elt
@@ -281,11 +281,7 @@ def remove_multiple_repeats_from_lst(lst):
 
 
 def remove_multi_repeats_from_rule(rule):
-    new_elts = []
-    for elt in rule.rvalues():
-        e = remove_multiple_repeats_from_elt(elt)
-        new_elts.append(e)
-    elts = remove_multiple_repeats_from_lst(new_elts)
+    elts = remove_multiple_repeats_from_lst(rule.rvalues())
     return miner.RWrap(rule.k, elts, rule._taint, rule.comparisons)
 
 
