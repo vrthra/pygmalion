@@ -41,14 +41,13 @@ def merge_grammars(g1, lg, xcmps, inp):
             for pos in r._taint:
                 val = get_regex(r.comparisons[pos])
                 hkey.append(val)
-            newk = miner.NTKey(k.k.newV(':'.join(hkey) + k.k.t))
+            newk = miner.NTKey(k.k.newV(':'.join(hkey)))
         kvdict[k] = newk
 
 
     nlg = {}
     for k in lg.keys():
         hk = kvdict[k]
-        assert hk not in nlg
         rules = lg[k]
         newrules = set()
         for rule in rules:
@@ -63,7 +62,10 @@ def merge_grammars(g1, lg, xcmps, inp):
                 new_rule.append(newelt)
             newr = miner.RWrap(rule.k, new_rule, rule.taint, rule.comparisons)
             newrules.add(newr)
-        nlg[hk] = newrules
+        if hk in nlg:
+            nlg[hk].update(newrules)
+        else:
+            nlg[hk] = newrules
     nlg = g.Grammar(nlg)
     my_g = {}
     for key in g1.keys() + nlg.keys():
