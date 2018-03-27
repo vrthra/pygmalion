@@ -34,10 +34,15 @@ class Grammar:
 
 class V:
     def __init__(self, fn, l, n, var, t, height=0):
-        self.fn, self.l, self.func, self.var, self.t, self.height = fn, l, n, var, t, height
-        self._x = (self.func, self.var, self.t)
-    def __str__(self): return "<%s:%s:%d>" % self._x
-    def __repr__(self): return "<%s:%s:%d>" % self._x
+        self.fn, self.l, self.func, self.var, self.t, self.height = fn, l, n, var, str(t), height
+        self._x = (self.func, self.var, str(self.t))
+    def newV(self, t):
+        return V(self.fn, self.l, self.func, self.var, t, self.height)
+    def __str__(self): return "<%s:%s:%s>" % self._x
+    def __repr__(self): return "<%s:%s:%s>" % self._x
     def __hash__(self): return hash(self._x)
     def __eq__(self, other): return not (self != other)
     def __ne__(self, other): return self._x != other._x
+    @classmethod
+    def start(cls):
+        return V(0, '', '', 'START', 0)

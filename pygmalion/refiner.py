@@ -169,7 +169,7 @@ def max_compress_grammar(grammar):
                 else:
                     lasti = None
                     lst = []
-                    for i in elt.rvalues:
+                    for i in elt.rvalues():
                         if not lasti:
                             lasti = i
                             lst.append(i)
@@ -261,9 +261,9 @@ def remove_subset_keys(grammar):
 
 def remove_multiple_repeats_from_elt(elt):
     if type(elt) == miner.NTKey: return elt
-    if len(elt.rvalues) == 1: return elt
-    rv = remove_multiple_repeats_from_lst(elt.rvalues)
-    elt.rvalues = rv
+    if len(elt.rvalues()) == 1: return elt
+    rv = remove_multiple_repeats_from_lst(elt.rvalues())
+    elt._rvalues = rv
     return elt
 
 def remove_multiple_repeats_from_lst(lst):
@@ -340,7 +340,7 @@ def remove_single_alternatives(g):
     assert False
 
 def grammar_gc(grammar):
-    start = miner.NTKey(g.V(0, '', '', 'START', 0))
+    start = miner.NTKey(g.V.start())
     keys = [start]
     seen = set(keys)
     new_g = {}
@@ -390,7 +390,12 @@ def compress_keys(grammar):
 
 
 def refine_grammar(grammar):
-    g = {k:unique_rules(to_char_classes(grammar._dict[k])) for k in grammar._dict}
+    newg = {}
+    for k in grammar.keys():
+        v = grammar.get(k)
+        cv = to_char_classes(v)
+        newg[k] = unique_rules(cv)
+    g = newg
     # g = remove_subset_keys(g)
     # print('To character classes', file=sys.stderr)
     if config.Sort_Grammar:

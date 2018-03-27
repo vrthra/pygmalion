@@ -74,7 +74,7 @@ def min_expansions(expansion, grammar, seen=set()):
 
 # Return an initialized tree
 def init_tree():
-    start_symbol = miner.NTKey(g.V(0, '', '', 'START', 0))#"[:START]"
+    start_symbol = miner.NTKey(g.V.start())#"[:START]"
     return (start_symbol, None)
 
 def is_symbol(s):
@@ -196,7 +196,7 @@ def to_str(v):
     if v == '+': return ''
     if type(v) is miner.NTKey:
         return str(v)
-    for i in v.rvalues:
+    for i in v.rvalues():
         if type(i) == refiner.Choice:
             if i.a:
                 res.append(random.choice(list(i.a.v)))

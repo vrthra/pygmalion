@@ -1,20 +1,76 @@
 import pygmalion.grammar as g
 import pygmalion.config as config
+import pygmalion.miner as miner
 import pudb
 import sys
 from taintedstr import Op
 brk = pudb.set_trace
 
+
+def get_regex(cmps):
+    # the input structure is a dict where keys are the instruction
+    # numbers and each value is a list of secondary instructions in key:o.
+    # or summaries in eq, ne, in, ni sne, fne, sni, sin etc.
+    # First priority to all equals that succeeded
+    # This is because we should be able to get a grammar that
+    # will include this element.
+    success_eq = set()
+    failure_eq = set()
+    for i in cmps:
+        kind, v = cmps[i]['charclass']
+        if kind:
+            success_eq.update(v)
+        else:
+            failure_eq.update(v)
+    v = "([%s]&[%s])" % (''.join(success_eq), ''.join(failure_eq))
+    return v
+
+
 def merge_grammars(g1, lg, xcmps, inp):
+    kvdict = {}
     for k in lg.keys():
         rule = lg[k]
         assert len(rule) == 1
         r = list(rule)[0]
         r.comparisons = {i:xcmps[i] for i in r.taint if i < len(xcmps)}
         r._input = inp
-        # get rule taints.
-        pass
-    return g.Grammar({key: g1[key] | lg[key] for key in g1.keys() + lg.keys()})
+        if k.k == g.V.start():
+            newk = k
+        else:
+            hkey = []
+            for pos in r._taint:
+                val = get_regex(r.comparisons[pos])
+                hkey.append(val)
+            newk = miner.NTKey(k.k.newV(':'.join(hkey) + k.k.t))
+        kvdict[k] = newk
+
+
+    nlg = {}
+    for k in lg.keys():
+        hk = kvdict[k]
+        assert hk not in nlg
+        rules = lg[k]
+        newrules = set()
+        for rule in rules:
+            new_rule = []
+            for elt in rule:
+                newelt = None
+                if type(elt) == miner.NTKey:
+                    newk = kvdict[elt]
+                    newelt = newk
+                else:
+                    newelt = elt
+                new_rule.append(newelt)
+            newr = miner.RWrap(rule.k, new_rule, rule.taint, rule.comparisons)
+            newrules.add(newr)
+        nlg[hk] = newrules
+    nlg = g.Grammar(nlg)
+    my_g = {}
+    for key in g1.keys() + nlg.keys():
+        v = g1[key] | nlg[key]
+        my_g[key] = v
+    return g.Grammar(my_g)
+    # return g.Grammar({key: g1[key] | lg[key] for key in g1.keys() + lg.keys()})
 
 def process_one_op(v, pos):
     if not v: assert False

@@ -18,10 +18,11 @@ class NTKey:
 class RWrap:
     def __init__(self, k, rvalues, taint, comparisons):
         self.k = k
-        self.rvalues = rvalues
+        self._rvalues = rvalues
         self._taint = taint
         self.comparisons = comparisons
-    def value(self): return ''.join(str(k) for k in self.rvalues)
+    def rvalues(self): return self._rvalues
+    def value(self): return ''.join(str(k) for k in self._rvalues)
     def __str__(self): return self.value()
     def __repr__(self):
         return 'R[%s]:=%s' % (self.k, self.value())

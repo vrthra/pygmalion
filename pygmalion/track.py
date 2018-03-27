@@ -7,7 +7,7 @@ from . import config
 class Vars:
     def __init__(self, i, istack):
         self.i = i
-        self.defs = {g.V(0, '', '', 'START', 0):i}
+        self.defs = {g.V.start():i}
         self.accessed_scop_var = {}
         self.istack = istack
 
