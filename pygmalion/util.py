@@ -1,5 +1,6 @@
 import json
 import string
+import hashlib
 import pudb
 brk = pudb.set_trace
 
@@ -46,3 +47,15 @@ def to_str(k):
         else:
             v += i
     return ''.join(sorted(v))
+
+Hash = {}
+
+def h1(w):
+    global Hash
+    v = hashlib.sha256(w.encode('utf-8')).hexdigest()[0:6]
+    if v in Hash:
+        s = Hash[v]
+        assert w == s
+    else:
+        Hash[v] = w
+    return v

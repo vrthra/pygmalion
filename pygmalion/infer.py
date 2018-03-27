@@ -1,6 +1,7 @@
 import pygmalion.grammar as g
 import pygmalion.config as config
 import pygmalion.miner as miner
+import pygmalion.util as u
 import pudb
 import sys
 from taintedstr import Op
@@ -41,7 +42,7 @@ def merge_grammars(g1, lg, xcmps, inp):
             for pos in r._taint:
                 val = get_regex(r.comparisons[pos])
                 hkey.append(val)
-            newk = miner.NTKey(k.k.newV(':'.join(hkey)))
+            newk = miner.NTKey(k.k.newV(u.h1(':'.join(hkey))))
         kvdict[k] = newk
 
 
