@@ -23,11 +23,10 @@ def get_regex(cmps):
             success_eq.update(v)
         else:
             failure_eq.update(v)
-    v = "([%s]&[%s])" % (''.join(success_eq), ''.join(failure_eq))
+    v = "([%s]&[^%s])" % (''.join(success_eq), ''.join(failure_eq))
     return v
 
-
-def merge_grammars(g1, lg, xcmps, inp):
+def get_regex_map(lg, xcmps, inp):
     kvdict = {}
     for k in lg.keys():
         rule = lg[k]
@@ -44,8 +43,9 @@ def merge_grammars(g1, lg, xcmps, inp):
                 hkey.append(val)
             newk = miner.NTKey(k.k.newV(u.h1(':'.join(hkey))))
         kvdict[k] = newk
+    return kvdict
 
-
+def translate_keys(lg, kvdict):
     nlg = {}
     for k in lg.keys():
         hk = kvdict[k]
@@ -61,13 +61,18 @@ def merge_grammars(g1, lg, xcmps, inp):
                 else:
                     newelt = elt
                 new_rule.append(newelt)
-            newr = miner.RWrap(rule.k, new_rule, rule.taint, rule.comparisons)
+            newr = rule.to_rwrap(new_rule)
             newrules.add(newr)
         if hk in nlg:
             nlg[hk].update(newrules)
         else:
             nlg[hk] = newrules
-    nlg = g.Grammar(nlg)
+    return nlg
+
+
+def merge_grammars(g1, lg, xcmps, inp):
+    kvdict = get_regex_map(lg, xcmps, inp)
+    nlg = g.Grammar(translate_keys(lg, kvdict))
     my_g = {}
     for key in g1.keys() + nlg.keys():
         v = g1[key] | nlg[key]

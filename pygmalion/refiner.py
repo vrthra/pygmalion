@@ -87,7 +87,7 @@ def to_comparisons(rule):
         else:
             new_elt = normalize_char_cmp(elt, rule)
             rvalues.append(new_elt)
-    return miner.RWrap(rule.k, rvalues, rule._taint, rule.comparisons)
+    return rule.to_rwrap(rvalues)
 
 def unique_rules(rules):
     my_rules_set = {}
@@ -185,7 +185,7 @@ def max_compress_grammar(grammar):
                         else:
                             lst.append(i)
                             lasti = i
-                    en = miner.RWrap(elt.k, lst, elt._taint, elt.comparisons)
+                    en = elt.to_rwrap(lst)
                 if not last_en:
                     last_en = to_str(en)
                     new_rule.append(en)
@@ -282,7 +282,7 @@ def remove_multiple_repeats_from_lst(lst):
 
 def remove_multi_repeats_from_rule(rule):
     elts = remove_multiple_repeats_from_lst(rule.rvalues())
-    return miner.RWrap(rule.k, elts, rule._taint, rule.comparisons)
+    return rule.to_rwrap(elts)
 
 
 def remove_multi_repeats(g):
@@ -316,7 +316,7 @@ def replace_key_in_rule(k, vr, my_r):
         else:
             newelt = [elt]
         ret_r.extend(newelt)
-    return (replaced, miner.RWrap(my_r.k, ret_r, my_r._taint, my_r.comparisons))
+    return (replaced, my_r.to_rwrap(ret_r))
 
 def remove_single_alternatives(g):
     # given key := value with no alternatives, replace
@@ -403,16 +403,16 @@ def refine_grammar(grammar):
         cv = to_char_classes(v)
         newg[k] = set(unique_rules(cv))
     g = newg
-    # g = remove_subset_keys(g)
-    # print('To character classes', file=sys.stderr)
+    #g = remove_subset_keys(g)
+    print('To character classes', file=sys.stderr)
     if config.Sort_Grammar:
         # print('sort', file=sys.stderr)
         g = {k:sorted(g[k], key=lambda x: str(x))
                 for k in sorted(g.keys(), key=lambda x: str(x))}
 
-    if 'remove_single_alternatives' in config.Refine_Tactics:
-        # print('remove_single_alternatives', file=sys.stderr)
-        g = remove_single_alternatives(g)
+    # if 'remove_single_alternatives' in config.Refine_Tactics:
+    #    # print('remove_single_alternatives', file=sys.stderr)
+    #    g = remove_single_alternatives(g)
 
     if 'single_repeat' in config.Refine_Tactics:
         # print('single_repeat', file=sys.stderr)

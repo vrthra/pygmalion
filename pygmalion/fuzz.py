@@ -196,6 +196,8 @@ def expand_tree(tree, grammar, max_symbols):
 def to_str(v):
     res = []
     if v == '+': return ''
+    if type(v) is list:
+        return ''.join([to_str(i) for i in v])
     if type(v) is miner.NTKey:
         return str(v)
     if type(v) == refiner.Choice:

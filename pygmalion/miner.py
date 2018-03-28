@@ -28,6 +28,9 @@ class RWrap:
         return 'R[%s]:=%s' % (self.k, self.value())
     def __hash__(self): return hash(self.value())
     def __eq__(self, o): return type(o) == RWrap and self.value() == o.value()
+    def __iter__(self): return iter(self.rvalues())
+    def to_rwrap(self, rvals):
+        return RWrap(self.k, rvals, self._taint, self.comparisons)
 
 
 class Rule:
@@ -37,6 +40,9 @@ class Rule:
         self._taint = v._taint
         self._rindex = {tainted_range(self): v}
         self.comparisons = None
+
+    def to_rwrap(self, rvals):
+        return RWrap(self.k, rvals, self._taint, self.comparisons)
 
     def ranges(self): return sorted(self._rindex, key=lambda a: a.start)
     def __lt__(self, o): return str(self).__lt__(str(o))
