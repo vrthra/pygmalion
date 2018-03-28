@@ -52,7 +52,7 @@ Hash = {}
 
 def h1(w):
     global Hash
-    v = hashlib.sha256(w.encode('utf-8')).hexdigest()[0:6]
+    v = hashlib.sha256(w.encode('utf-8')).hexdigest()[0:8]
     if v in Hash:
         s = Hash[v]
         assert w == s

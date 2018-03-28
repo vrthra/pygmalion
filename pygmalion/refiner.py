@@ -309,13 +309,10 @@ def replace_key_in_rule(k, vr, my_r):
         if elt == k:
             replaced = True
             # expand v because it is a complete sequence
-            if type(v) is list:
-                newelt = v
-            else:
-                newelt = [v]
+            newelt = v
         else:
-            newelt = [elt]
-        ret_r.extend(newelt)
+            newelt = elt
+        ret_r.append(newelt)
     return (replaced, my_r.to_rwrap(ret_r))
 
 def remove_single_alternatives(g):
@@ -324,18 +321,27 @@ def remove_single_alternatives(g):
     while True:
         replaced = False
         glst = [(k,g[k]) for k in g]
-        single_keys = [k for k,v in glst if len(v) == 1]
+        single_keys = {}
+        for k,v in glst:
+            if len(v) == 1:
+                # this is a list of rules
+                rule = v[0]
+                rv = rule.rvalues()
+                if len(rv) == 1:
+                    if  type(rv[0]) is miner.NTKey:
+                        single_keys[k] = rv[0]
         newg = {}
         for key in g:
             rset = g[key]
-            newrset = set()
+            newrset = []
             for r in rset:
                 my_r = r
                 for k in single_keys:
+                    replaced_by = single_keys[k]
                     if k == key: continue
-                    rep, my_r = replace_key_in_rule(k, list(g[k])[0], my_r)
+                    rep, my_r = replace_key_in_rule(k, replaced_by, my_r)
                     if rep: replaced = True
-                newrset.add(my_r)
+                newrset.append(my_r)
             newg[key] = newrset
         l = len(newg.keys())
         newg = grammar_gc(newg)
@@ -410,9 +416,11 @@ def refine_grammar(grammar):
         g = {k:sorted(g[k], key=lambda x: str(x))
                 for k in sorted(g.keys(), key=lambda x: str(x))}
 
-    # if 'remove_single_alternatives' in config.Refine_Tactics:
-    #    # print('remove_single_alternatives', file=sys.stderr)
-    #    g = remove_single_alternatives(g)
+    for k in g: assert type(g[k]) is list
+
+    if 'remove_single_alternatives' in config.Refine_Tactics:
+       # print('remove_single_alternatives', file=sys.stderr)
+       g = remove_single_alternatives(g)
 
     if 'single_repeat' in config.Refine_Tactics:
         # print('single_repeat', file=sys.stderr)
