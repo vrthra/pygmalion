@@ -152,66 +152,6 @@ def to_char_classes(rules):
     new_rules = merge_rules(new_rules)
     return new_rules
 
-def max_compress_grammar(grammar):
-    def to_k(k): return "[%s:%s]" % (k.k.func, k.k.var)
-    def to_str(l):
-        if type(l) is miner.NTKey: return to_k(l)
-        else: return str(l)
-    new_grammar = {}
-    for k in grammar.keys():
-        rules = grammar.get(k)
-        key = k
-        if key not in new_grammar: new_grammar[key] = []
-        new_rules = []
-        for rule in rules:
-            new_rule = []
-            last_en = None
-            for elt in rule:
-                if type(elt) is miner.NTKey:
-                    en = elt
-                else:
-                    lasti = None
-                    lst = []
-                    for i in elt.rvalues():
-                        if not lasti:
-                            lasti = i
-                            lst.append(i)
-                            continue
-                        if str(i) == str(lasti):
-                            if lst[-1] != '+':
-                                lst.append('+')
-                            else:
-                                pass
-                        else:
-                            lst.append(i)
-                            lasti = i
-                    en = elt.to_rwrap(lst)
-                if not last_en:
-                    last_en = to_str(en)
-                    new_rule.append(en)
-                    continue
-                if last_en == to_str(en):
-                    if new_rule[-1]!= '+':
-                        new_rule.append('+')
-                    else:
-                        pass
-                else:
-                    new_rule.append(en)
-                    last_en = to_str(en)
-            new_rules.append(new_rule)
-        new_grammar[key].extend(new_rules)
-    new_g = {}
-
-    # now compress the rules for each keys
-    for k in new_grammar:
-        new_rules = {}
-        for rules in new_grammar[k]:
-            v = {str(r):r for r in rules}
-            key = ''.join(list(v.keys()))
-            new_rules[key] = list(v.values())
-        new_grammar[k] = list(new_rules.values())
-    return new_grammar
-
 def get_key_set(short_keys):
     all_keys = {}
     for k in short_keys.keys():
@@ -433,6 +373,5 @@ def refine_grammar(grammar):
         # print('compress_keys', file=sys.stderr)
         g = compress_keys(g)
 
-    if config.Max_Compress_Grammar: g =  max_compress_grammar(g)
     return g
 
