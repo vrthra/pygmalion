@@ -6,7 +6,8 @@ def E(s):
 
 def Estar(s): # matches epsilon
     if s == '': return s
-    if s[0] == "+" or s[0] == "-":
+    nxt = s[0]
+    if nxt == "+" or nxt == "-":
         s = s[1:]
         s = T(s)
         s = Estar(s)
@@ -20,7 +21,8 @@ def T(s):
 
 def Tstar(s): # matches epsilon
     if s == '': return s
-    if s[0] == "*" or s[0] == "/":
+    nxt = s[0]
+    if nxt == "*" or nxt == "/":
         s = s[1:]
         s = F(s)
         s = Tstar(s)
@@ -28,14 +30,15 @@ def Tstar(s): # matches epsilon
     return s
 
 def F(s):
-    if s[0] == "(":
+    nxt = s[0]
+    if nxt == "(":
         s = s[1:]
         s = E(s)
-        if s[0] == ")":
+        if nxt == ")":
             s = s[1:]
         else:
             raise Exception("syntax error")
-    elif s[0].in_('0123456789'):
+    elif nxt.in_('0123456789'):
         s = s[1:]
     else:
         raise Exception("syntax error")
