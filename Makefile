@@ -1,7 +1,7 @@
 python3=python3
 pip3=pip3
 required_dirs=.pickled
-mytargets=hello whilescope microjson array urljava urlpy mathexpr expr
+mytargets=hello whilescope microjson array urljava urlpy mathexpr expr e
 
 .SUFFIXES:
 
