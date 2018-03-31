@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# https://www.cs.rochester.edu/~nelson/courses/csc_173/grammars/parsing.html
 def E(s):
     s = T(s)
     s = Estar(s)
