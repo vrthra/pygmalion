@@ -24,7 +24,12 @@ def lossy_obj_rep(val):
                 return '<not serializable #%s %s>' % (val.__class__.__name__, str(val))
 
 def elts_to_str(lstrule):
-    return ''.join(str(i) for i in lstrule.rvalues())
+    def to_chars(x):
+        if type(x) is list:
+            return ''.join([str(i) for i in x])
+        else:
+            return str(x)
+    return ''.join(to_chars(i) for i in lstrule.rvalues())
 
 def djs_to_string(djs):
     vals = [elts_to_str(i).replace('\n', '\n|\t') for i in djs]
