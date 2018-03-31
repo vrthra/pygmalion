@@ -23,6 +23,10 @@ def records(f):
     except EOFError:
         raise StopIteration
 
+def eval_grammar(grammars):
+    # fuzz g1 and g2 and find the better grammar
+    return grammars[0]
+
 if __name__ == "__main__":
     m_file = sys.argv[1]
     mod_obj = imp.new_module('example')
@@ -37,8 +41,10 @@ if __name__ == "__main__":
     fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[2], 'w')
 
     grammar = pickle.load(fin)
-    new_grammar = learner.learn_grammar(grammar)
-    # eval grammar and new_grammar if new_grammar is better, update with
-    # new_grammar
-    print(u.show_grammar(new_grammar))
-    print(u.show_grammar(new_grammar), file=fout)
+    while True:
+        new_grammars = learner.learn_grammar(grammar)
+        # eval new_grammar
+        grammar = eval_grammar([grammar] + new_grammars)
+        break
+
+    print(u.show_grammar(grammar), file=fout)

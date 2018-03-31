@@ -255,9 +255,9 @@ def replace_key_in_rule(k, vr, my_r):
         ret_r.append(newelt)
     return (replaced, my_r.to_rwrap(ret_r))
 
-def remove_single_alternatives(g):
-    # given key := value with no alternatives, replace
-    # any instance of tht key with the value.
+def remove_aliases(g):
+    # given key1 := key2 with no alternatives, replace
+    # any instance of tht key1 with key2.
     while True:
         replaced = False
         glst = [(k,g[k]) for k in g]
@@ -350,27 +350,23 @@ def refine_grammar(grammar):
         newg[k] = set(unique_rules(cv))
     g = newg
     #g = remove_subset_keys(g)
-    print('To character classes', file=sys.stderr)
     if config.Sort_Grammar:
-        # print('sort', file=sys.stderr)
         g = {k:sorted(g[k], key=lambda x: str(x))
                 for k in sorted(g.keys(), key=lambda x: str(x))}
 
     for k in g: assert type(g[k]) is list
 
-    if 'remove_single_alternatives' in config.Refine_Tactics:
-       # print('remove_single_alternatives', file=sys.stderr)
-       g = remove_single_alternatives(g)
+    if 'remove_aliases' in config.Refine_Tactics:
+       g = remove_aliases(g)
+
+    for k in g: assert type(g[k]) is list
 
     if 'single_repeat' in config.Refine_Tactics:
-        # print('single_repeat', file=sys.stderr)
         g = remove_multi_repeats(g)
 
-    # print('unique_rules', file=sys.stderr)
     g = {k:unique_rules(g[k]) for k in g}
 
     if 'compress_keys' in config.Refine_Tactics:
-        # print('compress_keys', file=sys.stderr)
         g = compress_keys(g)
 
     return g
