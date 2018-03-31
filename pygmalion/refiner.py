@@ -224,6 +224,19 @@ def remove_multi_repeats_from_rule(rule):
     elts = remove_multiple_repeats_from_lst(rule.rvalues())
     return rule.to_rwrap(elts)
 
+def remove_same_repeats(g):
+    for k in g:
+        rs = g[k]
+        new_rs = []
+        for r in rs:
+            v = r.rvalues()[0]
+            if len(r.rvalues()) == 1 and type(v) == type(k) and v == k:
+                pass
+            else:
+                new_rs.append(r)
+        g[k] = new_rs
+    return g
+
 
 def remove_multi_repeats(g):
     for k in g:
@@ -363,9 +376,12 @@ def refine_grammar(grammar):
 
     if 'single_repeat' in config.Refine_Tactics:
         g = remove_multi_repeats(g)
+        g = remove_same_repeats(g)
 
     g = {k:unique_rules(g[k]) for k in g}
 
+    # If two keys have exactly the same value, replace the second references
+    # with the first.
     if 'compress_keys' in config.Refine_Tactics:
         g = compress_keys(g)
 
