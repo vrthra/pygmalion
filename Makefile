@@ -5,19 +5,20 @@ mytargets=hello whilescope microjson array urljava urlpy mathexpr expr
 
 .SUFFIXES:
 
-eval=$(addprefix .pickled/, $(addsuffix .py.eval,$(mytargets)) )
-fuzz=$(addprefix .pickled/, $(addsuffix .py.fuzz,$(mytargets)) )
-chains=$(addprefix .pickled/, $(addsuffix .py.chain,$(mytargets)) )
-traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
-tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
-mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
-infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
-refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
+chains=$(addprefix .pickled/, $(addsuffix .py.chain,$(mytargets)))
+traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)))
+tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)))
+mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)))
+infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)))
+refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)))
+learn=$(addprefix .pickled/, $(addsuffix .py.learn,$(mytargets)))
+fuzz=$(addprefix .pickled/, $(addsuffix .py.fuzz,$(mytargets)))
+eval=$(addprefix .pickled/, $(addsuffix .py.eval,$(mytargets)))
 
-.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(fuzz) $(eval)
+.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(fuzz) $(eval) $(learn)
 
 all:
-	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz), eval $(eval)
+	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), learn $(learn), fuzz $(fuzz), eval $(eval)
 
 MY_RP=1.0
 NINPUT=10
@@ -69,6 +70,14 @@ else
 endif
 	@mv $<.tmp $@
 
+.pickled/%.py.learn: .pickled/%.py.refine
+ifeq ($(debug),learn)
+	$(python3) -m pudb ./bin/learn.py subjects/$*.py $<
+else
+	$(python3) ./bin/learn.py subjects/$*.py $<
+endif
+	@mv $<.tmp $@
+
 .pickled/%.py.fuzz: .pickled/%.py.refine
 ifeq ($(debug),fuzz)
 	NOUT=$(NOUT) MAXSYM=$(MAXSYM) $(python3) -m pudb ./bin/fuzzit.py $<
@@ -85,7 +94,6 @@ else
 endif
 	@mv $<.tmp $@
 
-
 chain.%: .pickled/%.py.chain; @:
 
 trace.%: .pickled/%.py.trace; @:
@@ -97,6 +105,8 @@ mine.%: .pickled/%.py.mine; @:
 infer.%: .pickled/%.py.infer; @:
 
 refine.%: .pickled/%.py.refine; @:
+
+learn.%: .pickled/%.py.learn; @:
 
 fuzz.%: .pickled/%.py.fuzz; @:
 
@@ -125,6 +135,11 @@ xinfer.%:
 xrefine.%:
 	rm -f .pickled/$*.py.refine
 	$(MAKE) refine.$*
+
+xlearn.%:
+	rm -f .pickled/$*.py.learn
+	$(MAKE) learn.$*
+	cat .pickled/$*.py.learn
 
 xfuzz.%:
 	rm -f .pickled/$*.py.fuzz
@@ -158,6 +173,7 @@ help:
 	@echo mine - Linear grammar
 	@echo infer - Context Free grammar
 	@echo refine - To normalized form
+	@echo learn - Learn from mistakes
 	@echo fuzz - Get fuzzed output from grammar
 	@echo eval - Evaluate the fuzzed output
 
