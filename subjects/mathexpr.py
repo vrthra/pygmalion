@@ -194,9 +194,7 @@ class Parser:
 
 def main(s):
     parse = Parser(s)
-    # if s in ["a", "b", "c"]:
-    #     return
-    print(parse.getValue())
+    return parse.getValue()
 
 def inputs():
     return ['1 + 2',
