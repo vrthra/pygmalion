@@ -26,10 +26,10 @@ def get_regex(cmps):
     v = "([%s]&[^%s])" % (''.join(success_eq), ''.join(failure_eq))
     return v
 
-def get_regex_map(lg, xcmps, inp):
-    kvdict = {}
-    for k in lg.keys():
-        rule = lg[k]
+def get_regex_map(parse_tree, xcmps, inp):
+    comparison_map = {}
+    for k in parse_tree.keys():
+        rule = parse_tree[k]
         assert len(rule) == 1
         r = list(rule)[0]
         r.comparisons = {i:xcmps[i] for i in r.taint if i < len(xcmps)}
@@ -42,21 +42,21 @@ def get_regex_map(lg, xcmps, inp):
                 val = get_regex(r.comparisons[pos])
                 hkey.append(val)
             newk = miner.NTKey(k.k.newV(u.h1(':'.join(hkey))))
-        kvdict[k] = newk
-    return kvdict
+        comparison_map[k] = newk
+    return comparison_map
 
-def translate_keys(lg, kvdict):
+def translate_keys(parse_tree, comparison_map):
     nlg = {}
-    for k in lg.keys():
-        hk = kvdict[k]
-        rules = lg[k]
+    for k in parse_tree.keys():
+        hk = comparison_map[k]
+        rules = parse_tree[k]
         newrules = set()
         for rule in rules:
             new_rule = []
             for elt in rule:
                 newelt = None
                 if type(elt) == miner.NTKey:
-                    newk = kvdict[elt]
+                    newk = comparison_map[elt]
                     newelt = newk
                 else:
                     newelt = elt
@@ -70,15 +70,15 @@ def translate_keys(lg, kvdict):
     return nlg
 
 
-def merge_grammars(g1, lg, xcmps, inp):
-    kvdict = get_regex_map(lg, xcmps, inp)
-    nlg = g.Grammar(translate_keys(lg, kvdict))
+def merge_grammars(g1, parse_tree, xcmps, inp):
+    comparison_map = get_regex_map(parse_tree, xcmps, inp)
+    nlg = g.Grammar(translate_keys(parse_tree, comparison_map))
     my_g = {}
     for key in g1.keys() + nlg.keys():
         v = g1[key] | nlg[key]
         my_g[key] = v
     return g.Grammar(my_g)
-    # return g.Grammar({key: g1[key] | lg[key] for key in g1.keys() + lg.keys()})
+    # return g.Grammar({key: g1[key] | parse_tree[key] for key in g1.keys() + parse_tree.keys()})
 
 def process_one_op(v, pos):
     if not v: assert False
@@ -96,39 +96,6 @@ def process_one_op(v, pos):
         return {'pos':pos, 'opA':opA, 'o':v, 'charclass':(c_eq, chars)}
     else:
         assert False # -- this is out of date. Needs to be fixed
-        # After the last tainted string update, some of these
-        # should go away. Hence the asserts
-        eq =  [i for i in v if Op(i.op) == Op.EQ]
-        ne =  [i for i in v if Op(i.op) == Op.NE]
-        inv = [i for i in v if Op(i.op) == Op.IN]
-        nin = [i for i in v if Op(i.op) == Op.NOT_IN]
-        assert not nin
-
-        # success
-        seq = [i.opB for i in eq if i.opA == i.opB]
-        feq = [i.opB for i in eq if i.opA != i.opB]
-
-        sne = [i.opB for i in ne if i.opA != i.opB]
-        fne = [i.opB for i in ne if i.opA == i.opB]
-
-        sin = [i.opB for i in inv if i.opA in i.opB]
-        fin = [i.opB for i in inv if i.opA not in i.opB]
-
-        sni = [i.opB for i in nin if i.opA not in i.opB]
-        fni = [i.opB for i in nin if i.opA in i.opB]
-
-        all_eq = seq + fne
-        all_ne = sne + feq
-
-        all_in = sin + fni
-        all_ni = sni + fin
-        return {'pos':pos, 'opA':opA, \
-                'eq': all_eq, 'ne': all_ne, \
-                'in': all_in, 'ni': all_ni, \
-                'seq': seq, 'feq': feq, \
-                'sne':sne, 'fne':fne, \
-                'sin':sin, 'fin':fin, \
-                'sni':sni, 'fni':fni, 'o':v}
 
 def process_one_instruction(pos, v):
     # split into separate operations
@@ -159,11 +126,11 @@ def process_comparisons_per_char(ins):
     return vals
 
 # Get a grammar for multiple inputs
-def infer_grammar(lgrammars):
+def infer_grammar(parse_trees):
     merged_grammar = g.Grammar()
-    for j, (i, xins, lgrammar) in enumerate(lgrammars):
+    for j, (i, xins, parse_tree) in enumerate(parse_trees):
         print("infer:", j, i, file=sys.stderr, flush=True)
         # this is for a single input
         xcmps = process_comparisons_per_char(separate_comparisons_per_char(xins))
-        merged_grammar = merge_grammars(merged_grammar, lgrammar, xcmps, i)
+        merged_grammar = merge_grammars(merged_grammar, parse_tree, xcmps, i)
     return merged_grammar
