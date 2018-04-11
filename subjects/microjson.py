@@ -395,6 +395,8 @@ decode = from_json
 encode = to_json
 
 def inputs():
+    import sys;
+    if len(sys.argv) > 1: return open(sys.argv[1]).readlines()
     INPUTS = [
             '15',
             '23',

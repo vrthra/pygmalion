@@ -777,6 +777,8 @@ def splitvalue(attr):
     return attr, None
 
 def inputs():
+    import sys;
+    if len(sys.argv) > 1: return open(sys.argv[1]).readlines()
     return ['http://www.google.com',
             'https://alaska.com:8080/me?you=this',
             'http://pages.com/new#fragment',

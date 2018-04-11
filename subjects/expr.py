@@ -46,6 +46,8 @@ def main(s):
     return parse(s)
 
 def inputs():
+    import sys;
+    if len(sys.argv) > 1: return open(sys.argv[1]).readlines()
     return ['((1+1)+1)','1+1+(1+(1+1))','1+(1+1)','(1+1)', '(1)', '1']
 
 if __name__ in ['__main__']:

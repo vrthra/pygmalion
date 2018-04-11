@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 def inputs():
+    import sys;
+    if len(sys.argv) > 1: return open(sys.argv[1]).readlines()
     return ['hello', 'HELLO']
 
 def main(s):

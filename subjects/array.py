@@ -3,6 +3,8 @@
 # the mezzanine validation of equal closing brackets.
 
 def inputs():
+    import sys;
+    if len(sys.argv) > 1: return open(sys.argv[1]).readlines()
     return ['(1)',
             '(1(2))',
             '(1(2)3)',

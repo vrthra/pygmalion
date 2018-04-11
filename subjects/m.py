@@ -194,7 +194,9 @@ class Parser:
 
 def main(s):
     parse = Parser(s)
-    return parse.getValue()
+    # if s in ["a", "b", "c"]:
+    #     return
+    print(parse.getValue())
 
 def inputs():
     import sys;
@@ -211,4 +213,5 @@ def skip_classes():
 if __name__ == "__main__":
     import taintedstr
     for i in inputs():
+        print(">>",i)
         print(main(taintedstr.tstr(i)))
