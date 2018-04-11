@@ -417,7 +417,7 @@ def skip_classes():
     return ['.*JSONStream.*']
 
 def main(s):
-    from_json(s)
+    return from_json(s)
 
 
 if __name__ == '__main__':
