@@ -155,7 +155,7 @@ help:
 	@echo chain - Pychains test generator -- use xchain.hello
 	@echo trace - Simple frame dumper -- use xtrace.hello
 	@echo track - Evaluate the dumps, figure out the causal chain
-	@echo mine - Linear grammar
+	@echo mine - Mine parse trees
 	@echo infer - Context Free grammar
 	@echo refine - To normalized form
 	@echo fuzz - Get fuzzed output from grammar

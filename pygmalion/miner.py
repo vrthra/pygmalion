@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Mine a grammar from dynamic behavior
+# Mine the parse trees
 import pudb; brk = pudb.set_trace
 from . import grammar as g
 from . import config
@@ -180,7 +180,7 @@ class Rule:
 def tainted_range(o): return range(o._taint[0], o._taint[-1]+1)
 
 # Obtain a grammar for a specific input
-def get_grammar(assignments):
+def get_parse_tree(assignments):
     my_grammar = {}
     # all values are tainted strings.
     for var, value in assignments.items():
@@ -224,7 +224,7 @@ def get_grammar(assignments):
     return g.Grammar({k:{v} for k,v in my_grammar.items()})
 
 # Get a grammar for multiple inputs
-def mine_grammar(definitions):
+def mine_parse_tree(definitions):
     for (i, xins, defs) in definitions:
-        yield (i, xins, get_grammar(defs))
+        yield (i, xins, get_parse_tree(defs))
 

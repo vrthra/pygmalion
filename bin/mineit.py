@@ -13,12 +13,12 @@ if __name__ == "__main__":
     fout = sys.stdout.buffer if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     defs = pickle.load(fin)
 
-    grammarinfo = []
-    for j, (i, xins, g) in enumerate(miner.mine_grammar(defs)):
+    parse_trees = []
+    for j, (i, xins, g) in enumerate(miner.mine_parse_tree(defs)):
         if os.getenv('DEBUG'):
             print(g, file=sys.stderr)
             print("Reconstitued:", file=sys.stderr)
             print(g.reconstitute(), file=sys.stderr)
         print("mine:", j, i, flush=True, file=sys.stderr)
-        grammarinfo.append((i, xins, g))
-    pickle.dump(grammarinfo, fout)
+        parse_trees.append((i, xins, g))
+    pickle.dump(parse_trees, fout)

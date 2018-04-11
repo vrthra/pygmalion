@@ -38,10 +38,10 @@ We have the following stages
    Evaluate the dumped frames to assertain scopes and causality rules. We
    essentially retrieve the input stack information from the dumped frames.
 * _mine_
-   Mine the linear grammar from the stack frames. These are still input
-   specific (hence the linear grammar)
+   Mine the parse tree from the stack frames. These are still input
+   specific (hence the parse tree)
 * _infer_
-   Generate the context free grammar by merging the mined grammar. At this
+   Generate the context free grammar by merging the parse trees. At this
    point, we nolonger can distinguish separate inputs.
 * _refine_
    Try to produce human readable grammar
