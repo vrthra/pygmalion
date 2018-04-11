@@ -12,8 +12,6 @@ if __name__ == "__main__":
     for i in range(times):
         e = pychains.chain.Chain()
         (a, r) = e.exec_argument(_mod.main)
-        results.append(a)
+        print(a, flush=True)
         taintedstr.reset_comparisons()
 
-    for i in results:
-        print(i)
