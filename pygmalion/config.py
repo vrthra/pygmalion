@@ -71,3 +71,10 @@ Use_Character_Classes = True
 Sort_Grammar = True
 
 Python_Specific = (os.getenv('PYTHON_OPT') or 'false') in {'true', '1'}
+
+StdErr_DevNull=(os.getenv('NO_LOG') or 'false') in {'true', '1'}
+
+if StdErr_DevNull:
+    import sys
+    f = open(os.devnull, 'w')
+    sys.stderr = f
