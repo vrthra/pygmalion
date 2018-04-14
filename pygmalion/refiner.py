@@ -309,6 +309,7 @@ def grammar_gc(grammar):
     return new_g
 
 def compress_keys(grammar):
+    # Removes duplicate keys (where all (str(rules) are exactly equal)
     while True:
         replaced = False
         glst = {k:u.djs_to_string(grammar[k]) for k in grammar}
@@ -359,18 +360,22 @@ def refine_grammar(grammar):
     for k in g: assert type(g[k]) is list
 
     if 'remove_single_alternatives' in config.Refine_Tactics:
-       # print('remove_single_alternatives', file=sys.stderr)
-       g = remove_single_alternatives(g)
+        # given key := value with no alternatives, replace
+        # any instance of tht key with the value.
+        print('remove_single_alternatives', file=sys.stderr)
+        g = remove_single_alternatives(g)
 
-    if 'single_repeat' in config.Refine_Tactics:
-        # print('single_repeat', file=sys.stderr)
-        g = remove_multi_repeats(g)
+    # if 'single_repeat' in config.Refine_Tactics:
+    #    # Lossy -- do not use -- replaces a a a a with a a
+    #    print('single_repeat', file=sys.stderr)
+    #    g = remove_multi_repeats(g)
 
     # print('unique_rules', file=sys.stderr)
     g = {k:unique_rules(g[k]) for k in g}
 
     if 'compress_keys' in config.Refine_Tactics:
-        # print('compress_keys', file=sys.stderr)
+        # Removes duplicate keys (where all (str(rules) are exactly equal)
+        print('compress_keys', file=sys.stderr)
         g = compress_keys(g)
 
     return g
