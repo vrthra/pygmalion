@@ -164,11 +164,10 @@ def recover_grammar(root, tree, inp, i):
         n, *nodes = nodes
         if not is_leaf(n, tree):
             rules = tree[n]
-            new_n = strip_key_suffix(n)
+            key = strip_key_suffix(n)
             for rule in rules:
                 # append if more children
-                if new_n not in grammar: grammar[new_n] = set()
-                key = strip_key_suffix(n)
+                if key not in grammar: grammar[key] = set()
                 grammar[key].add(miner.RWrap(key,[strip_suffix(child, tree) for child in rule.rvalues()]))
                 nodes.extend(rule.rvalues())
     print(u.show_grammar(grammar))
