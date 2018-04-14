@@ -44,7 +44,7 @@ if __name__ == "__main__":
             valid_n += 1
         except:
             pass
-        print("%", cov.report(file=fout))
+        print("%", cov.report(file=fout), ' at ', t, 'seconds')
             #print('Error')
     print("Valid:", valid_n)
     cov.stop()

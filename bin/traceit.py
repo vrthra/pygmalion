@@ -22,11 +22,11 @@ def records(f):
         raise StopIteration
 
 @contextmanager
-def opened_file(f):
+def opened_file(f, perm):
     if not f:
         yield sys.stdout.buffer
     else:
-        with open(f, 'wb') as f:
+        with open(f, perm) as f:
             yield f
 
 if __name__ == "__main__":
@@ -41,10 +41,10 @@ if __name__ == "__main__":
     else:
         fn = None
         inp = None
-    with opened_file(fn) as trace_file:
-        with opened_file(inp) as myinput:
+    with opened_file(fn, 'wb') as trace_file:
+        with opened_file(inp, 'rb') as myinput:
             # Infer grammar
-            for j,(t,_i) in enumerate(records(inp)):
+            for j,(t,_i) in enumerate(records(myinput)):
                 i = taintedstr.tstr(i)
                 print("trace:",j, repr(i), file=sys.stderr)
                 with tracer.Tracer(i, trace_file) as t:
