@@ -118,7 +118,7 @@ class URL:
             else:
                 userInfo = None
             port = -1
-            if host:
+            if host != '':
                 # If the host is surrounded by [ and ] then its an IPv6
                 # literal address as specified in RFC2732
                 if (len(host) >0 and (host[0] == '[')):
@@ -148,8 +148,6 @@ class URL:
                         if (len(host) > (ind + 1)):
                             port = int(host[ind + 1:])
                         host = host[0: ind]
-            else:
-                host = ""
             if (port < -1):
                 raise Exception("Invalid port number :" + port)
             start = i
@@ -157,9 +155,6 @@ class URL:
             # spec only; See RFC 2396 Section 5.2.4.
             if (authority and len(authority) > 0):
                 path = ""
-
-        if not host:
-            host = ""
 
         # Parse the file path if any
         if (start < limit):
