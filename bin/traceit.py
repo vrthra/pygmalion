@@ -44,7 +44,7 @@ if __name__ == "__main__":
     with opened_file(fn, 'wb') as trace_file:
         with opened_file(inp, 'rb') as myinput:
             # Infer grammar
-            for j,(t,_i) in enumerate(records(myinput)):
+            for j,(_i,t) in enumerate(records(myinput)):
                 i = taintedstr.tstr(_i)
                 print("trace:",j, repr(i), file=sys.stderr)
                 with tracer.Tracer(i, trace_file) as t:

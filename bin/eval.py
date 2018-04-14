@@ -36,15 +36,15 @@ if __name__ == "__main__":
     valid_n = 0
     cov = coverage.Coverage()
     cov.start()
-    for j,i in enumerate(records(fin)):
-        print(j, repr(i))
+    for j,(i, t) in enumerate(records(fin)):
         try:
+            print(j, repr(i))
             v = mod_obj.main(taintedstr.tstr(i))
             print("\t=>",v)
             valid_n += 1
         except:
             pass
-            #print('Error')
+        print("%", cov.report(file=fout), ' at ', t, 'seconds')
     cov.stop()
     print("Valid:", valid_n)
     cov.save()
