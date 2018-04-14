@@ -16,7 +16,7 @@ class NTKey:
     def __ne__(self, o): return not (self == o)
 
 class RWrap:
-    def __init__(self, k, rvalues, taint, comparisons):
+    def __init__(self, k, rvalues, taint=None, comparisons=None):
         self.k = k
         self._rvalues = rvalues
         self._taint = taint
