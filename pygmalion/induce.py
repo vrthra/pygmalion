@@ -154,28 +154,6 @@ def is_single(n, tree):
                 return False
     return True
 
-
-def elts_to_str(lstrule):
-    return ''.join(str(i) for i in lstrule.rvalues())
-
-def djs_to_string(djs):
-    vals = []
-    for i in djs:
-        v = elts_to_str(i).replace('\n', '\n|\t')
-        vals.append(v)
-    return "\n\t| ".join(vals)
-
-def fixline(key, rules):
-    fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t| %s"
-    return fmt % (key, djs_to_string(rules))
-
-def show_grammar(g):
-    x = []
-    for key in g:
-        v = fixline(key, g[key])
-        x.append(v)
-    return "\n".join(x)
-
 def recover_grammar(root, tree, inp, i):
     print()
     print(i,inp)
