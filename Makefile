@@ -148,7 +148,6 @@ xfuzz.%:
 xeval.%:
 	rm -f .pickled/$*.py.eval
 	$(MAKE) eval.$*
-	cat .pickled/$*.py.eval
 
 clobber.%:
 	rm -f .pickled/$*.*
