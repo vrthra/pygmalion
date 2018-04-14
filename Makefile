@@ -12,9 +12,10 @@ traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
 mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
 infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
+induces=$(addprefix .pickled/, $(addsuffix .py.induce,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(fuzz) $(eval)
+.precious: $(chains) $(traces) $(tracks) $(mines) $(induces) $(infers) $(refined) $(fuzz) $(eval)
 
 all:
 	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz), eval $(eval)
@@ -53,6 +54,14 @@ else
 endif
 	@mv $<.tmp $@
 
+.pickled/%.py.induce: .pickled/%.py.mine
+ifeq ($(debug),induce)
+	$(python3) -m pudb ./bin/induce.py $<
+else
+	$(python3) ./bin/induce.py $<
+endif
+	@mv $<.tmp $@
+
 .pickled/%.py.infer: .pickled/%.py.mine
 ifeq ($(debug),infer)
 	$(python3) -m pudb ./bin/inferit.py $<
@@ -69,7 +78,7 @@ else
 endif
 	@mv $<.tmp $@
 
-.pickled/%.py.fuzz: .pickled/%.py.refine
+.pickled/%.py.fuzz: .pickled/%.py.induce
 ifeq ($(debug),fuzz)
 	NOUT=$(NOUT) MAXSYM=$(MAXSYM) $(python3) -m pudb ./bin/fuzzit.py $<
 else
@@ -96,6 +105,8 @@ mine.%: .pickled/%.py.mine; @:
 
 infer.%: .pickled/%.py.infer; @:
 
+induce.%: .pickled/%.py.induce; @:
+
 refine.%: .pickled/%.py.refine; @:
 
 fuzz.%: .pickled/%.py.fuzz; @:
@@ -121,6 +132,10 @@ xmine.%:
 xinfer.%:
 	rm -f .pickled/$*.py.infer
 	$(MAKE) infer.$*
+
+xinduce.%:
+	rm -f .pickled/$*.py.induce
+	$(MAKE) induce.$*
 
 xrefine.%:
 	rm -f .pickled/$*.py.refine
