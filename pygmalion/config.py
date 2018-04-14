@@ -46,15 +46,13 @@ Ignore_Lambda = True
 Swap_Eclipsing_Keys = True
 
 # should we discard the peeking variables that got eclipsed?
-Strip_Peek = False
+Strip_Peek = True
 
 # [Verbosity]
 
 Show_Colors = True
 
 Show_Comparisons = True
-
-Max_Compress_Grammar = (os.getenv('MAX_COMPRESS_GRAMMAR') or 'false') in {'true', '1'}
 
 Refine_Tactics = (os.getenv('REFINE_TACTICS') or ','.join([
         'single_repeat',
@@ -78,3 +76,5 @@ if StdErr_DevNull:
     import sys
     f = open(os.devnull, 'w')
     sys.stderr = f
+
+With_Char_Class =  (os.getenv('WITH_CHAR_CLASS') or 'false') in {'true', '1'}

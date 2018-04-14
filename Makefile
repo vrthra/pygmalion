@@ -144,7 +144,6 @@ xrefine.%:
 xfuzz.%:
 	rm -f .pickled/$*.py.fuzz
 	$(MAKE) fuzz.$*
-	$(python3) ./bin/showpickle.py .pickled/$*.py.fuzz
 
 xeval.%:
 	rm -f .pickled/$*.py.eval

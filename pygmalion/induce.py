@@ -2,29 +2,11 @@ import pygmalion.grammar as g
 import pygmalion.config as config
 import pygmalion.miner as miner
 import pygmalion.util as u
+import pygmalion.refiner as refiner
 import pudb
 import sys
 from taintedstr import Op
 brk = pudb.set_trace
-
-
-def get_regex(cmps):
-    # the input structure is a dict where keys are the instruction
-    # numbers and each value is a list of secondary instructions in key:o.
-    # or summaries in eq, ne, in, ni sne, fne, sni, sin etc.
-    # First priority to all equals that succeeded
-    # This is because we should be able to get a grammar that
-    # will include this element.
-    success_eq = set()
-    failure_eq = set()
-    for i in cmps:
-        kind, v = cmps[i]['charclass']
-        if kind:
-            success_eq.update(v)
-        else:
-            failure_eq.update(v)
-    v = "([%s]&[^%s])" % (''.join(success_eq), ''.join(failure_eq))
-    return v
 
 def get_regex_map(parse_tree, xcmps, inp):
     comparison_map = {}
@@ -39,11 +21,61 @@ def get_regex_map(parse_tree, xcmps, inp):
         else:
             hkey = []
             for pos in r._taint:
-                val = get_regex(r.comparisons[pos])
-                hkey.append(val)
+                val = get_regex_choice(r.comparisons[pos])
+                hkey.append(str(val))
             newk = miner.NTKey(k.k.newV(u.h1(':'.join(hkey))))
         comparison_map[k] = newk
     return comparison_map
+
+#----
+
+
+def get_regex_choice(cmps):
+    # the input structure is a dict where keys are the instruction
+    # numbers and each value is a list of secondary instructions in key:o.
+    # or summaries in eq, ne, in, ni sne, fne, sni, sin etc.
+    # First priority to all equals that succeeded
+    # This is because we should be able to get a grammar that
+    # will include this element.
+    success_eq = set()
+    failure_eq = set()
+    assert not config.Python_Specific # we dont implement in, not in, neq etc yet.
+    for i in cmps:
+        kind, v = cmps[i]['charclass']
+        if kind:
+            success_eq.update(v)
+        else:
+            failure_eq.update(v)
+    v = refiner.Choice(refiner.Box(success_eq), refiner.Not(refiner.Box(failure_eq)))
+    return v
+
+def normalize_char_cmp(elt, rule):
+    """
+    Convert EQ and IN both to similar arrays. EQ is a one element
+    array while IN is a multi element array. The idea is to achieve
+    a in [a] for _eq_ and a in [abcd] for _in_
+    """
+    regex = []
+    for pos in elt._taint:
+        if not pos in rule.comparisons: continue
+        eltregex = get_regex_choice(rule.comparisons[pos])
+        regex.append(eltregex)
+    return regex
+
+def to_comparisons(rule):
+    """
+    The idea here is to shift away from individual results
+    to the comparisons made.
+    """
+    rvalues = []
+    for elt in rule.rvalues():
+        if type(elt) is miner.NTKey:
+            rvalues.append(strip_key_suffix(elt))
+        else:
+            new_elt = normalize_char_cmp(elt, rule)
+            rvalues.append(new_elt)
+    return rule.to_rwrap(rvalues)
+#----
 
 def translate_keys(parse_tree, comparison_map):
     nlg = {}
@@ -130,11 +162,11 @@ def replace_characters_with_cmp(v):
     nlg = translate_keys(parse_tree, comparison_map)
     return (i, nlg)
 
-def strip_suffix(elt, tree):
+def strip_suffix(elt, tree, cmp_map):
     if not isinstance(elt, miner.NTKey):
         return elt
-    elif is_leaf(elt, tree): # dont strip suffixes from singles they are almost leaves.
-        return elt
+    elif is_single(elt, tree): # dont strip suffixes from singles they are almost leaves.
+        return cmp_map[elt]
     else:
         return strip_key_suffix(elt)
 
@@ -146,6 +178,8 @@ def is_leaf(n, tree):
     return False
 
 def is_single(n, tree):
+    if not config.With_Char_Class:
+        return False
     if not n in tree: return True
     rules = tree[n]
     for rule in rules:
@@ -154,9 +188,11 @@ def is_single(n, tree):
                 return False
     return True
 
-def recover_grammar(root, tree, inp, i):
+def recover_grammar(root, tree, inp, i, xins):
     print()
     print(i,inp)
+    xcmps = process_comparisons_per_char(separate_comparisons_per_char(xins))
+    comparison_map = get_regex_map(tree, xcmps, i)
     nodes = [root]
     grammar = {}
     seen = set()
@@ -164,19 +200,24 @@ def recover_grammar(root, tree, inp, i):
         n, *nodes = nodes
         if not is_leaf(n, tree):
             rules = tree[n]
-            key = strip_key_suffix(n)
-            for rule in rules:
-                # append if more children
-                if key not in grammar: grammar[key] = set()
-                grammar[key].add(miner.RWrap(key,[strip_suffix(child, tree) for child in rule.rvalues()]))
-                nodes.extend(rule.rvalues())
+            key = strip_suffix(n, tree, comparison_map)
+            # append if more children
+            if key not in grammar: grammar[key] = set()
+            if is_single(n, tree):
+                for rule in rules:
+                    grammar[key].add(to_comparisons(rule))
+                    nodes.extend(rule.rvalues())
+            else:
+                for rule in rules:
+                    grammar[key].add(miner.RWrap(key,[strip_suffix(child, tree, comparison_map) for child in rule.rvalues()]))
+                    nodes.extend(rule.rvalues())
     print(u.show_grammar(grammar))
     return grammar
 
 def to_context_free(i,tree):
     (inp, xins, tree) = tree
     start = miner.NTKey(g.V.start())
-    return (inp, recover_grammar(start, tree._dict, inp, i))
+    return (inp, recover_grammar(start, tree._dict, inp, i, xins))
 
 # Get a grammar for multiple inputs
 def induce_grammar(parse_trees):

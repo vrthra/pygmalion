@@ -8,8 +8,12 @@ import imp
 import os
 import pickle
 import resource
+import pudb
+brk = pudb.set_trace
 resource.setrlimit(resource.RLIMIT_STACK, [0x10000000, resource.RLIM_INFINITY])
 sys.setrecursionlimit(0x100000)
+
+Branch =  (os.getenv('BRANCH') or 'false') in {'true', '1'}
 
 import pygmalion.fuzz as fuzz
 
@@ -34,19 +38,20 @@ if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 3 else open(sys.argv[2], 'rb')
     fout = sys.stdout if len(sys.argv) < 3 else open("%s.tmp" % sys.argv[2], 'w')
     valid_n = 0
-    cov = coverage.Coverage()
-    cov.start()
+    cov = coverage.Coverage(source=['example'], branch=Branch)
     for j,(i, t) in enumerate(records(fin)):
         try:
             print(j, repr(i))
+            cov.start()
             v = mod_obj.main(taintedstr.tstr(i))
+            cov.stop()
             print("\t=>",v)
             valid_n += 1
         except:
             pass
         print("%", cov.report(file=fout), ' at ', t, 'seconds')
-    cov.stop()
-    print("Valid:", valid_n)
     cov.save()
+    print("Valid:", valid_n)
     print(cov.report(file=fout))
     cov.html_report(directory='coverage')
+    cov.erase()
