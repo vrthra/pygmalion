@@ -20,20 +20,20 @@ all:
 	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz), eval $(eval)
 
 MY_RP=1.0
-NINPUT=10
+NINPUT=100
 R=0
 NOUT=100
 MAXSYM=100
 
 .pickled/%.py.chain: subjects/%.py | .pickled
-	NOCTRL=1 MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) > $@.tmp
+	NOCTRL=1 MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) $@.tmp
 	mv $@.tmp $@
 
 .pickled/%.py.trace: subjects/%.py .pickled/%.py.chain
 ifeq ($(debug),trace)
-	$(python3) -m pudb ./bin/traceit.py $< .pickled/$*.py.tmp < .pickled/$*.py.chain
+	$(python3) -m pudb ./bin/traceit.py $< .pickled/$*.py.tmp .pickled/$*.py.chain
 else
-	$(python3) ./bin/traceit.py $< .pickled/$*.py.tmp < .pickled/$*.py.chain
+	$(python3) ./bin/traceit.py $< .pickled/$*.py.tmp .pickled/$*.py.chain
 endif
 	@mv .pickled/$*.py.tmp $@
 

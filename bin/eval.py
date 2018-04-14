@@ -49,3 +49,4 @@ if __name__ == "__main__":
     print("Valid:", valid_n)
     cov.save()
     print(cov.report(file=fout))
+    cov.html_report(directory='coverage')

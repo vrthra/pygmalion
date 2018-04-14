@@ -13,6 +13,14 @@ import pickle
 import imp
 from contextlib import contextmanager
 
+
+def records(f):
+    try:
+        while not f.closed:
+            yield pickle.load(f)
+    except EOFError:
+        raise StopIteration
+
 @contextmanager
 def opened_file(f):
     if not f:
@@ -29,15 +37,17 @@ if __name__ == "__main__":
     exec(code, mod_obj.__dict__)
     if len(sys.argv) > 2:
         fn = sys.argv[2]
+        inp = sys.argv[3]
     else:
         fn = None
+        inp = None
     with opened_file(fn) as trace_file:
-        # Infer grammar
-        for j,_i in enumerate(sys.stdin):
-            assert _i[-1] == "\n"
-            i = taintedstr.tstr(_i[0:-1]) # strip '\n'
-            print("trace:",j, repr(i), file=sys.stderr)
-            with tracer.Tracer(i, trace_file) as t:
-                t._my_files = ['%s' % os.path.basename(m_file)]
-                t._skip_classes = mod_obj.skip_classes() if hasattr(mod_obj, 'skip_classes') else []
-                o = mod_obj.main(i)
+        with opened_file(inp) as myinput:
+            # Infer grammar
+            for j,(t,_i) in enumerate(records(inp)):
+                i = taintedstr.tstr(i)
+                print("trace:",j, repr(i), file=sys.stderr)
+                with tracer.Tracer(i, trace_file) as t:
+                    t._my_files = ['%s' % os.path.basename(m_file)]
+                    t._skip_classes = mod_obj.skip_classes() if hasattr(mod_obj, 'skip_classes') else []
+                    o = mod_obj.main(i)
