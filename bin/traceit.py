@@ -45,7 +45,7 @@ if __name__ == "__main__":
         with opened_file(inp, 'rb') as myinput:
             # Infer grammar
             for j,(t,_i) in enumerate(records(myinput)):
-                i = taintedstr.tstr(i)
+                i = taintedstr.tstr(_i)
                 print("trace:",j, repr(i), file=sys.stderr)
                 with tracer.Tracer(i, trace_file) as t:
                     t._my_files = ['%s' % os.path.basename(m_file)]
