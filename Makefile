@@ -5,7 +5,7 @@ mytargets=hello whilescope microjson array urljava urlpy mathexpr math expr
 
 .SUFFIXES:
 
-grammar=$(addprefix .pickled/, $(addsuffix .grammar,$(mytargets)) )
+scala=$(addprefix .pickled/, $(addsuffix .scala,$(mytargets)) )
 
 eval=$(addprefix .pickled/, $(addsuffix .py.eval,$(mytargets)) )
 fuzz=$(addprefix .pickled/, $(addsuffix .py.fuzz,$(mytargets)) )
@@ -17,7 +17,7 @@ infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
 induces=$(addprefix .pickled/, $(addsuffix .py.induce,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(chains) $(traces) $(tracks) $(mines) $(induces) $(infers) $(refined) $(fuzz) $(eval) $(grammar)
+.precious: $(chains) $(traces) $(tracks) $(mines) $(induces) $(infers) $(refined) $(fuzz) $(eval) $(scala)
 
 all:
 	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz), eval $(eval)
@@ -96,7 +96,7 @@ else
 endif
 	@mv $<.tmp $@
 
-.pickled/%.grammar: .pickled/%.py.refine
+.pickled/%.scala: .pickled/%.py.refine
 	$(python3) ./bin/scala.py $< > $@
 
 chain.%: .pickled/%.py.chain; @:
@@ -117,9 +117,9 @@ fuzz.%: .pickled/%.py.fuzz; @:
 
 eval.%: .pickled/%.py.eval; @:
 
-grammar.%: .pickled/%.grammar; @:
+scala.%: .pickled/%.scala; @:
 
-tribble.%: .pickled/%.grammar; @:
+tribble.%: .pickled/%.scala; @:
 	./bin/gramcov.sh $<
 
 xchain.%:
@@ -183,7 +183,7 @@ help:
 	@echo fuzz - Get fuzzed output from grammar
 	@echo eval - Evaluate the fuzzed output
 	
-	@echo grammar - Generate the scala grammar for Tribble
+	@echo scala - Generate the scala grammar for Tribble
 
 
 req:

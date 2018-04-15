@@ -12,17 +12,21 @@ import time
 import pudb
 brk = pudb.set_trace
 
+def escape(v):
+    v = str(v).replace('"', '\\"')
+    return v
+
 def to_str(i):
     if isinstance(i, miner.NTKey):
         return "'%s" % fmt_key(i.k)
     elif isinstance(i, list):
        return ' ~ '.join([to_str(j) for j in i])
     elif isinstance(i, refiner.Choice):
-        if i.a: return "\"%s\".regex " % i.a
+        if i.a: return "\"%s\".regex " % escape(i.a)
         elif i.b: return "\"%s\".regex " % refiner.Not(i.a)
         assert False
     elif isinstance(i, str):
-        return "\"%s\"" % i
+        return "\"%s\"" % escape(i)
     else: return str(i)
 
 def elts_to_str(lstrule):
