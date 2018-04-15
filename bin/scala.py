@@ -22,6 +22,8 @@ def to_str(i):
     elif isinstance(i, list):
        return ' ~ '.join([to_str(j) for j in i])
     elif isinstance(i, refiner.Choice):
+        if i.a.v == {']'}: return "\"]\""
+        if i.a.v == {'\\'}: return "\"\\\\\""
         if i.a: return "\"%s\".regex " % escape(i.a)
         elif i.b: return "\"%s\".regex " % refiner.Not(i.a)
         assert False
