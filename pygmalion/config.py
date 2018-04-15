@@ -77,4 +77,4 @@ if StdErr_DevNull:
     f = open(os.devnull, 'w')
     sys.stderr = f
 
-With_Char_Class =  (os.getenv('WITH_CHAR_CLASS') or 'false') in {'true', '1'}
+With_Char_Class =  (os.getenv('WITH_CHAR_CLASS') or 'true') in {'true', '1'}
