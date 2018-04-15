@@ -120,7 +120,7 @@ eval.%: .pickled/%.py.eval; @:
 scala.%: .pickled/%.scala; @:
 
 tribble.%: .pickled/%.scala; @:
-	./bin/gramcov.sh $<
+	java -Xss1g -jar ./bin/gramcov.jar generate --out-dir=gcov --mode=4-path $<
 
 xchain.%:
 	rm -f .pickled/$*.py.chain
