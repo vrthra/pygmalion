@@ -46,7 +46,9 @@ def to_str(k):
             v+= repr(i)[1:-1]
         else:
             v += i
-    return ''.join(sorted(v))
+    r = ''.join(sorted(v))
+    r = r.replace('+-.', '-+.')
+    return r
 
 Hash = {}
 

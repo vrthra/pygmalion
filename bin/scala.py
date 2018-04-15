@@ -24,6 +24,7 @@ def to_str(i):
     elif isinstance(i, refiner.Choice):
         if i.a.v == {']'}: return "\"]\""
         if i.a.v == {'\\'}: return "\"\\\\\""
+        if not i.a.v: return '\".\".regex'
         if i.a: return "\"%s\".regex " % escape(i.a)
         elif i.b: return "\"%s\".regex " % refiner.Not(i.a)
         assert False
@@ -39,7 +40,7 @@ def djs_to_string(djs):
     return "\n            | ".join(vals)
 
 def fmt_key(key):
-    func = key.func.replace('@.', '')
+    func = key.func.replace('@.', '').replace('.', '_')
     return "%s%s%s" % (func, key.var, key.t)
 
 def fixline(key, rules):
