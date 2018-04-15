@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import sys
 sys.path.append('.')
-import pygmalion.infer as infer
 import pygmalion.grammar as g
+import pygmalion.config as config
 import os
 import pickle
 import resource
@@ -13,7 +13,13 @@ if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
     fout = sys.stdout.buffer if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     parse_trees = pickle.load(fin)
-    grammar = infer.infer_grammar(parse_trees)
-    if os.getenv('DEBUG'):
+    if config.Infer == 'LOSSY':
+        import pygmalion.infer as infer
+        grammar = infer.infer_grammar(parse_trees)
         print(str(grammar), file=sys.stderr)
-    pickle.dump(grammar, fout)
+        pickle.dump(grammar, fout)
+    elif config.Infer == 'COMPLETE':
+        import pygmalion.induce as induce
+        grammar = induce.induce_grammar(parse_trees)
+        print(str(grammar), file=sys.stderr)
+        pickle.dump(grammar, fout)

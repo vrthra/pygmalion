@@ -210,6 +210,8 @@ def remove_multiple_repeats_from_elt(elt):
     return elt
 
 def remove_multiple_repeats_from_lst(lst):
+    if len(lst) < 3:
+        return lst
     # make them triplets
     tpls = it.zip_longest(lst, lst[1:], lst[2:])
     lst = []
@@ -221,7 +223,13 @@ def remove_multiple_repeats_from_lst(lst):
 
 
 def remove_multi_repeats_from_rule(rule):
-    elts = remove_multiple_repeats_from_lst(rule.rvalues())
+    elts = []
+    for c in rule.rvalues():
+        if type(c) is list:
+            c_ = remove_multiple_repeats_from_lst(c)
+        else:
+            c_ = c
+        elts.append(c_)
     return rule.to_rwrap(elts)
 
 
@@ -246,7 +254,7 @@ def replace_key_in_rule(k, vr, my_r):
     else:
         assert False
     for elt in my_r.rvalues():
-        if elt == k:
+        if type(elt) == type(k) and elt == k:
             replaced = True
             # expand v because it is a complete sequence
             newelt = v
@@ -308,6 +316,14 @@ def grammar_gc(grammar):
                     keys.append(e)
     return new_g
 
+def compress_rules(rules):
+    # Removes duplicate rules (where all (str(rule) are exactly equal)
+    seen = {}
+    for r in rules:
+        if r not in seen:
+            seen[str(r)] = r
+    return list(seen.values())
+
 def compress_keys(grammar):
     # Removes duplicate keys (where all (str(rules) are exactly equal)
     while True:
@@ -344,12 +360,13 @@ def compress_keys(grammar):
 
 
 def refine_grammar(grammar):
-    newg = {}
-    for k in grammar.keys():
-        v = grammar.get(k)
-        cv = to_char_classes(v)
-        newg[k] = set(unique_rules(cv))
-    g = newg
+    #newg = {}
+    #for k in grammar.keys():
+    #    v = grammar.get(k)
+    #    cv = to_char_classes(v)
+    #    newg[k] = set(unique_rules(cv))
+    #g = newg
+    g = grammar
     #g = remove_subset_keys(g)
     print('To character classes', file=sys.stderr)
     if config.Sort_Grammar:
@@ -365,10 +382,10 @@ def refine_grammar(grammar):
         print('remove_single_alternatives', file=sys.stderr)
         g = remove_single_alternatives(g)
 
-    # if 'single_repeat' in config.Refine_Tactics:
-    #    # Lossy -- do not use -- replaces a a a a with a a
-    #    print('single_repeat', file=sys.stderr)
-    #    g = remove_multi_repeats(g)
+    if 'single_repeat' in config.Refine_Tactics:
+        # Lossy -- do not use -- replaces a a a a with a a
+        print('single_repeat', file=sys.stderr)
+        g = remove_multi_repeats(g)
 
     # print('unique_rules', file=sys.stderr)
     g = {k:unique_rules(g[k]) for k in g}
@@ -377,6 +394,7 @@ def refine_grammar(grammar):
         # Removes duplicate keys (where all (str(rules) are exactly equal)
         print('compress_keys', file=sys.stderr)
         g = compress_keys(g)
+        g = {k:compress_rules(rs) for k,rs in g.items()}
 
     return g
 

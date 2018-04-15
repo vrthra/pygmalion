@@ -43,10 +43,6 @@ We have the following stages
    Mine the parse tree from the stack frames. These are still input
    specific (hence the parse tree)
 * _infer_
-   (*deprecated* in favor of _induce_)
-   Generate the context free grammar by merging the parse trees. At this
-   point, we nolonger can distinguish separate inputs.
-* _induce_
    Generate the context free grammar by merging the parse trees. At this
    point, we nolonger can distinguish separate inputs.
 * _refine_
@@ -82,7 +78,7 @@ $ make xchain.hello
 ```
 
 The result is placed in _.pickled/hello.py.chain_ and is in readable ASCII
-A number of environment variables are used to control the PyChains
+A number of environment variables are used to control the Pygmalion
 
 * **BFS**
    Whether to apply the wide search strategy or not. This has the effect of
@@ -161,3 +157,32 @@ vars
 
 * Use_Character_Classes (*True*)
   (* used in _refiner_ hence deprecated*)
+
+
+## Examples
+
+
+### Using Dumb Search for pychain and INFER for grammar
+
+```
+make xeval.mathexpr INFER=COMPLETE DUMB_SEARCH=1 NO_LOG=1
+```
+
+Using INFER=LOSSY here gets really terrible results
+
+```
+make xeval.mathexpr INFER=LOSSY DUMB_SEARCH=1 NO_LOG=1
+```
+
+### Using Return Probability for pychain
+
+```
+make xeval.urljava INFER=LOSSY NO_LOG=1 MY_RP=0.1
+```
+
+### Using direct evaluation
+
+```
+make xinfer.microjson NO_LOG=1 INFER=LOSSY NOUT=1000
+```
+

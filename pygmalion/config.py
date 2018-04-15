@@ -43,10 +43,10 @@ Ignore_Lambda = True
 # strval eventhough it obviously is. This is an interplay between
 # input and output formats.
 
-Swap_Eclipsing_Keys = True
+Swap_Eclipsing_Keys = (os.getenv('SWAP_PEEK') or 'true') in {'true', '1'}
 
 # should we discard the peeking variables that got eclipsed?
-Strip_Peek = True
+Strip_Peek = (os.getenv('STRIP_PEEK') or 'true') in {'true', '1'}
 
 # [Verbosity]
 
@@ -78,3 +78,7 @@ if StdErr_DevNull:
     sys.stderr = f
 
 With_Char_Class =  (os.getenv('WITH_CHAR_CLASS') or 'true') in {'true', '1'}
+
+Skip_Refine =  (os.getenv('SKIP_REFINE') or 'false') in {'true', '1'}
+
+Infer = (os.getenv('INFER') or 'LOSSY')

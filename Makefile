@@ -78,7 +78,7 @@ else
 endif
 	@mv $<.tmp $@
 
-.pickled/%.py.fuzz: .pickled/%.py.induce
+.pickled/%.py.fuzz: .pickled/%.py.refine
 ifeq ($(debug),fuzz)
 	NOUT=$(NOUT) MAXSYM=$(MAXSYM) $(python3) -m pudb ./bin/fuzzit.py $<
 else

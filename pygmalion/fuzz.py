@@ -230,7 +230,7 @@ def all_terminals(tree):
     return ''.join([all_terminals(c) for c in children])
 
 # All together
-def produce(grammar, max_symbols = 1000):
+def produce(grammar, max_symbols = 100):
     # Create an initial derivation tree
     tree = init_tree()
     log(tree)

@@ -34,7 +34,7 @@ def djs_to_string(djs):
 
 def fmt_key(key):
     func = key.func.replace('@.', '')
-    return "%s$%s$%s" % (func, key.var, key.t)
+    return "%s%s%s" % (func, key.var, key.t)
 
 def fixline(key, rules):
     fmt = "'%s := %s," if len(rules) == 1 else "'%s :=  %s,"
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
     fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     grammar = pickle.load(fin)
-    hgrammar = grammar._dict
+    hgrammar = grammar
     print("new GrammarFile(")
     for k in hgrammar:
         print("   ",fixline(k, hgrammar[k]))
