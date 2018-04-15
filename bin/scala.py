@@ -50,6 +50,7 @@ if __name__ == "__main__":
     fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     grammar = pickle.load(fin)
     hgrammar = grammar._dict
+    print("import anonymized.authors.dsl._")
     print("new GrammarFile(")
     for k in hgrammar:
         print("   ",fixline(k, hgrammar[k]))
