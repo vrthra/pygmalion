@@ -19,6 +19,8 @@ We have the following subjects under the _./subjects_ directory
 * urlpy.py
 * urljava.py
 * mathexpr.py
+* expr.py
+* number.py
 
 ## Complete end to end.
 
@@ -41,6 +43,10 @@ We have the following stages
    Mine the parse tree from the stack frames. These are still input
    specific (hence the parse tree)
 * _infer_
+   (*deprecated* in favor of _induce_)
+   Generate the context free grammar by merging the parse trees. At this
+   point, we nolonger can distinguish separate inputs.
+* _induce_
    Generate the context free grammar by merging the parse trees. At this
    point, we nolonger can distinguish separate inputs.
 * _refine_
@@ -83,10 +89,12 @@ A number of environment variables are used to control the PyChains
    finding out closing elements in subjects such as *microjson* and *array*
    but can result in inputs that are shorter in length. Default is *false*
 
-* **MY_RP**
+* **MY\_RP**
    Used to indicate how to proceed when an input is accepted. Some subjects such
-   as _urlpy.py_ allows single character inputs that can be extended to produce
-   larger inputs. Default is *1.0*.
+   as _urlpy.py_ and _urljava.py_ allows single character inputs that should be
+   extended to produce larger inputs. Default is *1.0*. Choose **MY_RP=0.1**
+   for _urljava.py_ for reasonable URLs
+
 
 * **NINPUT**
    The number of inputs that the *Chain* should produce before stopping.
@@ -99,6 +107,14 @@ A number of environment variables are used to control the PyChains
    Whether to produce characters such as _\t\b\f\x012_ which are not part of
    the list _string.ascii_letters + string.digits + string.punctuation_
 
+* **WIDE\_TRIGGER** (*10*)
+   The number of consecutive similar comparisons before *wide-search* strategy
+   on pychains is triggered.
+
+* **DEEP\_TRIGGER** (*1000*)
+   The number of states that the *wide-search* strategy has to hit before
+  *deep-search* strategy is triggered.
+
 * **PYTHON\_OPT**
    Whether to optimize for python specific string comparisons. Normally, the
    _tainted string_ converts all relevant string operations equality comparisons
@@ -108,9 +124,40 @@ A number of environment variables are used to control the PyChains
    output separately from other commands such as *trace*, *track*, *infer*,
    *refine*, and *fuzz*
 
-
 * **python3**
    The python interpreter used
 
 * **pip3**
    The pip installer command
+
+The configuration can be finetuned further by modifing these `pygmalion.confg`
+vars
+
+* config.Track_Params (*True*)
+  Whether to track function parameters or not 
+
+* config.Track_Vars (*True*)
+  Whether to track local variables or not 
+
+* config.Track_Return (*False*)
+  Should we insert a special *return* variable from each function?
+
+* config.Ignore_Lambda (*True*)
+  Strip out noice from _lambda_ expressions
+
+* config.Swap_Eclipsing_keys (*True*)
+  When we find a smaller key already contains a chunk (usually a _peek_)
+  of a later variable, what should we do with the smaller variable? With
+  enabled, we simply swap the order of these two variables in causality
+
+* config.Strip_Peek (*True*)
+  Related to above -- If we detect a swap, rather than swap, simply discard
+  the smaller (earlier) variable.
+
+* config.Prevent_Deep_Stack_Modification (*False*)
+  Only replace things at a lower height with something at higher height.
+  It is useful mainly for returned values that may be smaller than an earlier
+  variable deeper in the call scope.
+
+* Use_Character_Classes (*True*)
+  (* used in _refiner_ hence deprecated*)
