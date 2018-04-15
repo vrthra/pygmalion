@@ -382,8 +382,8 @@ def refine_grammar(grammar):
         print('remove_single_alternatives', file=sys.stderr)
         g = remove_single_alternatives(g)
 
-    if 'single_repeat' in config.Refine_Tactics:
-        # Lossy -- do not use -- replaces a a a a with a a
+    if 'single_repeat' in config.Refine_Tactics and config.Infer == 'LOSSY' :
+        # Lossy -- replaces a a a a with a a
         print('single_repeat', file=sys.stderr)
         g = remove_multi_repeats(g)
 
