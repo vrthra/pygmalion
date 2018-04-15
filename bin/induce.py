@@ -15,4 +15,5 @@ if __name__ == "__main__":
     parse_trees = pickle.load(fin)
     grammar = induce.induce_grammar(parse_trees)
     print(str(grammar), file=sys.stderr)
+    assert type(grammar) is g.Grammar
     pickle.dump(grammar, fout)

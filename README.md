@@ -44,7 +44,7 @@ We have the following stages
    specific (hence the parse tree)
 * _infer_
    Generate the context free grammar by merging the parse trees. At this
-   point, we nolonger can distinguish separate inputs.
+   point, we nolonger can distinguish separate inputs. If _WITH_CHAR_CLASS_
 * _refine_
    Try to produce human readable grammar
 * _fuzz_
@@ -119,6 +119,10 @@ A number of environment variables are used to control the Pygmalion
    the rest of commands. Hence, if you use it, make sure to generate the chain
    output separately from other commands such as *trace*, *track*, *infer*,
    *refine*, and *fuzz*
+
+* **WITH\_CHAR\_CLASS** (*True*)
+  If specified, replaces individual characters with regular expression
+  corresponding to comparisons on that index.
 
 * **python3**
    The python interpreter used

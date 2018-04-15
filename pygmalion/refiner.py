@@ -360,41 +360,34 @@ def compress_keys(grammar):
 
 
 def refine_grammar(grammar):
-    #newg = {}
-    #for k in grammar.keys():
-    #    v = grammar.get(k)
-    #    cv = to_char_classes(v)
-    #    newg[k] = set(unique_rules(cv))
-    #g = newg
-    g = grammar
-    #g = remove_subset_keys(g)
+    #grammar = remove_subset_keys(grammar)
     print('To character classes', file=sys.stderr)
     if config.Sort_Grammar:
         # print('sort', file=sys.stderr)
-        g = {k:sorted(g[k], key=lambda x: str(x))
-                for k in sorted(g.keys(), key=lambda x: str(x))}
+        grammar = {k:sorted(grammar[k], key=lambda x: str(x))
+                for k in sorted(grammar.keys(), key=lambda x: str(x))}
 
-    for k in g: assert type(g[k]) is list
+    for k in grammar: assert type(grammar[k]) is list
 
     if 'remove_single_alternatives' in config.Refine_Tactics:
         # given key := value with no alternatives, replace
         # any instance of tht key with the value.
         print('remove_single_alternatives', file=sys.stderr)
-        g = remove_single_alternatives(g)
+        grammar = remove_single_alternatives(grammar)
 
     if 'single_repeat' in config.Refine_Tactics and config.Infer == 'LOSSY' :
         # Lossy -- replaces a a a a with a a
         print('single_repeat', file=sys.stderr)
-        g = remove_multi_repeats(g)
+        grammar = remove_multi_repeats(grammar)
 
     # print('unique_rules', file=sys.stderr)
-    g = {k:unique_rules(g[k]) for k in g}
+    grammar = {k:unique_rules(grammar[k]) for k in grammar}
 
     if 'compress_keys' in config.Refine_Tactics:
         # Removes duplicate keys (where all (str(rules) are exactly equal)
         print('compress_keys', file=sys.stderr)
-        g = compress_keys(g)
-        g = {k:compress_rules(rs) for k,rs in g.items()}
+        grammar = compress_keys(grammar)
+        grammar = {k:compress_rules(rs) for k,rs in grammar.items()}
 
-    return g
+    return grammar
 

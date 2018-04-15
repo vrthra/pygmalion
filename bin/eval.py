@@ -38,11 +38,13 @@ if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 3 else open(sys.argv[2], 'rb')
     fout = sys.stdout if len(sys.argv) < 3 else open("%s.tmp" % sys.argv[2], 'w')
     valid_n = 0
+    all_n = 0
     cov = coverage.Coverage(source=['example'], branch=Branch)
     for j,(i, t) in enumerate(records(fin)):
         try:
             print(j, repr(i))
             cov.start()
+            all_n += 1
             v = mod_obj.main(taintedstr.tstr(i))
             cov.stop()
             print("\t=>",v)
@@ -51,7 +53,7 @@ if __name__ == "__main__":
             pass
         print("%", cov.report(file=fout), ' at ', t, 'seconds')
     cov.save()
-    print("Valid:", valid_n)
+    print("Valid: %d/%d" % (valid_n, all_n))
     print(cov.report(file=fout))
     cov.html_report(directory='coverage')
     cov.erase()

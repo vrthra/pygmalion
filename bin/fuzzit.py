@@ -7,6 +7,7 @@ sys.path.append('.')
 import os
 import pickle
 import pygmalion.fuzz as fuzz
+import pygmalion.grammar as g
 import time
 
 if __name__ == "__main__":
@@ -15,6 +16,7 @@ if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
     fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     grammar = pickle.load(fin)
+    assert type(grammar) is g.Grammar
     start = time.perf_counter()
     for i in range(nout):
         v = fuzz.produce(grammar, max_sym)

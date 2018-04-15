@@ -3,6 +3,7 @@ import sys
 sys.path.append('.')
 import pygmalion.refiner as refiner
 import pygmalion.config as config
+import pygmalion.grammar as g
 import pygmalion.util as u
 import os
 import pickle
@@ -24,8 +25,11 @@ if __name__ == "__main__":
     grammar = pickle.load(fin)
     if config.Skip_Refine:
         print(u.show_grammar(grammar._dict), file=sys.stderr)
+        assert type(grammar) is g.Grammar
         pickle.dump(grammar, file=fout)
     else:
         x = refiner.refine_grammar(grammar)
         print(u.show_grammar(x), file=sys.stderr)
-        pickle.dump(x, file=fout)
+        assert type(x) is dict
+        newgrammar = g.Grammar(x)
+        pickle.dump(newgrammar, file=fout)
