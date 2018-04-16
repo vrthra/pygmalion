@@ -23,12 +23,12 @@ if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
     fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     grammar = pickle.load(fin)
+    assert type(grammar) is dict
     if config.Skip_Refine:
-        print(u.show_grammar(grammar._dict), file=sys.stdout)
-        assert type(grammar) is g.Grammar
-        pickle.dump(grammar._dict, file=fout)
+        print(u.show_grammar(grammar), file=sys.stdout)
+        pickle.dump(grammar, file=fout)
     else:
-        x = refiner.refine_grammar(grammar)
+        x = refiner.refine_grammar(g.Grammar(grammar))
         print(u.show_grammar(x), file=sys.stdout)
         assert type(x) is dict
         pickle.dump(x, file=fout)
