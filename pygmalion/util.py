@@ -1,6 +1,7 @@
 import json
 import string
 import hashlib
+import itertools as it
 import pudb
 brk = pudb.set_trace
 
@@ -40,8 +41,39 @@ def fixline(key, rules):
     fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t| %s"
     return fmt % (key, djs_to_string(rules))
 
+def with_repeating_numbers(g):
+    ng = []
+    for k in g:
+        rules = g[k]
+        nrules = []
+        for rule in rules:
+            nrule = []
+            for elt in rule.rvalues():
+                if type(elt) is list:
+                    nelt = [(c, len(list(cgen))) for c,cgen in it.groupby(elt)]
+                    myelt = []
+                    for e,count in nelt:
+                        if count > 1:
+                            myelt.append("%s{%d}" % (str(e), count))
+                        else:
+                            myelt.append("%s" % str(e))
+                    nelt = ''.join(myelt)
+                else:
+                    nelt = str(elt)
+                nrule.append(nelt)
+            nrule = '~'.join(nrule)
+            nrules.append(nrule)
+        nrules = '\n\t|  '.join(sorted(nrules))
+        fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t|  %s"
+        fmtd = fmt % (k, nrules)
+        ng.append(fmtd)
+    res = "\n".join(ng)
+    return res
+
 def show_grammar(g):
-    return "\n".join([fixline(key, g[key]) for key in g])
+    res = with_repeating_numbers(g)
+    return res
+    #return "\n".join([fixline(key, g[key]) for key in g])
 
 def to_str(k):
     v = ''
