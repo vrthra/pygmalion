@@ -27,9 +27,11 @@ NINPUT=100
 R=0
 NOUT=100
 MAXSYM=100
+INFER=COMPLETE
+NOCTRL=1
 
 .pickled/%.py.chain: subjects/%.py | .pickled
-	NOCTRL=1 MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) $@.tmp
+	NOCTRL=$(NOCTRL) MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) $@.tmp
 	mv $@.tmp $@
 
 .pickled/%.py.trace: subjects/%.py .pickled/%.py.chain
@@ -66,9 +68,9 @@ endif
 
 .pickled/%.py.infer: .pickled/%.py.mine
 ifeq ($(debug),infer)
-	$(python3) -m pudb ./bin/inferit.py $<
+	INFER=$(INFER) $(python3) -m pudb ./bin/inferit.py $<
 else
-	$(python3) ./bin/inferit.py $<
+	INFER=$(INFER) $(python3) ./bin/inferit.py $<
 endif
 	@mv $<.tmp $@
 
