@@ -165,8 +165,8 @@ def replace_characters_with_cmp(v):
 def strip_suffix(elt, tree, cmp_map):
     if not isinstance(elt, miner.NTKey):
         return elt
-    elif is_single(elt, tree): # dont strip suffixes from singles they are almost leaves.
-        return cmp_map[elt]
+    #elif is_single(elt, tree): # dont strip suffixes from singles they are almost leaves.
+    #    return cmp_map[elt]
     else:
         return strip_key_suffix(elt)
 
@@ -209,7 +209,10 @@ def recover_grammar(root, tree, inp, i, xins):
                     nodes.extend(rule.rvalues())
             else:
                 for rule in rules:
-                    grammar[key].add(miner.RWrap(key,[strip_suffix(child, tree, comparison_map) for child in rule.rvalues()]))
+                    #grammar[key].add(miner.RWrap(key,
+                    # [strip_suffix(child, tree, comparison_map)
+                    # for child in rule.rvalues()]))
+                    grammar[key].add(to_comparisons(rule))
                     nodes.extend(rule.rvalues())
     print(u.show_grammar(grammar))
     return grammar

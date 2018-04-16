@@ -16,6 +16,12 @@ def escape(v):
     v = str(v).replace('"', '\\"')
     return v
 
+def get_range(v):
+    v = str(v).replace('0123456789', '0-9')
+    v = str(v).replace('abcdefghijklmnopqrstuvwxyz', 'a-z')
+    v = str(v).replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z')
+    return v
+
 def to_str(i):
     if isinstance(i, miner.NTKey):
         return "'%s" % fmt_key(i.k)
@@ -25,8 +31,8 @@ def to_str(i):
         if i.a.v == {']'}: return "\"]\""
         if i.a.v == {'\\'}: return "\"\\\\\""
         if not i.a.v: return '\".\".regex'
-        if i.a: return "\"%s\".regex " % escape(i.a)
-        elif i.b: return "\"%s\".regex " % refiner.Not(i.a)
+        if i.a: return "\"%s\".regex " % escape(get_range(i.a))
+        elif i.b: return "\"%s\".regex " % get_range(refiner.Not(i.a))
         assert False
     elif isinstance(i, str):
         return "\"%s\"" % escape(i)
@@ -56,7 +62,7 @@ if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
     fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     grammar = pickle.load(fin)
-    hgrammar = grammar._dict
+    hgrammar = grammar
     print("import anonymized.authors.dsl._")
     print("new GrammarFile(")
     for k in hgrammar:

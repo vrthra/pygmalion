@@ -434,14 +434,4 @@ def infer_grammar(parse_trees):
         xcmps = process_comparisons_per_char(separate_comparisons_per_char(xins))
         merged_grammar = merge_grammars(merged_grammar, parse_tree, xcmps, i)
 
-
-    if config.With_Char_Class:
-        grammar = merged_grammar
-        newg = {}
-        for k in grammar.keys():
-            v = grammar.get(k)
-            cv = to_char_classes(v)
-            newg[k] = set(unique_rules(cv))
-    else:
-        newg = merged_grammar
-    return g.Grammar(newg)
+    return merged_grammar

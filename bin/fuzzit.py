@@ -16,10 +16,10 @@ if __name__ == "__main__":
     fin = sys.stdin.buffer if len(sys.argv) < 2 else open(sys.argv[1], 'rb')
     fout = sys.stdout if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     grammar = pickle.load(fin)
-    assert type(grammar) is g.Grammar
+    assert type(grammar) is dict
     start = time.perf_counter()
     for i in range(nout):
-        v = fuzz.produce(grammar, max_sym)
+        v = fuzz.produce(g.Grammar(grammar), max_sym)
         t = time.perf_counter() - start
         print(i, t, repr(v), file=sys.stderr, flush=True)
         pickle.dump((v, t), fout)

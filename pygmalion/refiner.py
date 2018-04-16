@@ -1,4 +1,5 @@
 from taintedstr import Op
+from itertools import groupby
 import itertools as it
 import pygmalion.miner as miner
 import pygmalion.grammar as g
@@ -30,12 +31,19 @@ class Choice:
         self.a, self.b = a, b
     def __repr__(self): return 'choice: %s' % str(self)
     def __str__(self):
+        x = self.val()
+        x = x.replace('0123456789', '0-9')
+        x = x.replace('abcdefghijklmnopqrstuvwxyz', 'a-z')
+        x = x.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z')
+        return x
+    def val(self):
         if self.a and not self.b:
             return str(self.a)
         elif not self.a and self.b:
             return str(self.b)
         else:
-            return '(%s&%s)' % (self.a, self.b)
+            #return '(%s&%s)' % (self.a, self.b)
+            return '%s' % self.a
     def __eq__(self, o):
         return type(o) == Choice and str(self) == str(o)
 
@@ -360,8 +368,14 @@ def compress_keys(grammar):
 
 
 def refine_grammar(grammar):
+    # if config.With_Char_Class:
+    #     newg = {}
+    #     for k in grammar.keys():
+    #         v = grammar.get(k)
+    #         cv = to_char_classes(v)
+    #         newg[k] = set(unique_rules(cv))
+
     #grammar = remove_subset_keys(grammar)
-    print('To character classes', file=sys.stderr)
     if config.Sort_Grammar:
         # print('sort', file=sys.stderr)
         grammar = {k:sorted(grammar[k], key=lambda x: str(x))
