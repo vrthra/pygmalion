@@ -82,3 +82,4 @@ With_Char_Class =  (os.getenv('WITH_CHAR_CLASS') or 'true') in {'true', '1'}
 Skip_Refine =  (os.getenv('SKIP_REFINE') or 'false') in {'true', '1'}
 
 Infer = (os.getenv('INFER') or 'LOSSY')
+Simple_Class = (os.getenv('CCLASS') or 'false') in {'true', '1'}

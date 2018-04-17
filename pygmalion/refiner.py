@@ -42,8 +42,10 @@ class Choice:
         elif not self.a and self.b:
             return str(self.b)
         else:
-            return '(%s&%s)' % (self.a, self.b)
-            #return '%s' % self.a
+            if config.Simple_Class:
+                return '%s' % self.a
+            else:
+                return '(%s&%s)' % (self.a, self.b)
     def __eq__(self, o):
         return type(o) == Choice and str(self) == str(o)
 
