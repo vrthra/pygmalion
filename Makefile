@@ -28,7 +28,7 @@ R=0
 NOUT=100
 MAXSYM=100
 INFER=COMPLETE
-NOCTRL=1
+NOCTRL=0
 
 .pickled/%.py.chain: subjects/%.py | .pickled
 	NOCTRL=$(NOCTRL) MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) $@.tmp
