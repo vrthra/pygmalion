@@ -8,6 +8,8 @@ import sys
 from taintedstr import Op
 brk = pudb.set_trace
 
+def get_key(k):
+     return (k.k.func, k.k.var)
 
 def get_regex_map(parse_tree, xcmps, inp):
     comparison_map = {}
@@ -60,25 +62,20 @@ def normalize_char_cmp(elt, rule):
         regex.append(eltregex)
     return regex
 
-def trans_key(key):
-    if config.Infer == 'SOUND':
-        return key
-    else:
-        return strip_key_suffix(key)
-
-def to_comparisons(rule):
+def rule_elts_to_comparisons(rule, tree, comparison_map, nassigns):
     """
     The idea here is to shift away from individual results
     to the comparisons made.
     """
-    if not config.With_Char_Class:
-        return rule
     rvalues = []
     for elt in rule.rvalues():
         if type(elt) is miner.NTKey:
-            rvalues.append(trans_key(elt))
+            rvalues.append(strip_suffix(key_add_cmp_hash(elt, comparison_map), nassigns))
         else:
-            new_elt = normalize_char_cmp(elt, rule)
+            if config.With_Char_Class:
+                new_elt = normalize_char_cmp(elt, rule)
+            else:
+                new_elt = elt
             rvalues.append(new_elt)
     return rule.to_rwrap(rvalues)
 
@@ -135,13 +132,20 @@ def process_comparisons_per_char(ins):
         vals.append(process_one_instruction(pos, v))
     return vals
 
-def strip_suffix(elt, tree, cmp_map):
-    if not isinstance(elt, miner.NTKey):
+def key_add_cmp_hash(elt, comparison_map):
+    return comparison_map[elt]
+
+def strip_suffix(elt, nassigns):
+    if config.Infer == 'SOUND':
         return elt
-    #elif is_single(elt, tree): # dont strip suffixes from singles they are almost leaves.
-    #    return cmp_map[elt]
-    else:
+    elif is_single_assigned(elt, nassigns):
+        # Was the variable assigned to multiple times in the same iteration?
+        # if not, it is a strong sign that it is unambiguous as to the part
+        # it parses.
         return strip_key_suffix(elt)
+    else:
+        # multiply assigned. We have no guarantee which part of input it handles
+        return elt
 
 def strip_key_suffix(v):
     return miner.NTKey(v.k.newV('0'))
@@ -150,18 +154,10 @@ def is_leaf(n, tree):
     if not n in tree: return True
     return False
 
-def is_single(n, tree):
-    if not config.With_Char_Class:
-        return False
-    if not n in tree: return True
-    rules = tree[n]
-    for rule in rules:
-        for elt in rule:
-            if isinstance(elt, miner.NTKey):
-                return False
-    return True
+def is_single_assigned(n, nassigns):
+    return nassigns[get_key(n)] == 0
 
-def recover_grammar(root, tree, inp, i, xins):
+def recover_grammar(root, tree, inp, i, xins, nassigns):
     xcmps = process_comparisons_per_char(separate_comparisons_per_char(xins))
     comparison_map = get_regex_map(tree, xcmps, i)
     nodes = [root]
@@ -172,27 +168,40 @@ def recover_grammar(root, tree, inp, i, xins):
         if not is_leaf(n, tree):
             rules = tree[n]
             if isinstance(n, miner.NTKey):
-                key = n
+                key = strip_suffix(key_add_cmp_hash(n, comparison_map), nassigns)
             else:
-                key = trans_key(key)
+                if config.With_Char_Class:
+                    key = comparison_map[n]
+                else:
+                    key = key
             # append if more children
             if key not in grammar: grammar[key] = set()
             for rule in rules:
-                grammar[key].add(to_comparisons(rule))
+                grammar[key].add(rule_elts_to_comparisons(rule, tree, comparison_map, nassigns))
                 nodes.extend(rule.rvalues())
-    print(u.show_grammar(grammar), file=sys.stderr, flush=True)
+    print(u.readable_grammar(grammar), file=sys.stderr, flush=True)
     print('', file=sys.stderr, flush=True)
     return grammar
 
-def to_context_free(i,tree):
+def to_context_free(i,tree, nassigns):
     (inp, xins, tree) = tree
     start = miner.NTKey(g.V.start())
-    return (inp, recover_grammar(start, tree._dict, inp, i, xins))
+    return (inp, recover_grammar(start, tree._dict, inp, i, xins, nassigns))
 
 # Get a grammar for multiple inputs
 def infer_grammar(parse_trees):
     merged_grammar = g.Grammar()
-    comparison_grammar = [to_context_free(i,t) for i,t in enumerate(parse_trees)]
+
+    # find the maxiumum number of assignments for a named var
+    num_assigns = {}
+    for (i, cmp, parse_tree) in parse_trees:
+        for k in parse_tree._dict:
+            key = get_key(k)
+            it = int(k.k.t)
+            if not key in num_assigns or num_assigns[key] < it:
+                num_assigns[key] = it
+
+    comparison_grammar = [to_context_free(i,t, num_assigns) for i,t in enumerate(parse_trees)]
     for j, (i, cmp_tree) in enumerate(comparison_grammar):
         # this is for a single input
         merged_grammar = merge_grammars(merged_grammar, g.Grammar(cmp_tree))

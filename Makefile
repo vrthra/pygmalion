@@ -6,6 +6,7 @@ mytargets=hello whilescope microjson array urljava urlpy mathexpr math expr
 .SUFFIXES:
 
 scala=$(addprefix .pickled/, $(addsuffix .scala,$(mytargets)) )
+bnf=$(addprefix .pickled/, $(addsuffix .bnf,$(mytargets)) )
 
 eval=$(addprefix .pickled/, $(addsuffix .py.eval,$(mytargets)) )
 fuzz=$(addprefix .pickled/, $(addsuffix .py.fuzz,$(mytargets)) )
@@ -14,10 +15,9 @@ traces=$(addprefix .pickled/, $(addsuffix .py.trace,$(mytargets)) )
 tracks=$(addprefix .pickled/, $(addsuffix .py.track,$(mytargets)) )
 mines=$(addprefix .pickled/, $(addsuffix .py.mine,$(mytargets)) )
 infers=$(addprefix .pickled/, $(addsuffix .py.infer,$(mytargets)) )
-induces=$(addprefix .pickled/, $(addsuffix .py.induce,$(mytargets)) )
 refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 
-.precious: $(chains) $(traces) $(tracks) $(mines) $(induces) $(infers) $(refined) $(fuzz) $(eval) $(scala)
+.precious: $(chains) $(traces) $(tracks) $(mines) $(infers) $(refined) $(fuzz) $(eval) $(scala) $(bnf)
 
 all:
 	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz), eval $(eval)
@@ -59,14 +59,6 @@ else
 endif
 	@mv $<.tmp $@
 
-.pickled/%.py.induce: .pickled/%.py.mine
-ifeq ($(debug),induce)
-	$(python3) -m pudb ./bin/induce.py $<
-else
-	$(python3) ./bin/induce.py $<
-endif
-	@mv $<.tmp $@
-
 .pickled/%.py.infer: .pickled/%.py.mine
 ifeq ($(debug),infer)
 	$(python3) -m pudb ./bin/inferit.py $<
@@ -102,6 +94,9 @@ endif
 .pickled/%.scala: .pickled/%.py.refine
 	$(python3) ./bin/scala.py $< > $@
 
+.pickled/%.bnf: .pickled/%.py.refine
+	$(python3) ./bin/bnf.py $< > $@
+
 chain.%: .pickled/%.py.chain; @:
 
 trace.%: .pickled/%.py.trace; @:
@@ -112,8 +107,6 @@ mine.%: .pickled/%.py.mine; @:
 
 infer.%: .pickled/%.py.infer; @:
 
-induce.%: .pickled/%.py.induce; @:
-
 refine.%: .pickled/%.py.refine; @:
 
 fuzz.%: .pickled/%.py.fuzz; @:
@@ -122,44 +115,89 @@ eval.%: .pickled/%.py.eval; @:
 
 scala.%: .pickled/%.scala; @:
 
+bnf.%: .pickled/%.bnf; @:
+
 tribble.%: .pickled/%.scala; @:
 	java -Xss1g -jar ./bin/gramcov.jar generate --out-dir=gcov --mode=4-path $<
 
+clean.%:
+	rm -f .pickled/$(file).$*
+
+cleantill.chain:
+	$(MAKE) cleantill.trace
+	$(MAKE) clean.chain
+
+cleantill.trace:
+	$(MAKE) cleantill.track
+	$(MAKE) clean.trace
+
+cleantill.track:
+	$(MAKE) cleantill.mine
+	$(MAKE) clean.track
+
+cleantill.mine:
+	$(MAKE) cleantill.infer
+	$(MAKE) clean.mine
+
+cleantill.infer:
+	$(MAKE) cleantill.refine
+	$(MAKE) clean.infer
+
+cleantill.refine:
+	$(MAKE) cleantill.fuzz
+	$(MAKE) clean.refine
+
+cleantill.fuzz:
+	$(MAKE) cleantill.eval
+	$(MAKE) clean.fuzz
+
+cleantill.eval:
+	$(MAKE) clean.eval
+
+xchain.%: from=chain
 xchain.%:
-	rm -f .pickled/$*.py.chain
+	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) chain.$*
 
+xtrace.%: from=trace
 xtrace.%:
-	rm -f .pickled/$*.py.trace
+	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) trace.$*
 
+xtrack.%: from=track
 xtrack.%:
-	rm -f .pickled/$*.py.track
+	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) track.$*
 
+xmine.%: from=mine
 xmine.%:
-	rm -f .pickled/$*.py.mine
+	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) mine.$*
 
+xinfer.%: from=infer
 xinfer.%:
-	rm -f .pickled/$*.py.infer
+	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) infer.$*
 
-xinduce.%:
-	rm -f .pickled/$*.py.induce
-	$(MAKE) induce.$*
-
+xrefine.%: from=refine
 xrefine.%:
-	rm -f .pickled/$*.py.refine
+	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) refine.$*
 
+xfuzz.%: from=fuzz
 xfuzz.%:
-	rm -f .pickled/$*.py.fuzz
+	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) fuzz.$*
 
+xeval.%: from=eval
 xeval.%:
-	rm -f .pickled/$*.py.eval
+	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) eval.$*
+
+xbnf.%:
+	$(MAKE) clean.bnf file=$*
+	$(MAKE) bnf.$*
+	cat .pickled/$*.bnf
 
 clobber.%:
 	rm -f .pickled/$*.*

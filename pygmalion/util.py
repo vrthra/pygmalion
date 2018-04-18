@@ -61,7 +61,7 @@ def with_repeating_numbers(g):
                 else:
                     nelt = str(elt)
                 nrule.append(nelt)
-            nrule = '~'.join(nrule)
+            nrule = ''.join(nrule)
             nrules.append(nrule)
         nrules = '\n\t|  '.join(sorted(nrules))
         fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t|  %s"
@@ -70,10 +70,141 @@ def with_repeating_numbers(g):
     res = "\n".join(ng)
     return res
 
+def simplify_grammar(g):
+    new_g = g
+    new_g = count_elements(new_g)
+    new_g = flatten_choices(new_g)
+    new_g = compress_grammar(new_g)
+    return new_g
+
+def flatten_choices(grammar):
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        newrules = []
+        for rule in rules:
+            newrule = []
+            for elt in rule:
+                if type(elt) == list:
+                    newrule.extend(elt)
+                else:
+                    newrule.append(elt)
+            newrules.append(newrule)
+        ng[k] = newrules
+    return ng
+
+
+def are_elements_same(elts):
+    # taking elements of each rules,
+    # make sure we are talking about similar elements e.g ntkey = ntkey
+    v = list({type(i) for i in elts})
+    # else cant compress the rule
+    if len(v) != 1: return False
+    my_type = v[0]
+    # make sure all nt keys are same
+    stype = set(type(i) for i in elts)
+    if len(stype) != 1: return False
+
+    sstr = set(str(i) for i in elts)
+    if len(sstr) == 1: return elts[0]
+    if tuple in stype:
+        res = are_choices_same(elts)
+        if not res: return False
+        return res
+    else:
+        # not choices
+        return False
+
+def are_choices_same(list_of_choices):
+    my_choice = {str(choice) for choice, count in list_of_choices}
+    my_counts = {count for choice, count in list_of_choices}
+    if len(my_choice) > 1: return False
+    return (list_of_choices[0][0], my_counts)
+
+
+
+def compress_grouped_rules(rules):
+    if len(rules) == 1: return rules
+    new_rule = []
+    for k in zip(*rules):
+        res = are_elements_same(k)
+        if not res: return rules
+        new_rule.append(res)
+    return [new_rule]
+
+def compress_rules(rules):
+    new_rules = []
+    for c, cgen in it.groupby(rules, key=len):
+        v = compress_grouped_rules(list(cgen))
+        new_rules.extend(v)
+    return new_rules
+
+def compress_grammar(g):
+    ng = {}
+    for k in g:
+        rules = g[k]
+        ng[k] = compress_rules(rules)
+    return ng
+
+def count_elements(g):
+    ng = {}
+    for k in g:
+        rules = g[k]
+        nrules = []
+        for rule in rules:
+            nrule = []
+            for elt in rule.rvalues():
+                if type(elt) is list:
+                    nelt = [(c, len(list(cgen))) for c,cgen in it.groupby(elt)]
+                else:
+                    nelt = elt
+                nrule.append(nelt)
+            nrules.append(nrule)
+        ng[k] = nrules
+    return ng
+
+def choice_to_bnf(c):
+    assert type(c) is tuple
+    choice, count = c
+    cv = choice.a if choice.a else choice.b
+    strcv = str(cv)
+    strcv = strcv.replace('0123456789', '0-9')
+    strcv = strcv.replace('abcdefghijklmnopqrstuvwxyz', 'a-z')
+    strcv = strcv.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z')
+    if type(count) is set:
+        fst = min(count)
+        lst = max(count)
+        return "%s{%d,%d}" % (strcv, fst, lst)
+    else:
+        if count == 1:
+            return "%s" % strcv
+        else:
+            return "%s{%d}" % (strcv, count)
+
+def elt_to_bnf(elt):
+    if type(elt) is tuple:
+        return choice_to_bnf(elt)
+    else:
+        return str(elt)
+
+def rule_to_bnf(rule):
+    return ''.join(elt_to_bnf(elt) for elt in rule)
+
+def alter_to_bnf(k, rules):
+    fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n    | %s"
+    alters = {rule_to_bnf(rule) for rule in rules}
+    return fmt % (k, "\n    | ".join(sorted(list(alters))))
+
+def g_to_bnf(g):
+    return '\n'.join([alter_to_bnf(k,g[k]) for k in g])
+
+def readable_grammar(g):
+    res = simplify_grammar(g)
+    return g_to_bnf(res)
+
 def show_grammar(g):
     res = with_repeating_numbers(g)
     return res
-    #return "\n".join([fixline(key, g[key]) for key in g])
 
 def to_str(k):
     v = ''
