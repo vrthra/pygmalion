@@ -254,24 +254,34 @@ def remove_multi_repeats(g):
         g[k] = new_rs
     return g
 
-def replace_key_in_rule(k, vr, my_r):
+def replace_key_in_rule(k, vrs, my_r):
     replaced = False
     ret_r = []
-    if type(vr) is miner.NTKey:
-        v = vr
-    elif type(vr) is miner.RWrap:
-        v = vr.rvalues()[0]
-    else:
-        assert False
-    for elt in my_r.rvalues():
-        if type(elt) == type(k) and elt == k:
-            replaced = True
-            # expand v because it is a complete sequence
-            newelt = v
+    if len(vrs) == 0:
+        if type(vr) is miner.NTKey:
+            v = vr
+        elif type(vr) is miner.RWrap:
+            v = vr.rvalues()[0]
         else:
-            newelt = elt
-        ret_r.append(newelt)
-    return (replaced, my_r.to_rwrap(ret_r))
+            assert False
+        for elt in my_r.rvalues():
+            if type(elt) == type(k) and elt == k:
+                replaced = True
+                # expand v because it is a complete sequence
+                newelt = v
+            else:
+                newelt = elt
+            ret_r.append(newelt)
+        return (replaced, my_r.to_rwrap(ret_r))
+    else:
+        for elt in my_r.rvalues():
+            if type(elt) == type(k) and elt == k:
+                replaced = True
+                newelt = vrs
+            else:
+                newelt = [elt]
+            ret_r.extend(newelt)
+        return (replaced, my_r.to_rwrap(ret_r))
 
 def remove_single_alternatives(g):
     # given key := value with no alternatives, replace
@@ -285,9 +295,7 @@ def remove_single_alternatives(g):
                 # this is a list of rules
                 rule = v[0]
                 rv = rule.rvalues()
-                if len(rv) == 1:
-                    if  type(rv[0]) is miner.NTKey:
-                        single_keys[k] = rv[0]
+                single_keys[k] = rv
         newg = {}
         for key in g:
             rset = g[key]

@@ -16,5 +16,5 @@ if __name__ == "__main__":
     fout = sys.stdout.buffer if len(sys.argv) < 2 else open("%s.tmp" % sys.argv[1], 'wb')
     parse_trees = pickle.load(fin)
     grammar = infer.infer_grammar(parse_trees)
-    print(u.readable_grammar(grammar), file=sys.stderr)
+    print(u.readable_grammar(grammar._dict), file=sys.stderr)
     pickle.dump(grammar._dict, fout)

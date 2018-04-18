@@ -15,15 +15,6 @@ sys.setrecursionlimit(0x100000)
 
 Branch =  (os.getenv('BRANCH') or 'false') in {'true', '1'}
 
-import pygmalion.fuzz as fuzz
-
-def records(f):
-    try:
-        while not f.closed:
-            yield pickle.load(f)
-    except EOFError:
-        raise StopIteration
-
 if __name__ == "__main__":
     m_file = sys.argv[1]
     mod_obj = imp.new_module('example')
@@ -40,18 +31,19 @@ if __name__ == "__main__":
     valid_n = 0
     all_n = 0
     cov = coverage.Coverage(source=['example'], branch=Branch)
-    for j,(i, t) in enumerate(records(fin)):
+    mylst = pickle.load(fin)
+    for j,(i, t) in enumerate(mylst):
         try:
             print(j, repr(i))
             cov.start()
             all_n += 1
             v = mod_obj.main(taintedstr.tstr(i))
             cov.stop()
-            print("\t=>",v)
+            print("\t=>",repr(v), flush=True)
             valid_n += 1
         except:
             pass
-        print("%", cov.report(file=fout), ' at ', t, 'seconds')
+        print("%", cov.report(), ' at ', t, 'seconds')
     cov.save()
     print("Valid: %d/%d" % (valid_n, all_n))
     print(cov.report(file=fout))

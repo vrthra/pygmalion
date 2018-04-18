@@ -22,7 +22,7 @@ if __name__ == "__main__":
         event = i['event']
         if event in ['start']:
             inp = i['$input']
-            print("track:", count, inp, file=sys.stderr, flush=True)
+            print("track:", count, repr(inp), file=sys.stderr, flush=True)
             count += 1
             tracker = track.Tracker(inp)
         elif event in ['stop']:

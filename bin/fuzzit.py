@@ -18,8 +18,10 @@ if __name__ == "__main__":
     grammar = pickle.load(fin)
     assert type(grammar) is dict
     start = time.perf_counter()
+    mylst = []
     for i in range(nout):
         v = fuzz.produce(g.Grammar(grammar), max_sym)
         t = time.perf_counter() - start
         print(i, t, repr(v), file=sys.stderr, flush=True)
-        pickle.dump((v, t), fout)
+        mylst.append((v,t))
+    pickle.dump(mylst, fout)
