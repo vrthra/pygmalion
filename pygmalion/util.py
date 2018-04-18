@@ -2,8 +2,11 @@ import json
 import string
 import hashlib
 import itertools as it
+from pygmalion.bc import bc
 import pudb
 brk = pudb.set_trace
+
+green = bc(bc.green)
 
 def lossy_obj_rep(val):
     if isinstance(val, list):
@@ -76,7 +79,28 @@ def simplify_grammar(g):
     new_g = flatten_choices(new_g)
     new_g = compress_grammar(new_g)
     new_g = remove_redundant(new_g)
+    new_g = expand_every_thing(new_g)
     return new_g
+
+def expand_every_thing(grammar):
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        newrules = []
+        for rule in rules:
+            newrule = []
+            for elt in rule:
+                if type(elt) is tuple:
+                    if type(elt[1]) is set:
+                        newrule.append(elt)
+                    else:
+                        newrule.extend([elt[0]] * elt[1])
+                else:
+                    newrule.append(elt)
+            newrules.append(newrule)
+        ng[k] = newrules
+    return ng
+
 
 def remove_redundant(grammar):
     ng = {}
@@ -181,10 +205,7 @@ def choice_to_bnf(c):
     assert type(c) is tuple
     choice, count = c
     cv = choice.a if choice.a else choice.b
-    strcv = str(cv)
-    strcv = strcv.replace('0123456789', '0-9')
-    strcv = strcv.replace('abcdefghijklmnopqrstuvwxyz', 'a-z')
-    strcv = strcv.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z')
+    strcv = compact(str(cv))
     if type(count) is set:
         fst = min(count)
         lst = max(count)
@@ -201,8 +222,46 @@ def elt_to_bnf(elt):
     else:
         return str(elt)
 
+def get_choice(c):
+    if c.a: return c.a
+    else: return c.b
+
+def escape(s):
+    s = s.replace('[', '\\[')
+    s = s.replace(']', '\\]')
+    s = s.replace('(', '\\(')
+    s = s.replace(')', '\\)')
+    s = s.replace('+', '\\+')
+    s = s.replace('*', '\\*')
+    s = s.replace('?', '\\?')
+    return s
+
+def compact(s):
+    s = s.replace('0123456789', '0-9')
+    s = s.replace('abcdefghijklmnopqrstuvwxyz', 'a-z')
+    s = s.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z')
+    return s
+
+def item_to_bnf(elt):
+    if hasattr(elt, 'a'):
+        v = get_choice(elt)
+        if 'Box' in str(type(v)) and len(v.v) == 1:
+            return "%s" % escape(str(list(v.v)[0]))
+        else:
+            return compact(str(v))
+    else:
+        return elt_to_bnf(elt)
+
 def rule_to_bnf(rule):
-    return ''.join(elt_to_bnf(elt) for elt in rule)
+    nrule = [(c, len(list(cgen))) for c,cgen in it.groupby(rule, key=item_to_bnf)]
+    res = []
+    for elt, l in nrule:
+        if l == 1:
+            res.append(elt)
+        else:
+            res.append("%s{%d}" % (elt, l))
+    return ''.join(res)
+    #return ''.join(elt_to_bnf(elt) for elt in rule)
 
 def alter_to_bnf(k, rules):
     fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n    | %s"
