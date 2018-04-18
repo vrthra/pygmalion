@@ -58,7 +58,7 @@ def merge_grammars(g1, parse_tree, xcmps, inp):
     nlg = g.Grammar(translate_keys(parse_tree, comparison_map))
     my_g = {}
     for key in g1.keys() + nlg.keys():
-        v = g1[key] | nlg[key]
+        v = g1[key] | set(to_comparisons(r) for r in nlg[key])
         my_g[key] = v
     return g.Grammar(my_g)
     # return g.Grammar({key: g1[key] | parse_tree[key] for key in g1.keys() + parse_tree.keys()})
