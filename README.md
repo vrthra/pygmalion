@@ -169,24 +169,24 @@ vars
 ### Using Dumb Search for pychain and INFER for grammar
 
 ```
-make xeval.mathexpr INFER=COMPLETE DUMB_SEARCH=1 NO_LOG=1
+make xeval.mathexpr INFER=SOUND DUMB_SEARCH=1 NO_LOG=1
 ```
 
-Using INFER=LOSSY here gets really terrible results
+Using INFER=UNSOUND here gets really terrible results
 
 ```
-make xeval.mathexpr INFER=LOSSY DUMB_SEARCH=1 NO_LOG=1
+make xeval.mathexpr INFER=UNSOUND DUMB_SEARCH=1 NO_LOG=1
 ```
 
 ### Using Return Probability for pychain
 
 ```
-make xeval.urljava INFER=LOSSY NO_LOG=1 MY_RP=0.1
+make xeval.urljava INFER=UNSOUND NO_LOG=1 MY_RP=0.1
 ```
 
 ### Using direct evaluation
 
 ```
-make xinfer.microjson NO_LOG=1 INFER=LOSSY NOUT=1000
+make xinfer.microjson NO_LOG=1 INFER=UNSOUND NOUT=1000
 ```
 
