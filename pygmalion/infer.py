@@ -71,6 +71,8 @@ def to_comparisons(rule):
     The idea here is to shift away from individual results
     to the comparisons made.
     """
+    if not config.With_Char_Class:
+        return rule
     rvalues = []
     for elt in rule.rvalues():
         if type(elt) is miner.NTKey:
