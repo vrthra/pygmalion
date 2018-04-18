@@ -190,4 +190,5 @@ help:
 
 
 req:
+	$(python3) -c 'import sys; assert sys.version_info >= (3,6)'
 	$(pip3) install -r requirements.txt --user
