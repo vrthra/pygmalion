@@ -75,7 +75,21 @@ def simplify_grammar(g):
     new_g = count_elements(new_g)
     new_g = flatten_choices(new_g)
     new_g = compress_grammar(new_g)
+    new_g = remove_redundant(new_g)
     return new_g
+
+def remove_redundant(grammar):
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        newrules = []
+        for rule in rules:
+            newrule = []
+            if len(rule) == 1 and str(rule[0]) == str(k):
+                continue
+            newrules.append(rule)
+        ng[k] = newrules
+    return ng
 
 def flatten_choices(grammar):
     ng = {}
