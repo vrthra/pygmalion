@@ -22,16 +22,17 @@ refined=$(addprefix .pickled/, $(addsuffix .py.refine,$(mytargets)) )
 all:
 	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz), eval $(eval)
 
-MY_RP=1.0
+export MY_RP:=1.0
+export R:=0
+export NOUT:=100
+export MAXSYM=100
+export INFER:=COMPLETE
+export NOCTRL:=0
+export NO_LOG:=1
 NINPUT=100
-R=0
-NOUT=100
-MAXSYM=100
-INFER=COMPLETE
-NOCTRL=0
 
 .pickled/%.py.chain: subjects/%.py | .pickled
-	NOCTRL=$(NOCTRL) MY_RP=$(MY_RP) R=$(R) $(python3) ./bin/pychain.py $< $(NINPUT) $@.tmp
+	$(python3) ./bin/pychain.py $< $(NINPUT) $@.tmp
 	mv $@.tmp $@
 
 .pickled/%.py.trace: subjects/%.py .pickled/%.py.chain
@@ -68,9 +69,9 @@ endif
 
 .pickled/%.py.infer: .pickled/%.py.mine
 ifeq ($(debug),infer)
-	INFER=$(INFER) $(python3) -m pudb ./bin/inferit.py $<
+	$(python3) -m pudb ./bin/inferit.py $<
 else
-	INFER=$(INFER) $(python3) ./bin/inferit.py $<
+	$(python3) ./bin/inferit.py $<
 endif
 	@mv $<.tmp $@
 
@@ -84,9 +85,9 @@ endif
 
 .pickled/%.py.fuzz: .pickled/%.py.refine
 ifeq ($(debug),fuzz)
-	NOUT=$(NOUT) MAXSYM=$(MAXSYM) $(python3) -m pudb ./bin/fuzzit.py $<
+	$(python3) -m pudb ./bin/fuzzit.py $<
 else
-	NOUT=$(NOUT) MAXSYM=$(MAXSYM) $(python3) ./bin/fuzzit.py $<
+	$(python3) ./bin/fuzzit.py $<
 endif
 	@mv $<.tmp $@
 
