@@ -24,8 +24,12 @@ def get_regex_map(parse_tree, xcmps, inp):
         else:
             hkey = []
             for pos in r._taint:
-                val = get_regex_choice(r.comparisons[pos])
-                hkey.append(str(val))
+                if pos in r.comparisons:
+                    val = get_regex_choice(r.comparisons[pos])
+                    hkey.append(str(val))
+                else:
+                    # likely input returned without parsing the rest
+                    continue
             newk = miner.NTKey(k.k.newV(u.h1(':'.join(hkey))))
         comparison_map[k] = newk
     return comparison_map
