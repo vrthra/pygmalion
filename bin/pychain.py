@@ -18,6 +18,6 @@ if __name__ == "__main__":
             e = pychains.chain.Chain()
             (a, r) = e.exec_argument(_mod.main)
             t = time.perf_counter() - start
-            print(i, t, a, flush=True)
+            print(i, t, repr(a), flush=True)
             pickle.dump((a, t), file=f)
 
