@@ -4,7 +4,6 @@
 import random
 import pygmalion.miner as miner
 import pygmalion.grammar as g
-import pygmalion.refiner as refiner
 import re
 import sys
 import json
@@ -200,15 +199,15 @@ def to_str(v):
         return ''.join([to_str(i) for i in v])
     if type(v) is miner.NTKey:
         return str(v)
-    if type(v) == refiner.Choice:
+    if type(v) == g.Choice:
         if v.a:
             return random.choice(list(v.a.v))
         elif v.b:
             lst = [c for c in All_Characters if c not in v.b.v.v]
             return random.choice(lst)
-    elif type(v) == refiner.Box:
+    elif type(v) == g.Box:
         return random.choice(list(v.v))
-    elif type(v) == refiner.Not:
+    elif type(v) == g.Not:
         lst = [c for c in All_Characters if c not in v.v.v]
         return random.choice(lst)
     else:

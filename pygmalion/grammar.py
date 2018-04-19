@@ -1,5 +1,5 @@
-import pygmalion.bc as bc
-red = bc.bc(bc.bc.red)
+import string
+import pygmalion.config as config
 class Grammar:
     def __init__(self, d={}): self._dict = d
     def __setitem__(self, key, item): self._dict[key] = item
@@ -46,3 +46,61 @@ class V:
     @classmethod
     def start(cls):
         return V(0, '', '', 'START', 0)
+
+class Not:
+    def __init__(self, v):
+        self.v = v
+    def __str__(self): return "[^%s]" % str(self.v.val())
+    def __repr__(self): return "!%s" % str(self.v)
+    def __bool__(self): return bool(self.v)
+
+class Box:
+    def __init__(self, v):
+        self.v = v
+    def val(self): return to_str(self.v)
+    def __str__(self): return "[%s]" % self.val()
+    def __repr__(self): return "<%s>" % ''.join(self.v)
+    def __bool__(self): return len(''.join(self.v)) > 0
+
+class Choice:
+    def __init__(self, a, b):
+        self.a, self.b = a, b
+    def __repr__(self): return 'choice: %s' % str(self)
+    def __str__(self):
+        x = self.val()
+        return simplify(x)
+    def val(self):
+        if self.a and not self.b:
+            return str(self.a)
+        elif not self.a and self.b:
+            return str(self.b)
+        else:
+            if config.Simple_Class:
+                return '%s' % self.a
+            else:
+                return '(%s&%s)' % (self.a, self.b)
+    def __eq__(self, o):
+        return type(o) == Choice and str(self) == str(o)
+
+def escape(v):
+    return v
+
+def simplify(x):
+    x = x.replace('0123456789', '0-9')
+    x = x.replace('abcdefghijklmnopqrstuvwxyz', 'a-z')
+    x = x.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z')
+    return x
+
+def to_str(k):
+    v = ''
+    if not k:
+        return ':empty:'
+    for i in k:
+        if str(i) not in string.punctuation + string.digits + string.ascii_letters:
+            v+= repr(i)[1:-1]
+        else:
+            v += i
+    r = ''.join(sorted(v))
+    r = r.replace('+-.', '-+.')
+    return r
+

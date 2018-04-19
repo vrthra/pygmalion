@@ -11,44 +11,6 @@ import pickle
 from pygmalion.bc import bc
 import pudb; brk = pudb.set_trace
 
-class Not:
-    def __init__(self, v):
-        self.v = v
-    def __str__(self): return "[^%s]" % str(self.v.val())
-    def __repr__(self): return "!%s" % str(self.v)
-    def __bool__(self): return bool(self.v)
-
-class Box:
-    def __init__(self, v):
-        self.v = v
-    def val(self): return u.to_str(self.v)
-    def __str__(self): return "[%s]" % self.val()
-    def __repr__(self): return "<%s>" % ''.join(self.v)
-    def __bool__(self): return len(''.join(self.v)) > 0
-
-class Choice:
-    def __init__(self, a, b):
-        self.a, self.b = a, b
-    def __repr__(self): return 'choice: %s' % str(self)
-    def __str__(self):
-        x = self.val()
-        x = x.replace('0123456789', '0-9')
-        x = x.replace('abcdefghijklmnopqrstuvwxyz', 'a-z')
-        x = x.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z')
-        return x
-    def val(self):
-        if self.a and not self.b:
-            return str(self.a)
-        elif not self.a and self.b:
-            return str(self.b)
-        else:
-            if config.Simple_Class:
-                return '%s' % self.a
-            else:
-                return '(%s&%s)' % (self.a, self.b)
-    def __eq__(self, o):
-        return type(o) == Choice and str(self) == str(o)
-
 def nt_key_to_s(i):
     v = i.k
     return "[%s:%s]" % (v.func, v.var)
@@ -69,7 +31,7 @@ def get_regex(cmps):
             success_eq.update(v)
         else:
             failure_eq.update(v)
-    v = Choice(Box(success_eq), Not(Box(failure_eq)))
+    v = g.Choice(g.Box(success_eq), g.Not(g.Box(failure_eq)))
     return v
 
 def normalize_char_cmp(elt, rule):

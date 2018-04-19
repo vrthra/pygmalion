@@ -1,6 +1,5 @@
 import pygmalion.grammar as g
 import pygmalion.config as config
-import pygmalion.refiner as refiner
 import pygmalion.miner as miner
 import pygmalion.util as u
 import pudb
@@ -50,7 +49,7 @@ def get_regex_choice(cmps):
             success_eq.update(v)
         else:
             failure_eq.update(v)
-    v = refiner.Choice(refiner.Box(success_eq), refiner.Not(refiner.Box(failure_eq)))
+    v = g.Choice(g.Box(success_eq), g.Not(g.Box(failure_eq)))
     return v
 
 def normalize_char_cmp(elt, rule):
