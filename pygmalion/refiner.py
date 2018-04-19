@@ -257,7 +257,17 @@ def remove_multi_repeats(g):
 def replace_key_in_rule(k, vrs, my_r):
     replaced = False
     ret_r = []
-    if len(vrs) == 0:
+    if type(vrs) != list:
+        for elt in my_r.rvalues():
+            if type(elt) == type(k) and elt == k:
+                replaced = True
+                # expand v because it is a complete sequence
+                newelt = vrs
+            else:
+                newelt = elt
+            ret_r.append(newelt)
+        return (replaced, my_r.to_rwrap(ret_r))
+    elif len(vrs) == 0:
         if type(vr) is miner.NTKey:
             v = vr
         elif type(vr) is miner.RWrap:
