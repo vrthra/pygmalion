@@ -232,7 +232,7 @@ def generalize_sets(grammar):
                 else:
                     choice, count = elt
                     if type(count) is set:
-                        newrule.append((choice, {min(count), max(count)}))
+                        newrule.append((choice, set(range(min(count),max(count)))))
                     else:
                         newrule.append((choice, count))
             newrules.append(rule.to_rwrap(newrule))

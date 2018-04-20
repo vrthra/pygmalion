@@ -208,7 +208,8 @@ def tuple_to_bnf(c):
     choice, count = c
     strcv = str(choice)
     if type(count) is set:
-        return "%s{%d,%d}" % (strcv, *sorted(count))
+        scount = sorted(count)
+        return "%s{%d,%d}" % (strcv, *[scount[i] for i in [0,-1]])
     else:
         return "%s{%d}" % (strcv, count)
 
