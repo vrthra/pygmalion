@@ -1,6 +1,5 @@
 import pygmalion.grammar as g
 import pygmalion.config as config
-import pygmalion.miner as miner
 import pygmalion.util as u
 import pudb
 import sys
@@ -29,7 +28,7 @@ def get_regex_map(parse_tree, xcmps, inp):
                 else:
                     # likely input returned without parsing the rest
                     continue
-            newk = miner.NTKey(k.k.newV(u.h1(':'.join(hkey))))
+            newk = g.NTKey(k.k.newV(u.h1(':'.join(hkey))))
         comparison_map[k] = newk
     return comparison_map
 
@@ -72,7 +71,7 @@ def rule_elts_to_comparisons(rule, tree, comparison_map, nassigns):
     """
     rvalues = []
     for elt in rule.rvalues():
-        if type(elt) is miner.NTKey:
+        if type(elt) is g.NTKey:
             rvalues.append(strip_suffix(key_add_cmp_hash(elt, comparison_map), nassigns))
         else:
             if config.With_Char_Class:
@@ -151,7 +150,7 @@ def strip_suffix(elt, nassigns):
         return elt
 
 def strip_key_suffix(v):
-    return miner.NTKey(v.k.newV('0'))
+    return g.NTKey(v.k.newV('0'))
 
 def is_leaf(n, tree):
     if not n in tree: return True
@@ -170,7 +169,7 @@ def recover_grammar(root, tree, inp, i, xins, nassigns):
         n, *nodes = nodes
         if not is_leaf(n, tree):
             rules = tree[n]
-            if isinstance(n, miner.NTKey):
+            if isinstance(n, g.NTKey):
                 key = strip_suffix(key_add_cmp_hash(n, comparison_map), nassigns)
             else:
                 if config.With_Char_Class:
@@ -188,7 +187,7 @@ def recover_grammar(root, tree, inp, i, xins, nassigns):
 
 def to_context_free(i,tree, nassigns):
     (inp, xins, tree) = tree
-    start = miner.NTKey(g.V.start())
+    start = g.NTKey(g.V.start())
     return (inp, recover_grammar(start, tree._dict, inp, i, xins, nassigns))
 
 # Get a grammar for multiple inputs

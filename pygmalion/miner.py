@@ -5,36 +5,7 @@ from . import grammar as g
 from . import config
 
 
-class NTKey:
-    def __init__(self, k):
-        assert type(k) is g.V
-        self.k = k
-    def __repr__(self): return "$%s" % self.k
-    def __str__(self): return "$%s" % self.k
-    def __hash__(self): return hash(self.k)
-    def __eq__(self, o): return type(o) == NTKey and self.k == o.k
-    def __ne__(self, o): return not (self == o)
-
-class RWrap:
-    def __init__(self, k, rvalues, taint=None, comparisons=None):
-        self.k = k
-        self._rvalues = rvalues
-        self._taint = taint
-        self.comparisons = comparisons
-    def rvalues(self): return self._rvalues
-    def value(self): return ''.join(str(k) for k in self._rvalues)
-    def __str__(self): return self.value()
-    def __repr__(self):
-        return 'R[%s]:=%s' % (self.k, self.value())
-    def __hash__(self): return hash(self.value())
-    def __eq__(self, o): return type(o) == RWrap and self.value() == o.value()
-    def __lt__(self, o): return str(self).__lt__(str(o))
-    def __iter__(self): return iter(self.rvalues())
-    def to_rwrap(self, rvals):
-        return RWrap(self.k, rvals, self._taint, self.comparisons)
-
-
-class Rule:
+class Def:
     def __init__(self,k, v):
         self.k = k
         self.v = v
@@ -43,18 +14,18 @@ class Rule:
         self.comparisons = None
 
     def to_rwrap(self, rvals):
-        return RWrap(self.k, rvals, self._taint, self.comparisons)
+        return g.Rule(self.k, rvals, self._taint, self.comparisons)
 
     def ranges(self): return sorted(self._rindex, key=lambda a: a.start)
     def __lt__(self, o): return str(self).__lt__(str(o))
-    def __repr__(self): return 'Rule[%s]:=%s' % (self.k, self.value())
+    def __repr__(self): return 'Def[%s]:=%s' % (self.k, self.value())
     def value(self): return ''.join(str(k) for k in self.rvalues())
     def rvalues(self): return [self._rindex[k] for k in self.ranges()]
     def __str__(self): return self.value()
     def __iter__(self): return iter(self.rvalues())
 
     def reconstitute(self, v, g):
-        if type(v) is NTKey:
+        if type(v) is g.NTKey:
             # get the value from grammar
             val = list(g[v])
             assert len(val) == 1 # only for linear grammars
@@ -113,7 +84,7 @@ class Rule:
         keytaint = self._tinclude(o)
         # get starting point.
         my_str = self._rindex[keytaint]
-        if type(my_str) is not NTKey:
+        if type(my_str) is not g.NTKey:
             del self._rindex[keytaint]
             splitA = trange.start - keytaint.start
             init_range = range(keytaint.start, trange.start)
@@ -148,7 +119,7 @@ class Rule:
             # So we need to take these eclipsed variables and remove from
             # this rule after setting this var instead.
             evalues = {k:self._rindex[k] for k in eclipsed
-                    if type(self._rindex[k]) is NTKey} # choose only keys
+                    if type(self._rindex[k]) is g.NTKey} # choose only keys
             for k in eclipsed: del self._rindex[k]
             self._rindex[trange] = ntkey
             return evalues
@@ -165,7 +136,7 @@ class Rule:
             my_str = self._rindex[keytaint]
             # we are replacing part of another (larger) key
             # so, get its corresponding rule, and replace it there.
-            if type(my_str) is NTKey:
+            if type(my_str) is g.NTKey:
                 rule = my_grammar[my_str]
                 # update the value o with key key
                 # check if the rule is smaller
@@ -185,7 +156,7 @@ def get_parse_tree(assignments):
     # all values are tainted strings.
     for var, value in assignments.items():
         all_eclipsed = []
-        nt_var = NTKey(var)
+        nt_var = g.NTKey(var)
         append = False if my_grammar else True
         for key, rule in my_grammar.items():
             # is the key at a higher stack height than var?
@@ -206,8 +177,8 @@ def get_parse_tree(assignments):
                         all_eclipsed.append((eclipsed, nt_var))
                 append = True
 
-        # Until merge, all keys have a single rule.
-        if append: my_grammar[nt_var] = Rule(nt_var, value)
+        # Until merge, all keys have a single definition.
+        if append: my_grammar[nt_var] = Def(nt_var, value)
 
         for einfo in all_eclipsed:
             eclipsed, by_var_key = einfo

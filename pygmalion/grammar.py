@@ -82,6 +82,35 @@ class Choice:
     def __eq__(self, o):
         return type(o) == Choice and str(self) == str(o)
 
+
+class NTKey:
+    def __init__(self, k):
+        assert type(k) is V
+        self.k = k
+    def __repr__(self): return "$%s" % self.k
+    def __str__(self): return "$%s" % self.k
+    def __hash__(self): return hash(self.k)
+    def __eq__(self, o): return type(o) == NTKey and self.k == o.k
+    def __ne__(self, o): return not (self == o)
+
+class Rule:
+    def __init__(self, k, rvalues, taint=None, comparisons=None):
+        self.k = k
+        self._rvalues = rvalues
+        self._taint = taint
+        self.comparisons = comparisons
+    def rvalues(self): return self._rvalues
+    def value(self): return ''.join(str(k) for k in self._rvalues)
+    def __str__(self): return self.value()
+    def __repr__(self):
+        return 'Rule[%s]:=%s' % (self.k, self.value())
+    def __hash__(self): return hash(self.value())
+    def __eq__(self, o): return type(o) == Rule and self.value() == o.value()
+    def __lt__(self, o): return str(self).__lt__(str(o))
+    def __iter__(self): return iter(self.rvalues())
+    def to_rwrap(self, rvals):
+        return Rule(self.k, rvals, self._taint, self.comparisons)
+
 def escape(v):
     return v
 

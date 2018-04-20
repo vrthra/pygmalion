@@ -2,7 +2,6 @@
 # Use a grammar to fuzz, using derivation trees
 
 import random
-import pygmalion.miner as miner
 import pygmalion.grammar as g
 import re
 import sys
@@ -74,11 +73,11 @@ def min_expansions(expansion, grammar, seen=set()):
 
 # Return an initialized tree
 def init_tree():
-    start_symbol = miner.NTKey(g.V.start())#"[:START]"
+    start_symbol = g.NTKey(g.V.start())#"[:START]"
     return (start_symbol, None)
 
 def is_symbol(s):
-    if type(s) != miner.NTKey: return False
+    if type(s) != g.NTKey: return False
     if s == '+': return False
     return True
     
@@ -197,7 +196,7 @@ def to_str(v):
     if v == '+': return ''
     if type(v) is list:
         return ''.join([to_str(i) for i in v])
-    if type(v) is miner.NTKey:
+    if type(v) is g.NTKey:
         return str(v)
     if type(v) == g.Choice:
         if v.a:

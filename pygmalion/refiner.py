@@ -1,7 +1,6 @@
 from taintedstr import Op
 from itertools import groupby
 import itertools as it
-import pygmalion.miner as miner
 import pygmalion.grammar as g
 import pygmalion.config as config
 import pygmalion.util as u
@@ -54,7 +53,7 @@ def to_comparisons(rule):
     """
     rvalues = []
     for elt in rule.rvalues():
-        if type(elt) is miner.NTKey:
+        if type(elt) is g.NTKey:
             rvalues.append(elt)
         else:
             new_elt = normalize_char_cmp(elt, rule)
@@ -81,7 +80,7 @@ def rule_match_simple(rwmr, rwr):
     if len(mr) != len(r): return False
     for i, me in enumerate(mr):
         e = r[i]
-        if all(i == miner.NTKey for i in [type(me), type(e)]):
+        if all(i == g.NTKey for i in [type(me), type(e)]):
             if me != e: return False
         if all(i == list for i in [type(me), type(e)]):
             if me != e: return False
@@ -175,7 +174,7 @@ def remove_subset_keys(grammar):
     return new_grammar
 
 def remove_multiple_repeats_from_elt(elt):
-    if type(elt) == miner.NTKey: return elt
+    if type(elt) == g.NTKey: return elt
     if len(elt) == 1: return elt
     rv = remove_multiple_repeats_from_lst(elt.rvalues())
     elt._rvalues = rv
@@ -230,9 +229,9 @@ def replace_key_in_rule(k, vrs, my_r):
             ret_r.append(newelt)
         return (replaced, my_r.to_rwrap(ret_r))
     elif len(vrs) == 0:
-        if type(vr) is miner.NTKey:
+        if type(vr) is g.NTKey:
             v = vr
-        elif type(vr) is miner.RWrap:
+        elif type(vr) is g.Rule:
             v = vr.rvalues()[0]
         else:
             assert False
@@ -291,7 +290,7 @@ def remove_single_alternatives(g):
 def grammar_gc(grammar):
     # Removes any unused keys if one starts from START and adds
     # all referencing keys in rules recursively
-    start = miner.NTKey(g.V.start())
+    start = g.NTKey(g.V.start())
     keys = [start]
     seen = set(keys)
     new_g = {}
@@ -301,7 +300,7 @@ def grammar_gc(grammar):
         rules = grammar[k]
         for rule in rules:
             for e in rule.rvalues():
-                if type(e) is miner.NTKey and e not in seen:
+                if type(e) is g.NTKey and e not in seen:
                     seen.add(e)
                     keys.append(e)
     return new_g
