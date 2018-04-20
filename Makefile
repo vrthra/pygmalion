@@ -6,7 +6,7 @@ mytargets=hello whilescope microjson array urljava urlpy mathexpr math expr
 .SUFFIXES:
 
 scala=$(addprefix .pickled/, $(addsuffix .scala,$(mytargets)) )
-bnf=$(addprefix .pickled/, $(addsuffix .bnf,$(mytargets)) )
+bnf=$(addprefix .pickled/, $(addsuffix .py.bnf,$(mytargets)) )
 
 eval=$(addprefix .pickled/, $(addsuffix .py.eval,$(mytargets)) )
 fuzz=$(addprefix .pickled/, $(addsuffix .py.fuzz,$(mytargets)) )
@@ -94,7 +94,7 @@ endif
 .pickled/%.scala: .pickled/%.py.refine
 	$(python3) ./bin/scala.py $< > $@
 
-.pickled/%.bnf: .pickled/%.py.refine
+.pickled/%.py.bnf: .pickled/%.py.refine
 	$(python3) ./bin/bnf.py $< > $@
 
 chain.%: .pickled/%.py.chain; @:
@@ -115,7 +115,7 @@ eval.%: .pickled/%.py.eval; @:
 
 scala.%: .pickled/%.scala; @:
 
-bnf.%: .pickled/%.bnf; @:
+bnf.%: .pickled/%.py.bnf; @:
 
 tribble.%: .pickled/%.scala; @:
 	java -Xss1g -jar ./bin/gramcov.jar generate --out-dir=gcov --mode=4-path $<
@@ -202,7 +202,7 @@ xbnf.%: from=bnf
 xbnf.%:
 	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) bnf.$*
-	cat .pickled/$*.bnf
+	cat .pickled/$*.py.bnf
 
 clobber.%:
 	rm -f .pickled/$*.*

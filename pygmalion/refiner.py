@@ -110,14 +110,28 @@ def are_elements_same(elts):
         # different NTKeys
         return False
 
-def compress_grouped_rules(rules):
-    if len(rules) == 1: return rules
+def compress_grouped_rules(llen, rules):
+    if len(rules) == 1:
+        res = are_elements_same(rules[0])
+        if not res: return rules
+        return [[res]]
     new_rule = []
     for k in zip(*rules):
         res = are_elements_same(k)
         if not res: return rules
         new_rule.append(res)
     return [new_rule]
+
+def plain_expand(elts):
+    res = []
+    for i in elts:
+        if type(i) is g.NTKey:
+            res.append(str(i))
+        else:
+            assert type(i) is tuple
+            k, count = i
+            res.append(str(k))
+    return ''.join(res)
 
 def compress_alternative_with_set_count(k, rules):
     # take the set of alternatives, group them by their length
@@ -130,8 +144,8 @@ def compress_alternative_with_set_count(k, rules):
     # (hence the extend)
     expanded_rules = [l.rvalues() for l in rules]
     new_rules = []
-    for c, cgen in it.groupby(expanded_rules, key=len):
-        v = compress_grouped_rules(list(cgen))
+    for c, cgen in it.groupby(expanded_rules, key=plain_expand):
+        v = compress_grouped_rules(c, list(cgen))
         for r in v:
             new_rules.append(g.Rule(k, r))
     return new_rules
@@ -155,7 +169,6 @@ def remove_self_repetition(grammar):
         rules = grammar[k]
         newrules = []
         for rule in rules:
-            newrule = []
             if len(rule.rvalues()) == 1 and str(rule.rvalues()[0]) == str(k):
                 continue
             newrules.append(rule)
@@ -181,15 +194,61 @@ def expand_every_thing(grammar):
         ng[k] = newrules
     return ng
 
+def simplify_choices(grammar):
+    # change all choices from either box or not box
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        newrules = set()
+        for rule in rules:
+            newrule = []
+            for elt in rule.rvalues():
+                if type(elt) is list:
+                    clist = []
+                    for c in elt:
+                        if type(c) is g.Choice:
+                            cx = c.a if c.a else c.b
+                            clist.append(cx)
+                        else:
+                            clist.append(c)
+                    newrule.append(clist)
+                else:
+                    newrule.append(elt)
+            newrules.add(rule.to_rwrap(newrule))
+        ng[k] = newrules
+    return ng
+
+def generalize_sets(grammar):
+    # Replace a set by just its min and max values
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        newrules = []
+        for rule in rules:
+            newrule = []
+            for elt in rule.rvalues():
+                if type(elt) is g.NTKey:
+                    newrule.append(elt)
+                else:
+                    choice, count = elt
+                    if type(count) is set:
+                        newrule.append((choice, {min(count), max(count)}))
+                    else:
+                        newrule.append((choice, count))
+            newrules.append(rule.to_rwrap(newrule))
+        ng[k] = newrules
+    return ng
+
 def refine_grammar(grammar):
     assert type(grammar) is dict
-    if 'remove_single_alternatives' in config.Refine_Tactics:
-        # given key := value with no alternatives, replace
-        # any instance of tht key with the value.
-        print('remove_single_alternatives', file=sys.stderr)
-        grammar = remove_single_alternatives(grammar)
+    grammar = simplify_choices(grammar)
 
     assert type(grammar) is dict
+    # given key := value with no alternatives, replace
+    # any instance of tht key with the value.
+    print('remove_single_alternatives', file=sys.stderr)
+    grammar = remove_single_alternatives(grammar)
+
     grammar = g.grammar_complete_gc(grammar)
 
     grammar = count_elements(grammar)
@@ -201,6 +260,8 @@ def refine_grammar(grammar):
     grammar = compress_grammar_alternatives(grammar)
 
     grammar = remove_self_repetition(grammar)
+
+    grammar = generalize_sets(grammar)
 
     return grammar
 

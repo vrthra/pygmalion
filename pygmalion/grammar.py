@@ -47,6 +47,7 @@ class Not:
     def __str__(self): return "[^%s]" % str(self.v.val())
     def __repr__(self): return "!%s" % str(self.v)
     def __bool__(self): return bool(self.v)
+    def __eq__(self, other): return type(other) == Not and self.v == other.v
 
 class Box:
     def __init__(self, v):
@@ -55,6 +56,7 @@ class Box:
     def __str__(self): return "[%s]" % self.val()
     def __repr__(self): return "<%s>" % ''.join(self.v)
     def __bool__(self): return len(''.join(self.v)) > 0
+    def __eq__(self, other): return type(other) == Box and self.v == other.v
 
 class Choice:
     def __init__(self, a, b):
@@ -199,3 +201,47 @@ def unique_keys(grammar):
         assert l > len(newg)
         grammar = newg
     assert False
+
+
+def tuple_to_bnf(c):
+    assert type(c) is tuple
+    choice, count = c
+    strcv = str(choice)
+    if type(count) is set:
+        return "%s{%d,%d}" % (strcv, *sorted(count))
+    else:
+        return "%s{%d}" % (strcv, count)
+
+
+def choice_to_bnf(c):
+    assert type(c) is tuple
+    choice, count = c
+    strcv = compact(str(choice))
+    if type(count) is set:
+        return "%s{%s}" % (strcv, count)
+    else:
+        if count == 1:
+            return "%s" % strcv
+        else:
+            return "%s{%d}" % (strcv, count)
+
+def elt_to_bnf(elt):
+    if type(elt) is tuple:
+        return tuple_to_bnf(elt)
+    else:
+        if  type(elt) is NTKey:
+            return str(elt)
+        else:
+            return "(%s)" % str(elt)
+
+
+def rule_to_bnf(rule):
+    return '~'.join(elt_to_bnf(elt) for elt in rule)
+
+def alter_to_bnf(k, rules):
+    fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n    | %s"
+    alters = {rule_to_bnf(rule) for rule in rules}
+    return fmt % (k, "\n    | ".join(sorted(list(alters))))
+
+def grammar_to_bnf(g):
+    return '\n'.join([alter_to_bnf(k,g[k]) for k in g])

@@ -73,27 +73,6 @@ def with_repeating_numbers(g):
     res = "\n".join(ng)
     return res
 
-def choice_to_bnf(c):
-    assert type(c) is tuple
-    choice, count = c
-    cv = choice.a if choice.a else choice.b
-    strcv = compact(str(cv))
-    if type(count) is set:
-        fst = min(count)
-        lst = max(count)
-        return "%s{%d,%d}" % (strcv, fst, lst)
-    else:
-        if count == 1:
-            return "%s" % strcv
-        else:
-            return "%s{%d}" % (strcv, count)
-
-def elt_to_bnf(elt):
-    if type(elt) is tuple:
-        return choice_to_bnf(elt)
-    else:
-        return str(elt)
-
 def get_choice(c):
     if c.a: return c.a
     else: return c.b
@@ -124,16 +103,35 @@ def item_to_bnf(elt):
     else:
         return elt_to_bnf(elt)
 
-def rule_to_bnf(rule):
-    nrule = [(c, len(list(cgen))) for c,cgen in it.groupby(rule, key=item_to_bnf)]
-    res = []
-    for elt, l in nrule:
-        if l == 1:
-            res.append(elt)
+def choice_to_bnf(c):
+    assert type(c) is tuple
+    choice, count = c
+    # if type(choice) == g.Choice:
+    #     cv = choice.a if choice.a else choice.b
+    # elif type(choice) == g.Box:
+    #     cv = choice
+    # elif type(choice) == g.Not:
+    #     cv = choice
+    strcv = compact(str(choice))
+    if type(count) is set:
+        fst = min(count)
+        lst = max(count)
+        return "%s{%d,%d}" % (strcv, fst, lst)
+    else:
+        if count == 1:
+            return "%s" % strcv
         else:
-            res.append("%s{%d}" % (elt, l))
-    return ''.join(res)
-    #return ''.join(elt_to_bnf(elt) for elt in rule)
+            return "%s{%d}" % (strcv, count)
+
+def elt_to_bnf(elt):
+    if type(elt) is tuple:
+        return choice_to_bnf(elt)
+    else:
+        return str(elt)
+
+
+def rule_to_bnf(rule):
+    return ''.join(elt_to_bnf(elt) for elt in rule)
 
 def alter_to_bnf(k, rules):
     fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n    | %s"
