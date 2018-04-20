@@ -154,6 +154,10 @@ cleantill.fuzz:
 cleantill.eval:
 	$(MAKE) clean.eval
 
+cleantill.bnf:
+	$(MAKE) clean.bnf
+
+
 xchain.%: from=chain
 xchain.%:
 	$(MAKE) cleantill.$(from) file=$*.py
