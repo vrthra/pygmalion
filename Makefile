@@ -194,8 +194,9 @@ xeval.%:
 	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) eval.$*
 
+xbnf.%: from=bnf
 xbnf.%:
-	$(MAKE) clean.bnf file=$*
+	$(MAKE) cleantill.$(from) file=$*.py
 	$(MAKE) bnf.$*
 	cat .pickled/$*.bnf
 
