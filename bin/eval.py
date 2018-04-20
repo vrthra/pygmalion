@@ -9,6 +9,7 @@ import os
 import pickle
 import resource
 import pudb
+import pygmalion.config as c
 brk = pudb.set_trace
 resource.setrlimit(resource.RLIMIT_STACK, [0x10000000, resource.RLIM_INFINITY])
 sys.setrecursionlimit(0x100000)
@@ -32,20 +33,22 @@ if __name__ == "__main__":
     all_n = 0
     cov = coverage.Coverage(source=['example'], branch=Branch)
     mylst = pickle.load(fin)
+    last_t = 0
     for j,(i, t) in enumerate(mylst):
         try:
-            print(j, repr(i))
+            #print(j, repr(i), flush=True, end='')
             cov.start()
             all_n += 1
             v = mod_obj.main(taintedstr.tstr(i))
             cov.stop()
-            print("\t=>",repr(v), flush=True)
             valid_n += 1
         except:
             pass
-        print("%", cov.report(file=open(os.devnull, 'w')), ' at ', t, 'seconds')
-    print("Valid: %d/%d" % (valid_n, all_n))
+        last_t = t
+        f = cov.report(file=open(os.devnull, 'w'))
+        print(j, "coverage: %.2f%%" % f, ' at ', '%.2f seconds' % t, repr(i), flush=True)
     cov.save()
-    print(cov.report(file=fout))
+    c = cov.report(file=fout)
+    print("Valid: %d/%d with %f coverage at %f seconds" % (valid_n, all_n, c, last_t))
     cov.html_report(directory='coverage')
     cov.erase()
