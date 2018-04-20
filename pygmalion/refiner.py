@@ -51,6 +51,136 @@ def remove_single_alternatives(grammar):
         grammar = newg
     assert False
 
+def count_elements(grammar):
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        nrules = []
+        for rule in rules:
+            nrule = list()
+            for elt in rule.rvalues():
+                if type(elt) is list:
+                    # a list of choices
+                    nelt = [(c, len(list(cgen))) for c,cgen in it.groupby(elt)]
+                else:
+                    nelt = elt
+                nrule.append(nelt)
+            nrules.append(rule.to_rwrap(nrule))
+        ng[k] = nrules
+    return ng
+
+def flatten_choices(grammar):
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        newrules = []
+        for rule in rules:
+            newrule = []
+            for elt in rule:
+                if type(elt) == list:
+                    newrule.extend(elt)
+                else:
+                    newrule.append(elt)
+            newrules.append(rule.to_rwrap(newrule))
+        ng[k] = newrules
+    return ng
+
+def are_choices_same(list_of_choices):
+    my_choice = {str(choice) for choice, count in list_of_choices}
+    my_counts = {count for choice, count in list_of_choices}
+    if len(my_choice) > 1: return False
+    return (list_of_choices[0][0], my_counts)
+
+def are_elements_same(elts):
+    # taking elements of each rules,
+    # make sure we are talking about similar elements e.g ntkey = ntkey
+    stype = {type(i) for i in elts}
+    # else cant compress the rule
+    if len(stype) != 1: return False
+
+    # If they are all exactly the same, we have no issues
+    sstr = set(str(i) for i in elts)
+    if len(sstr) == 1: return elts[0]
+
+    if  tuple in stype:
+        res = are_choices_same(elts)
+        if not res: return False
+        return res
+    else:
+        # different NTKeys
+        return False
+
+def compress_grouped_rules(rules):
+    if len(rules) == 1: return rules
+    new_rule = []
+    for k in zip(*rules):
+        res = are_elements_same(k)
+        if not res: return rules
+        new_rule.append(res)
+    return [new_rule]
+
+def compress_alternative_with_set_count(k, rules):
+    # take the set of alternatives, group them by their length
+    # then for each group, start with the first element, and check
+    # if elements are the same. If they are a choice with different
+    # count but same char set, it is considered the same. It returns
+    # the set of counts instead of a single count. and returns the
+    # combined rule.
+    # If they are not the same, each rule is returned separately
+    # (hence the extend)
+    expanded_rules = [l.rvalues() for l in rules]
+    new_rules = []
+    for c, cgen in it.groupby(expanded_rules, key=len):
+        v = compress_grouped_rules(list(cgen))
+        for r in v:
+            new_rules.append(g.Rule(k, r))
+    return new_rules
+
+def compress_grammar_alternatives(grammar):
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        ng[k] = compress_alternative_with_set_count(k, rules)
+    return ng
+
+
+def remove_self_repetition(grammar):
+    # If a rule is of the form
+    # key ::=
+    #       key
+    #      | rule rest
+    # skip key
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        newrules = []
+        for rule in rules:
+            newrule = []
+            if len(rule.rvalues()) == 1 and str(rule.rvalues()[0]) == str(k):
+                continue
+            newrules.append(rule)
+        ng[k] = newrules
+    return ng
+
+def expand_every_thing(grammar):
+    ng = {}
+    for k in grammar:
+        rules = grammar[k]
+        newrules = []
+        for rule in rules:
+            newrule = []
+            for elt in rule.rvalues():
+                if type(elt) is tuple:
+                    if type(elt[1]) is set:
+                        newrule.append(elt)
+                    else:
+                        newrule.extend([elt[0]] * elt[1])
+                else:
+                    newrule.append(elt)
+            newrules.append(newrule)
+        ng[k] = newrules
+    return ng
+
 def refine_grammar(grammar):
     assert type(grammar) is dict
     if 'remove_single_alternatives' in config.Refine_Tactics:
@@ -61,6 +191,16 @@ def refine_grammar(grammar):
 
     assert type(grammar) is dict
     grammar = g.grammar_complete_gc(grammar)
+
+    grammar = count_elements(grammar)
+
+    # make <key> [choice_char1, choice_char2] <key> [choice_char3]
+    # into <key> choice_char1 choice_char2 <key> choice_char3
+    grammar = flatten_choices(grammar)
+
+    grammar = compress_grammar_alternatives(grammar)
+
+    grammar = remove_self_repetition(grammar)
 
     return grammar
 

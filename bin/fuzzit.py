@@ -20,7 +20,7 @@ if __name__ == "__main__":
     start = time.perf_counter()
     mylst = []
     for i in range(nout):
-        v = fuzz.produce(g.Grammar(grammar), max_sym)
+        v = fuzz.produce(grammar, max_sym)
         t = time.perf_counter() - start
         print(i, t, repr(v), file=sys.stderr, flush=True)
         mylst.append((v,t))

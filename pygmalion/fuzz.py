@@ -88,7 +88,20 @@ def expansion_to_children(expansion):
     log("Converting " + repr(ex))
     # strings contains all substrings -- both terminals and non-terminals such
     # that ''.join(strings) == expansion
-    r = [(s, None) if is_symbol(s) else (s, []) for s in ex if s]
+    r = []
+    for s in ex:
+        if not s: continue
+        if is_symbol(s):
+            r.append((s, None) )
+        else:
+            #assert type(s) is tuple # choice list
+            #for lchoice in s:
+            choice, count = s
+            if type(count) is set:
+                count = random.choice(list(count))
+            assert type(count) is int # may be int
+            for i in range(count):
+                r.append((choice, []))
     return r
     
 # Expand a node

@@ -43,9 +43,9 @@ if __name__ == "__main__":
             valid_n += 1
         except:
             pass
-        print("%", cov.report(), ' at ', t, 'seconds')
-    cov.save()
+        print("%", cov.report(file=open(os.devnull, 'w')), ' at ', t, 'seconds')
     print("Valid: %d/%d" % (valid_n, all_n))
+    cov.save()
     print(cov.report(file=fout))
     cov.html_report(directory='coverage')
     cov.erase()

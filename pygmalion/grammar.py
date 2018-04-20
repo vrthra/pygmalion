@@ -63,6 +63,9 @@ class Choice:
     def __str__(self):
         x = self.val()
         return simplify(x)
+    def __hash__(self):
+        return hash((self.a, self.b))
+
     def val(self):
         if self.a and not self.b:
             return str(self.a)
