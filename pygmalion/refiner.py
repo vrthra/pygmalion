@@ -350,13 +350,6 @@ def compress_keys(grammar):
 
 
 def refine_grammar(grammar):
-    # if config.With_Char_Class:
-    #     newg = {}
-    #     for k in grammar.keys():
-    #         v = grammar.get(k)
-    #         cv = to_char_classes(v)
-    #         newg[k] = set(unique_rules(cv))
-
     #grammar = remove_subset_keys(grammar)
     if config.Sort_Grammar:
         # print('sort', file=sys.stderr)
