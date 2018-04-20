@@ -142,7 +142,7 @@ def compress_alternative_with_set_count(k, rules):
     # combined rule.
     # If they are not the same, each rule is returned separately
     # (hence the extend)
-    expanded_rules = [l.rvalues() for l in rules]
+    expanded_rules = [l.rvalues() for l in sorted(rules, key=plain_expand)]
     new_rules = []
     for c, cgen in it.groupby(expanded_rules, key=plain_expand):
         v = compress_grouped_rules(c, list(cgen))
