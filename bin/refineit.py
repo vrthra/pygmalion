@@ -28,7 +28,7 @@ if __name__ == "__main__":
         print(u.readable_grammar(grammar), file=sys.stdout)
         pickle.dump(grammar, file=fout)
     else:
-        x = refiner.refine_grammar(g.Grammar(grammar))
+        x = refiner.refine_grammar(grammar)
         print(u.readable_grammar(x), file=sys.stdout)
         assert type(x) is dict
         pickle.dump(x, file=fout)

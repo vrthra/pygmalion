@@ -14,23 +14,17 @@ class Grammar:
     def get_dict(self):
         return {str(k):v for k,v in self._dict.items()}
 
-    def reconstitute(self):
-        def djs_to_string(djs):
-            return "\n\t| ".join([i.inputval(self).replace('\n', '\n|\t')
-                for i in sorted(djs)])
-        def fixline(key, rules):
-            fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t| %s"
-            return fmt % (key, djs_to_string(rules))
-        return "\n".join([fixline(key, self[key]) for key in self.keys()])
-
     def __str__(self):
-        def djs_to_string(djs):
-            return "\n\t| ".join([str(i).replace('\n', '\n|\t')
-                for i in sorted(djs)])
-        def fixline(key, rules):
-            fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n\t| %s"
-            return fmt % (key, djs_to_string(rules))
-        return "\n".join([fixline(key, self[key]) for key in self.keys()])
+        return "\n".join([key_djs_to_str(key, self) for key in self.keys()])
+
+def djs_to_str(key, grammar):
+    djs = grammar[key]
+    return "\n\t| ".join([str(i).replace('\n', '\n|\t') for i in sorted(djs)])
+
+def key_djs_to_str(key, grammar):
+    fmt = "%s ::= %s" if len(grammar[key]) == 1 else "%s ::=\n\t| %s"
+    return fmt % (key, djs_to_str(key, grammar))
+
 
 class V:
     def __init__(self, fn, l, n, var, t, height=0):
@@ -133,3 +127,72 @@ def to_str(k):
     r = r.replace('+-.', '-+.')
     return r
 
+def grammar_gc(grammar):
+    # Removes any unused keys if one starts from START and adds
+    # all referencing keys in rules recursively
+    start = NTKey(V.start())
+    keys = [start]
+    seen = set(keys)
+    new_g = {}
+    while keys:
+        k, *keys = keys
+        new_g[k] = grammar[k]
+        rules = grammar[k]
+        for rule in rules:
+            for e in rule.rvalues():
+                if type(e) is NTKey and e not in seen:
+                    seen.add(e)
+                    keys.append(e)
+    return new_g
+
+def grammar_complete_gc(grammar):
+    grammar = grammar_gc(grammar)
+    grammar = {k:unique_rules(rs) for k,rs in grammar.items()}
+    grammar = unique_keys(grammar)
+    return grammar
+
+def unique_rules(rules):
+    my_rules_set = {}
+    for rule in rules:
+        if str(rule) not in my_rules_set:
+            my_rules_set[str(rule)] = rule
+    return list(my_rules_set.values())
+
+def sort_gramamr(grammar):
+    grammar = {k:sorted(grammar[k], key=lambda x: str(x))
+                for k in sorted(grammar.keys(), key=lambda x: str(x))}
+    return grammar
+
+def unique_keys(grammar):
+    # Removes duplicate keys (where all (str(rules) are exactly equal)
+    while True:
+        replaced = False
+        glst = {k:djs_to_str(k, grammar) for k in grammar}
+        replacements = []
+        for k1 in glst:
+            v1 = glst[k1]
+            for k2 in glst:
+                if k1 == k2: continue
+                v2 = glst[k2]
+                if v1 == v2:
+                    replacements.append((k2, k1))
+        newg = None
+        newg = {}
+        for k in grammar:
+            rules = grammar[k]
+            new_rules = []
+            for rule in rules:
+                new_rule = rule
+                for k2, k1 in replacements:
+                    rep, new_rule = replace_key_in_rule(k2, k1, rule)
+                    if rep:
+                        # print("In ", k, ":", k2, "=>", k1)
+                        replaced = True
+                new_rules.append(new_rule)
+            newg[k] = new_rules
+        if not replaced: return newg
+        l = len(grammar)
+        newg = g.grammar_gc(newg)
+        assert l > len(newg)
+        grammar = newg
+    assert False
