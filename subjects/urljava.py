@@ -1,4 +1,5 @@
 import string
+from pycore import dataparser as d
 class URL:
     __slots__ = [
             'protocol',
@@ -45,7 +46,7 @@ class URL:
 
         # Only use our context if the protocols match.
         self.protocol = newProtocol
-        if not self.protocol:
+        if self.protocol == '':
             raise Exception("no protocol: "+original)
 
         # Get the protocol handler if not specified or the protocol
@@ -135,7 +136,7 @@ class URL:
                                 ind += 1
                                 # port can be null according to RFC2396
                                 if (len(nhost) > (ind + 1)):
-                                    port = int(nhost[ind+1:])
+                                    port = d.parse_int(nhost[ind+1:])
                             else:
                                 raise Exception("Invalid authority field: " + authority)
                     else:
@@ -146,7 +147,7 @@ class URL:
                     if (ind >= 0):
                         # port can be null according to RFC2396
                         if (len(host) > (ind + 1)):
-                            port = int(host[ind + 1:])
+                            port = d.parse_int(host[ind + 1:])
                         host = host[0: ind]
             if (port < -1):
                 raise Exception("Invalid port number :" + port)
@@ -193,7 +194,7 @@ class URL:
             return False
         c = protocol[0]
         v = c.in_(string.ascii_letters)
-        if not c:
+        if not v:
             return False
         i = 1
         while i < _len:
