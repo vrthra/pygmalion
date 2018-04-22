@@ -18,6 +18,9 @@ if __name__ == "__main__":
             e = pychains.chain.Chain()
             (a, r) = e.exec_argument(_mod.main)
             t = time.perf_counter() - start
+            if not a:
+                print('#', i, 'Exhausted sec', t, file=sys.stdout, flush=True)
+                continue
             print(i, t, repr(a), flush=True)
             pickle.dump((a, t), file=f)
 

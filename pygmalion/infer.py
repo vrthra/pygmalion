@@ -116,13 +116,13 @@ def process_one_instruction(pos, v):
     return ops
 
 
-def separate_comparisons_per_char(xins):
-    cmps, icmps = xins
+def separate_comparisons_per_char(cmps):
     outputs = {}
     for i,o in enumerate(cmps):
         op = o.op_A.x()
         if op not in outputs: outputs[op] = []
-        outputs[op].append((o, icmps[i]))
+        for oc in o.expand():
+            outputs[op].append((oc, i))
     return outputs
 
 def process_comparisons_per_char(ins):
