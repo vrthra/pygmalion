@@ -5,18 +5,6 @@ import pygmalion.util as u
 import sys
 import pudb; brk = pudb.set_trace
 
-def replace_key_in_rule(k, vrs, my_r):
-    replaced = False
-    ret_r = []
-    assert type(vrs) is list
-    for elt in my_r.rvalues():
-        if type(elt) == type(k) and elt == k:
-            replaced = True
-            ret_r.extend(vrs)
-        else:
-            ret_r.append(elt)
-    return (replaced, my_r.to_rwrap(ret_r))
-
 def remove_single_alternatives(grammar):
     # given key := value with no alternatives, replace
     # any instance of tht key with the value.
@@ -40,7 +28,7 @@ def remove_single_alternatives(grammar):
                 for k in single_keys:
                     replaced_by = single_keys[k]
                     if k == key: continue
-                    rep, my_r = replace_key_in_rule(k, replaced_by, my_r)
+                    rep, my_r = g.replace_key(k, replaced_by, my_r)
                     if rep: replaced = True
                 newrset.append(my_r)
             newg[key] = newrset

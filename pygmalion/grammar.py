@@ -168,6 +168,18 @@ def sort_gramamr(grammar):
                 for k in sorted(grammar.keys(), key=lambda x: str(x))}
     return grammar
 
+def replace_key(k2, k1, my_r):
+    replaced = False
+    ret_r = []
+    assert type(k1) is list
+    for elt in my_r.rvalues():
+        if type(elt) == type(k2) and elt == k2:
+            replaced = True
+            ret_r.extend(k1)
+        else:
+            ret_r.append(elt)
+    return (replaced, my_r.to_rwrap(ret_r))
+
 def unique_keys(grammar):
     # Removes duplicate keys (where all (str(rules) are exactly equal)
     while True:
@@ -189,7 +201,7 @@ def unique_keys(grammar):
             for rule in rules:
                 new_rule = rule
                 for k2, k1 in replacements:
-                    rep, new_rule = replace_key_in_rule(k2, k1, rule)
+                    rep, new_rule = replace_key(k2, [k1], rule)
                     if rep:
                         # print("In ", k, ":", k2, "=>", k1)
                         replaced = True
@@ -197,7 +209,7 @@ def unique_keys(grammar):
             newg[k] = new_rules
         if not replaced: return newg
         l = len(grammar)
-        newg = g.grammar_gc(newg)
+        newg = grammar_gc(newg)
         assert l > len(newg)
         grammar = newg
     assert False
