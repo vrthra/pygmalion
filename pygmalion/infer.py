@@ -120,9 +120,10 @@ def separate_comparisons_per_char(cmps):
     outputs = {}
     for i,o in enumerate(cmps):
         op = o.op_A.x()
-        if op not in outputs: outputs[op] = []
         for oc in o.expand():
-            outputs[op].append((oc, i))
+            pos = oc.op_A.x()
+            if pos not in outputs: outputs[pos] = []
+            outputs[pos].append((oc, i))
     return outputs
 
 def process_comparisons_per_char(ins):
