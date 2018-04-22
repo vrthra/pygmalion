@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append('.')
 import taintedstr
 import coverage
 import linecache
 import imp
 import os
 import pickle
-import resource
-resource.setrlimit(resource.RLIMIT_STACK, [0x10000000, resource.RLIM_INFINITY])
-sys.setrecursionlimit(0x100000)
 
 import pygmalion.fuzz as fuzz
 

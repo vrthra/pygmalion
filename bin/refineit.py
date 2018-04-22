@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append('.')
 import pygmalion.refiner as refiner
 import pygmalion.config as config
 import pygmalion.grammar as g

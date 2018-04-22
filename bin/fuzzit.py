@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 import sys
-import resource
-resource.setrlimit(resource.RLIMIT_STACK, [0x10000000, resource.RLIM_INFINITY])
-sys.setrecursionlimit(0x100000)
-sys.path.append('.')
 import os
 import pickle
 import pygmalion.fuzz as fuzz

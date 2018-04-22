@@ -1,4 +1,4 @@
-python3=python3
+python3=python3 ./bin/limits.py
 pip3=pip3
 required_dirs=.pickled
 mytargets=hello whilescope microjson array urljava urlpy mathexpr math expr

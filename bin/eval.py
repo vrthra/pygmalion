@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append('.')
 import taintedstr
 import coverage
 import linecache
 import imp
 import os
 import pickle
-import resource
 import pudb
 import pygmalion.config as c
 brk = pudb.set_trace
-resource.setrlimit(resource.RLIMIT_STACK, [0x10000000, resource.RLIM_INFINITY])
-sys.setrecursionlimit(0x100000)
 
 Branch =  (os.getenv('BRANCH') or 'false') in {'true', '1'}
 
