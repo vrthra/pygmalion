@@ -9,6 +9,11 @@ the following command
 $ make req
 ```
 
+Note that we have strict requirements for Python. That is, this is tested only
+on Python 3.6.5 It _may_ work on later versions, but _will not_ work on
+previous versions because we rely on constructs introduced in _3.6_.
+
+
 ## Subjects
 
 We have the following subjects under the _./subjects_ directory
@@ -22,11 +27,21 @@ We have the following subjects under the _./subjects_ directory
 * expr.py
 * number.py
 
-## Complete end to end.
+## Complete end to end for subject _hello.py_
+
+### First generate inputs, derive and evaluate our grammar
 
 ```bash
 $ make xeval.hello
 ```
+
+### Next, get the human readable grammar
+
+```bash
+$ make xeval.bnf
+```
+
+## Stages
 
 We have the following stages
 
@@ -44,7 +59,7 @@ We have the following stages
    specific (hence the parse tree)
 * _infer_
    Generate the context free grammar by merging the parse trees. At this
-   point, we nolonger can distinguish separate inputs. If _WITH_CHAR_CLASS_
+   point, we nolonger can distinguish separate inputs.
 * _refine_
    Try to produce human readable grammar
 * _fuzz_
@@ -53,6 +68,10 @@ We have the following stages
    Use the outputs generated and find how many are valid, and the amount of
    coverage obtained
 
+* _bnf_
+  This is not a stage for grammar evaluation, but can be used to generate
+  Human readable grammars from the refined grammar (depends on _refine_)
+
 Each stage can be invoked by _x<stagename>.<subject>_. For example, for
 complete evaluation of _microjson.py_, the following command would be used
 
@@ -60,13 +79,12 @@ complete evaluation of _microjson.py_, the following command would be used
 $ make xeval.microjson
 ```
 
-On the other hand, if only production of grammar is neceassary, the following
-command is used
+On the other hand, if only the human readable grammar is neceassary, the
+following command is used
 
 ```bash
-$ make xrefine.microjson
+$ make xbnf.microjson
 ```
-
 
 ## Generating initial inputs using PyChains
 
@@ -77,13 +95,14 @@ _hello.py_
 $ make xchain.hello
 ```
 
-The result is placed in _.pickled/hello.py.chain_ and is in readable ASCII
-A number of environment variables are used to control the Pygmalion
+The result is placed in _.pickled/hello.py.chain_ and can be converted
+to readable ASCII by
 
-* **BFS**
-   Whether to apply the wide search strategy or not. This has the effect of
-   finding out closing elements in subjects such as *microjson* and *array*
-   but can result in inputs that are shorter in length. Default is *false*
+```bash
+$ ./bin/showpickle.py .pickled/hello.py.chain
+```
+
+A number of environment variables are used to control the Pygmalion
 
 * **MY\_RP**
    Used to indicate how to proceed when an input is accepted. Some subjects such
@@ -99,30 +118,13 @@ A number of environment variables are used to control the Pygmalion
 * **R**
    The random number seed. The default is *0*.
 
-* **NOCTL**
+* **NOCTRL**
    Whether to produce characters such as _\t\b\f\x012_ which are not part of
    the list _string.ascii_letters + string.digits + string.punctuation_
 
-* **WIDE\_TRIGGER** (*10*)
-   The number of consecutive similar comparisons before *wide-search* strategy
-   on pychains is triggered.
-
-* **DEEP\_TRIGGER** (*1000*)
-   The number of states that the *wide-search* strategy has to hit before
-  *deep-search* strategy is triggered.
-
-* **PYTHON\_OPT**
-   Whether to optimize for python specific string comparisons. Normally, the
-   _tainted string_ converts all relevant string operations equality comparisons
-   on characters. With this variable set, the other comparisons such as
-   *NE*, *IN*, *NOT_IN* etc are also used for generation. It is not useful for
-   the rest of commands. Hence, if you use it, make sure to generate the chain
-   output separately from other commands such as *trace*, *track*, *infer*,
-   *refine*, and *fuzz*
-
-* **WITH\_CHAR\_CLASS** (*True*)
-  If specified, replaces individual characters with regular expression
-  corresponding to comparisons on that index.
+* **NO\_LOG** (*1*)
+  If set to `0`, we get more informative and verbose output (which slows down
+  the program quite a bit).
 
 * **python3**
    The python interpreter used
@@ -131,62 +133,71 @@ A number of environment variables are used to control the Pygmalion
    The pip installer command
 
 The configuration can be finetuned further by modifing these `pygmalion.confg`
-vars
+variables and `pychains.config` variables
 
-* config.Track_Params (*True*)
+### Pygmalion config variables
+
+* *config.Track\_Params* (*True*)
   Whether to track function parameters or not 
 
-* config.Track_Vars (*True*)
+* *config.Track\_Vars* (*True*)
   Whether to track local variables or not 
 
-* config.Track_Return (*False*)
+* *config.Track\_Return* (*False*)
   Should we insert a special *return* variable from each function?
 
-* config.Ignore_Lambda (*True*)
+* *config.Ignore\_Lambda* (*True*)
   Strip out noice from _lambda_ expressions
 
-* config.Swap_Eclipsing_keys (*True*)
+* *config.Swap\_Eclipsing_keys* (*True*)
   When we find a smaller key already contains a chunk (usually a _peek_)
   of a later variable, what should we do with the smaller variable? With
   enabled, we simply swap the order of these two variables in causality
 
-* config.Strip_Peek (*True*)
+* *config.Strip\_Peek* (*True*)
   Related to above -- If we detect a swap, rather than swap, simply discard
   the smaller (earlier) variable.
 
-* config.Prevent_Deep_Stack_Modification (*False*)
+* *config.Prevent\_Deep\_Stack\_Modification* (*False*)
   Only replace things at a lower height with something at higher height.
   It is useful mainly for returned values that may be smaller than an earlier
   variable deeper in the call scope.
 
-* Use_Character_Classes (*True*)
-  (* used in _refiner_ hence deprecated*)
+### Pychain config variables
 
+* *config.Wide\_Trigger* (*10*)
+  Trigger wide search when this number of similar comparisons is done
+  consecutively
+
+* *config.Deep\_Trigger* (*10*)
+  Trigger deep search when this number of unique states is reached for wide
+  search.
 
 ## Examples
 
-
-### Using Dumb Search for pychain and INFER for grammar
-
-```
-make xeval.mathexpr INFER=SOUND DUMB_SEARCH=1 NO_LOG=1
-```
-
-Using INFER=UNSOUND here gets really terrible results
+### Our evaluations were using these command lines.
 
 ```
-make xeval.mathexpr INFER=UNSOUND DUMB_SEARCH=1 NO_LOG=1
+make xeval.urljava MY_RP=0.1 NINPUT=100 NOUT=1000
+make xeval.mathexpr MY_RP=0.1 NINPUT=100 NOUT=1000
+make xeval.microjson NINPUT=100 NOUT=1000
 ```
 
-### Using Return Probability for pychain
+### Example: Math expression with return probability set to 0.1
 
 ```
-make xeval.urljava INFER=UNSOUND NO_LOG=1 MY_RP=0.1
+make xeval.mathexpr MY_RP=0.1
 ```
 
-### Using direct evaluation
+### Example: Microjson with logging set.
 
 ```
-make xinfer.microjson NO_LOG=1 INFER=UNSOUND NOUT=1000
+make xeval.microjson NO_LOG=0
+```
+
+### Example: Print the bnf for URL
+
+```
+make xbnf.urljava NINPUT=100
 ```
 

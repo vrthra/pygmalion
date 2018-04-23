@@ -236,3 +236,24 @@ help:
 req:
 	$(python3) -c 'import sys; assert sys.version_info >= (3,6)'
 	$(pip3) install -r requirements.txt --user
+
+dist=dist/pygmalion.0.1
+make dist: req
+	rm -rf $(dist);
+	mkdir -p $(dist)
+	cp -r src $(dist)/
+	cp -r pygmalion $(dist)/
+	rm -rf $(dist)/*/.git
+	rm -rf $(dist)/*/*/.git
+	rm -rf $(dist)/.git
+	rm -rf $(dist)/src/pip-delete-this-directory.txt
+	cp README.md $(dist)/
+	cp Makefile $(dist)/
+	cp LICENSE $(dist)/
+	cp -R bin $(dist)/
+	echo "coverage==4.5.1" > $(dist)/requirements.txt
+	echo "-e ./src/taintedstr" >> $(dist)/requirements.txt
+	echo "-e ./src/pycore" >> $(dist)/requirements.txt
+	echo "-e ./src/pychains" >> $(dist)/requirements.txt
+	echo "-e ./src/pygfuzz" >> $(dist)/requirements.txt
+	cp -R subjects $(dist)/
