@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 import os
 import pickle
-import pygmalion.miner as miner
-import pygmalion.refiner as refiner
-import pygmalion.util as u
+import sys
 import pygmalion.grammar as g
 import time
 import pudb
