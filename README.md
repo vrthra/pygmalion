@@ -147,7 +147,7 @@ variables and `pychains.config` variables
   Should we insert a special *return* variable from each function?
 
 * *config.Ignore\_Lambda* (*True*)
-  Strip out noice from _lambda_ expressions
+  Strip out noise from _lambda_ expressions
 
 * *config.Swap\_Eclipsing_keys* (*True*)
   When we find a smaller key already contains a chunk (usually a _peek_)

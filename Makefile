@@ -251,6 +251,7 @@ make dist: req
 	cp Makefile $(dist)/
 	cp LICENSE $(dist)/
 	cp -R bin $(dist)/
+	rm $(dist)/bin/gramcov.jar
 	echo "coverage==4.5.1" > $(dist)/requirements.txt
 	echo "-e ./src/taintedstr" >> $(dist)/requirements.txt
 	echo "-e ./src/pycore" >> $(dist)/requirements.txt
