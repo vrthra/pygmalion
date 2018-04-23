@@ -30,6 +30,10 @@ if __name__ == "__main__":
     cov = coverage.Coverage(source=['example'], branch=Branch)
     mylst = pickle.load(fin)
     last_t = 0
+    last_f = 0
+    last_f_t = 0
+    last_f_i = 0
+    unique = 0
     for j,(i, t) in enumerate(mylst):
         try:
             #print(j, repr(i), flush=True, end='')
@@ -42,9 +46,15 @@ if __name__ == "__main__":
             pass
         last_t = t
         f = cov.report(file=open(os.devnull, 'w'))
+        if f > last_f:
+            last_f = f
+            last_f_t = t
+            last_f_i = j
+            unique += 1
         print(j, "coverage: %.2f%%" % f, ' at ', '%.2f seconds' % t, repr(i), flush=True)
     cov.save()
     c = cov.report(file=fout)
     print("Valid: %d/%d with %f coverage at %f seconds" % (valid_n, all_n, c, last_t))
+    print("Maximum coverage", last_f, "reached at", last_f_t, "seconds with",  last_f_i, "inputs cov.unique:", unique)
     cov.html_report(directory='coverage')
     cov.erase()
