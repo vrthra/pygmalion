@@ -24,6 +24,7 @@ all:
 	@echo  chains $(chains), traces $(traces), tracks $(tracks), mines $(mines), infers $(infers), refined $(refined), fuzz $(fuzz), eval $(eval)
 
 export MY_RP:=1.0
+export PYTHONPATH:=.
 export R:=0
 export NOUT:=100
 export MAXSYM=100
