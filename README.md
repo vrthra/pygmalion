@@ -38,7 +38,7 @@ $ make xeval.hello
 ### Next, get the human readable grammar
 
 ```bash
-$ make xeval.bnf
+$ make xbnf.hello
 ```
 
 ## Stages
