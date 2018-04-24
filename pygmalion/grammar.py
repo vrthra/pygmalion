@@ -1,5 +1,6 @@
 import string
 import pygmalion.config as config
+import pygmalion.util as u
 class Grammar:
     def __init__(self, d={}): self._dict = d
     def __setitem__(self, key, item): self._dict[key] = item
@@ -218,7 +219,7 @@ def unique_keys(grammar):
 def tuple_to_bnf(c):
     assert type(c) is tuple
     choice, count = c
-    strcv = str(choice)
+    strcv = u.compact(str(choice))
     if type(count) is set:
         scount = sorted(count)
         return "%s{%d,%d}" % (strcv, *[scount[i] for i in [0,-1]])
