@@ -250,7 +250,7 @@ def elt_to_bnf(elt):
 
 
 def rule_to_bnf(rule):
-    return '~'.join(elt_to_bnf(elt) for elt in rule)
+    return ''.join(elt_to_bnf(elt) for elt in rule)
 
 def alter_to_bnf(k, rules):
     fmt = "%s ::= %s" if len(rules) == 1 else "%s ::=\n    | %s"
