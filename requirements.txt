@@ -6,3 +6,4 @@
 -e git://github.com/vrthra/pychains.git@comparisons#egg=pychains
 -e git://github.com/vrthra/pygfuzz.git@master#egg=pygfuzz
 coverage==4.5.1
+pudb
