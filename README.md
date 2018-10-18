@@ -21,7 +21,6 @@ We have the following subjects under the _./subjects_ directory
 * hello.py
 * array.py
 * microjson.py
-* urlpy.py
 * urljava.py
 * mathexpr.py
 * expr.py
